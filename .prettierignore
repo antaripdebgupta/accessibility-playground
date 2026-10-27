@@ -1,0 +1,5 @@
+.next
+node_modules
+public/axe.min.js
+package-lock.json
+test-results

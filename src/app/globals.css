@@ -1,0 +1,111 @@
+@import "tailwindcss";
+@import "@accessly-ui/tailwind-preset/theme.css";
+@source "../../node_modules/@accessly-ui/react/dist/**/*.js";
+@source "../**/*.{ts,tsx}";
+
+:root {
+  color-scheme: light;
+  --color-canvas: #fafafb;
+  --color-surface: #ffffff;
+  --color-surface-raised: #f6f6f8;
+  --color-surface-sunken: #eeeff2;
+  --color-surface-inverse: #0e1014;
+
+  --color-text-primary: #0e1014;
+  --color-text-secondary: #464a53;
+  --color-text-disabled: #8b8e98;
+  --color-text-inverse: #ffffff;
+
+  --color-accent: #5b21b6;
+  --color-accent-default: #5b21b6;
+  --color-accent-hover: #4c1d95;
+  --color-accent-active: #3b0764;
+  --color-accent-subtle: #f5f3ff;
+
+  --color-focus-ring: #4338ca;
+
+  --color-border: #e6e7eb;
+  --color-border-strong: #d3d5dc;
+  --color-border-control: #8a8e99;
+
+  --color-danger-default: #b91c1c;
+  --color-danger-hover: #991b1b;
+  --color-danger-subtle: #fef2f2;
+  --color-success-default: #15803d;
+  --color-success-hover: #166534;
+  --color-success-subtle: #f0fdf4;
+  --color-warning-default: #a16207;
+  --color-warning-hover: #854d0e;
+  --color-warning-subtle: #fefce8;
+
+  --success: var(--color-success-default);
+  --success-subtle: var(--color-success-subtle);
+  --warning: var(--color-warning-default);
+  --warning-subtle: var(--color-warning-subtle);
+  --font-mono-ui:
+    var(--font-mono), ui-monospace, "SF Mono", "Fira Code", monospace;
+
+  /* Syntax Highlighting Tokens (Light mode: >= 4.5:1 against #ffffff and #f6f6f8) */
+  --color-code-tag: #6d28d9;
+  --color-code-attr: #0369a1;
+  --color-code-val: #15803d;
+  --color-code-punct: #475569;
+  --color-code-comment: #64748b;
+  --color-code-num: #c2410c;
+}
+
+@theme {
+  --font-sans:
+    var(--font-sans), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, sans-serif;
+  --font-mono:
+    var(--font-mono), "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo,
+    Monaco, Consolas, monospace;
+
+  --text-md: 0.875rem;
+  --text-md--line-height: 1.5rem;
+
+  --color-canvas: var(--color-canvas);
+  --color-surface: var(--color-surface);
+  --color-surface-raised: var(--color-surface-raised);
+  --color-surface-sunken: var(--color-surface-sunken);
+  --color-border: var(--color-border);
+  --color-border-strong: var(--color-border-strong);
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-accent: var(--color-accent);
+  --color-accent-subtle: var(--color-accent-subtle);
+  --color-focus-ring: var(--color-focus-ring);
+
+  --color-success-default: var(--color-success-default);
+  --color-success-subtle: var(--color-success-subtle);
+  --color-warning-default: var(--color-warning-default);
+  --color-warning-subtle: var(--color-warning-subtle);
+  --color-danger-default: var(--color-danger-default);
+  --color-danger-subtle: var(--color-danger-subtle);
+
+  --radius-card: 8px;
+  --radius-control: 6px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
