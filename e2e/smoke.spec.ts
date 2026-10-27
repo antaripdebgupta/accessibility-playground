@@ -1,0 +1,53 @@
+import { test, expect } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
+
+const ROUTES = ["/", "/playground", "/contrast", "/about"];
+
+for (const route of ROUTES) {
+  test.describe(`Route: ${route}`, () => {
+    test("has 0 WCAG 2.2 AA axe violations", async ({ page }) => {
+      await page.goto(route);
+      await page.waitForLoadState("networkidle");
+
+      const accessibilityScanResults = await new AxeBuilder({ page })
+        .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+        .analyze();
+
+      expect(accessibilityScanResults.violations).toEqual([]);
+    });
+
+    test("header has exactly one nav landmark with all 3 items", async ({
+      page,
+    }) => {
+      await page.goto(route);
+
+      // Single <nav> landmark in header
+      const headerNavs = page.locator("header nav");
+      await expect(headerNavs).toHaveCount(1);
+      await expect(headerNavs).toHaveAttribute("aria-label", "Main");
+
+      // Verify the 3 nav destinations exist
+      const links = headerNavs.locator("a");
+      const hrefs = await links.evaluateAll((anchors) =>
+        anchors.map((a) => a.getAttribute("href"))
+      );
+
+      expect(hrefs).toContain("/playground");
+      expect(hrefs).toContain("/contrast");
+      expect(hrefs).toContain("/about");
+    });
+
+    test("footer landmark exists only on home route ('/')", async ({
+      page,
+    }) => {
+      await page.goto(route);
+
+      const footer = page.locator("footer");
+      if (route === "/") {
+        await expect(footer).toHaveCount(1);
+      } else {
+        await expect(footer).toHaveCount(0);
+      }
+    });
+  });
+}
