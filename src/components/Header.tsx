@@ -1,11 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Accessibility, Menu, X } from "lucide-react";
-import { PageContainer } from "@/components/PageContainer";
-import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { href: "/playground", label: "Playground" },
@@ -15,143 +12,70 @@ const NAV_ITEMS = [
 
 export function Header() {
   const pathname = usePathname();
-  const [isOpen, setIsOpen] = useState(false);
-  const [prevPathname, setPrevPathname] = useState(pathname);
-  if (prevPathname !== pathname) {
-    setPrevPathname(pathname);
-    setIsOpen(false);
-  }
-  const buttonRef = useRef<HTMLButtonElement | null>(null);
-  const menuRef = useRef<HTMLDivElement | null>(null);
-
-  // Handle Escape key and outside clicks
-  useEffect(() => {
-    if (!isOpen) return;
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        setIsOpen(false);
-        buttonRef.current?.focus();
-      }
-    }
-
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(event.target as Node) &&
-        buttonRef.current &&
-        !buttonRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    }
-
-    document.addEventListener("keydown", handleKeyDown);
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isOpen]);
 
   const isItemActive = (href: string) => {
     if (href === "/") {
       return pathname === "/";
     }
-    return pathname === href || pathname.startsWith(href + "/");
+    const basePath = href.split("?")[0];
+    return pathname === basePath || pathname.startsWith(basePath + "/");
   };
 
   return (
-    <header className="sticky top-0 z-40 h-14 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
-      <PageContainer className="flex h-14 items-center justify-between">
-        {/* Brand */}
-        <Link
-          href="/"
-          className="flex items-center gap-2 rounded py-1 text-sm font-semibold tracking-tight text-[var(--color-text-primary)] hover:opacity-90 focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
-        >
-          <Accessibility
-            className="h-5 w-5 text-[var(--color-accent)]"
+    <header className="site-header">
+      <div className="wrap">
+        <Link className="brand" href="/">
+          <svg
+            className="brand-mark"
+            viewBox="0 0 26 26"
+            fill="none"
             aria-hidden="true"
-          />
+          >
+            <rect
+              x="1"
+              y="1"
+              width="24"
+              height="24"
+              rx="6"
+              stroke="#1d4ed8"
+              strokeWidth="1.6"
+            />
+            <circle cx="13" cy="8.4" r="1.9" fill="#1d4ed8" />
+            <path
+              d="M5.6 11.2c3.2 1.4 11.6 1.4 14.8 0"
+              stroke="#1d4ed8"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+            />
+            <path
+              d="M13 12v5.4M13 17.4l-3.4 4.6M13 17.4l3.4 4.6"
+              stroke="#1d4ed8"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
           <span>Accessibility Playground</span>
         </Link>
-
-        {/* Single Navigation Landmark */}
-        <nav aria-label="Main" className="flex items-center">
-          {/* Desktop Nav */}
-          <div className="hidden items-center gap-1 md:flex">
+        <nav className="primary-nav" aria-label="Main">
+          <ul>
             {NAV_ITEMS.map((item) => {
               const active = isItemActive(item.href);
               return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  aria-current={active ? "page" : undefined}
-                  className={cn(
-                    "relative inline-flex items-center rounded px-2.5 py-1.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]",
-                    active
-                      ? "border-b-2 border-[var(--color-accent)] font-semibold text-[var(--color-text-primary)]"
-                      : "text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-text-primary)]"
-                  )}
-                >
-                  {item.label}
-                </Link>
+                <li key={item.label}>
+                  <Link
+                    href={item.href}
+                    aria-current={active ? "page" : undefined}
+                    className="inline-flex min-h-[36px] items-center"
+                  >
+                    {item.label}
+                  </Link>
+                </li>
               );
             })}
-          </div>
-
-          {/* Mobile Disclosure Menu */}
-          <div className="relative md:hidden">
-            <button
-              ref={buttonRef}
-              type="button"
-              aria-expanded={isOpen}
-              aria-controls="mobile-nav-menu"
-              aria-label={isOpen ? "Close menu" : "Open menu"}
-              onClick={() => setIsOpen((prev) => !prev)}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
-            >
-              {isOpen ? (
-                <X className="h-5 w-5" aria-hidden="true" />
-              ) : (
-                <Menu className="h-5 w-5" aria-hidden="true" />
-              )}
-            </button>
-
-            {isOpen && (
-              <div
-                id="mobile-nav-menu"
-                ref={menuRef}
-                className="absolute top-full right-0 mt-2 w-52 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-2 shadow-lg"
-              >
-                <div className="flex flex-col gap-1">
-                  {NAV_ITEMS.map((item) => {
-                    const active = isItemActive(item.href);
-                    return (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        aria-current={active ? "page" : undefined}
-                        onClick={() => setIsOpen(false)}
-                        className={cn(
-                          "flex items-center rounded-md px-3 py-2 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]",
-                          active
-                            ? "border-l-2 border-[var(--color-accent)] bg-[var(--color-surface-raised)] font-semibold text-[var(--color-text-primary)]"
-                            : "text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-text-primary)]"
-                        )}
-                      >
-                        {item.label}
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
+          </ul>
         </nav>
-      </PageContainer>
+      </div>
     </header>
   );
 }

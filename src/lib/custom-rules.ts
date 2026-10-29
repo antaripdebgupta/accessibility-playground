@@ -615,7 +615,7 @@ export function runCustomRules(
             description: `CSS removes default focus outlines (outline: none or 0) without defining a visible replacement :focus-visible style. Keyboard users will not be able to see which element is focused.`,
             helpUrl: "https://www.w3.org/WAI/WCAG22/quickref/#focus-appearance",
             wcag: ["2.4.7", "2.4.11"],
-            fix: "Provide a visible :focus-visible indicator (e.g. outline: 2px solid #5b21b6; outline-offset: 2px;).",
+            fix: "Provide a visible :focus-visible indicator (e.g. outline: 2px solid #1d4ed8; outline-offset: 2px;).",
             node: focusableNode,
           })
         );

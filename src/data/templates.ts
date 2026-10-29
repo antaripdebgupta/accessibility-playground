@@ -37,14 +37,14 @@ export const STARTER_TEMPLATES: readonly StarterTemplate[] = [
 .badge {
   display: inline-block;
   padding: 2px 8px;
-  background: #ede9fe;
-  color: #5b21b6;
+  background: #eef3fd;
+  color: #1d4ed8;
   font-size: 12px;
   font-weight: 600;
   border-radius: 4px;
 }
 .btn-primary {
-  background: #5b21b6;
+  background: #1d4ed8;
   color: #ffffff;
   padding: 8px 16px;
   border-radius: 6px;
@@ -53,7 +53,7 @@ export const STARTER_TEMPLATES: readonly StarterTemplate[] = [
   cursor: pointer;
 }
 .btn-primary:focus-visible {
-  outline: 2px solid #5b21b6;
+  outline: 2px solid #1d4ed8;
   outline-offset: 2px;
 }`,
   },
@@ -92,7 +92,7 @@ input {
   font-size: 14px;
 }
 input:focus-visible {
-  outline: 2px solid #5b21b6;
+  outline: 2px solid #1d4ed8;
 }
 .hint {
   font-size: 12px;

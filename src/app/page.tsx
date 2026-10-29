@@ -1,120 +1,323 @@
 "use client";
 
+import React, { useState, useRef } from "react";
 import Link from "next/link";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  ButtonLink,
-} from "@/components/ui";
-import { PageContainer } from "@/components/PageContainer";
 import { Footer } from "@/components/Footer";
-import { MiniDemo } from "@/features/landing/MiniDemo";
 
 export default function HomePage() {
-  const features = [
-    {
-      title: "Computed Accessibility Tree",
-      description:
-        "See the exact hierarchical tree screen readers construct from your HTML structure, not just the visual DOM.",
-      href: "/playground",
-    },
-    {
-      title: "ARIA Explorer",
-      description:
-        "See exactly which ARIA attributes a screen reader will use, and which ones you added for nothing.",
-      href: "/playground",
-    },
-    {
-      title: "Accessible Name Trace",
-      description:
-        "Trace the step-by-step algorithm that determines what assistive technology actually speaks aloud.",
-      href: "/playground",
-    },
-    {
-      title: "Sandboxed axe-core Scanner",
-      description:
-        "Catch WCAG violations locally inside an isolated iframe sandbox with zero external server dependencies.",
-      href: "/playground",
-    },
-    {
-      title: "Color Contrast Engine",
-      description:
-        "Calculate exact contrast ratios, verify AA/AAA compliance, and auto-suggest the nearest passing color with one click.",
-      href: "/contrast",
-    },
-  ];
+  const [activeTab, setActiveTab] = useState<
+    "elements" | "accessibility" | "console"
+  >("accessibility");
+  const [announceValue, setAnnounceValue] = useState('"Save changes, button"');
+  const [isFlashing, setIsFlashing] = useState(false);
+  const [flashColor, setFlashColor] = useState<string>("inherit");
+  const fakeBtnRef = useRef<HTMLDivElement | null>(null);
+
+  const flash = (color: string) => {
+    setIsFlashing(true);
+    setFlashColor(color);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setIsFlashing(false);
+        setFlashColor("var(--ink)");
+      });
+    });
+  };
+
+  const handleFakeBtnClick = () => {
+    setAnnounceValue("(nothing — not exposed to assistive tech)");
+    flash("#92400e");
+    if (
+      fakeBtnRef.current &&
+      typeof fakeBtnRef.current.animate === "function"
+    ) {
+      fakeBtnRef.current.animate(
+        [
+          { transform: "translateX(0)" },
+          { transform: "translateX(-4px)" },
+          { transform: "translateX(4px)" },
+          { transform: "translateX(0)" },
+        ],
+        { duration: 220, easing: "ease-in-out" }
+      );
+    }
+  };
+
+  const handleRealBtnClick = () => {
+    setAnnounceValue('"Save changes, button"');
+    flash("#065f46");
+  };
 
   return (
     <div className="flex flex-1 flex-col">
-      <PageContainer className="flex flex-1 flex-col gap-6 py-4 sm:gap-8 sm:py-6">
-        {/* Hero / Orientation section */}
-        <section className="flex flex-col items-start gap-4">
-          <h1 className="text-2xl font-bold tracking-tight text-[var(--color-text-primary)] sm:text-3xl md:text-4xl">
-            Accessibility is mostly invisible. <br />
-            <span className="text-[var(--color-accent)]">
-              Our job is to make it visible.
-            </span>
-          </h1>
-
-          <p className="max-w-3xl text-sm leading-relaxed text-[var(--color-text-secondary)] sm:text-base">
-            Paste or write HTML into a live editor to immediately inspect its
-            computed accessibility tree, ARIA validity, accessible name
-            algorithm trace, and automated axe-core violations in a sandboxed,
-            standards-focused workflow.
-          </p>
-
-          <div className="flex flex-wrap items-center gap-3 pt-1">
-            <ButtonLink href="/playground" variant="primary">
-              Open the Playground
-            </ButtonLink>
-          </div>
-        </section>
-
-        {/* Live Mini-Demo */}
-        <section aria-labelledby="mini-demo-heading" className="w-full">
-          <h2 id="mini-demo-heading" className="sr-only">
-            Live Interactive Demonstration: Button vs Div
-          </h2>
-          <MiniDemo />
-        </section>
-
-        {/* Compact Feature Index */}
-        <section aria-labelledby="tools-heading" className="w-full">
-          <div className="mb-4 flex flex-col gap-1">
-            <h2
-              id="tools-heading"
-              className="text-base font-semibold tracking-tight text-[var(--color-text-primary)]"
-            >
-              Precision inspection tools
-            </h2>
-            <p className="text-sm text-[var(--color-text-secondary)]">
-              Engineered specifically for frontend developers and QA engineers
-              who care about genuine accessibility.
+      {/* Hero */}
+      <section className="hero">
+        <div className="wrap">
+          <div className="hero-inner">
+            <h1>You can&apos;t fix what you can&apos;t see.</h1>
+            <p className="lede">
+              Paste HTML into a live editor and watch its accessibility tree,
+              ARIA state, and screen-reader announcement compute in real time —
+              inside a sandboxed, standards-driven inspector.
+            </p>
+            <div className="hero-actions">
+              <Link className="btn btn-primary" href="/playground">
+                Open the Playground
+              </Link>
+              <Link
+                className="btn btn-ghost"
+                href="/playground?pattern=button-vs-div"
+              >
+                Browse the pattern library
+              </Link>
+            </div>
+            <p className="hero-micro">
+              Runs entirely in your browser · no account · <kbd>Tab</kbd> works
+              everywhere on this page
             </p>
           </div>
+        </div>
+      </section>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {features.map((feature) => (
-              <Link
-                key={feature.title}
-                href={feature.href}
-                className="group rounded-lg focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
+      {/* Inspector Section */}
+      <section className="inspector-section" aria-label="Live demonstration">
+        <div className="inspector-canvas">
+          <div className="wrap">
+            <div className="devtools-window">
+              <div className="window-chrome">
+                <div className="window-dots" aria-hidden="true">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+                <span className="window-url">
+                  inspector — localhost/playground
+                </span>
+              </div>
+              <div
+                className="tab-strip"
+                role="tablist"
+                aria-label="Devtools panel (illustrative)"
               >
-                <Card className="h-full transition-all group-hover:border-[var(--color-border-strong)] group-hover:bg-[var(--color-surface-raised)]/60">
-                  <CardHeader>
-                    <CardTitle className="text-sm font-semibold text-[var(--color-text-primary)] group-hover:text-[var(--color-accent)]">
-                      {feature.title}
-                    </CardTitle>
-                    <CardDescription>{feature.description}</CardDescription>
-                  </CardHeader>
-                </Card>
-              </Link>
-            ))}
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={activeTab === "elements"}
+                  onClick={() => setActiveTab("elements")}
+                >
+                  Elements
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={activeTab === "accessibility"}
+                  data-active={
+                    activeTab === "accessibility" ? "true" : undefined
+                  }
+                  onClick={() => setActiveTab("accessibility")}
+                >
+                  Accessibility
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={activeTab === "console"}
+                  onClick={() => setActiveTab("console")}
+                >
+                  Console
+                </button>
+              </div>
+              <div className="window-body">
+                <div className="compare-grid">
+                  <div className="element-card" data-kind="bad">
+                    <div className="element-card-head">
+                      <span className="selector">div.fake-btn</span>
+                      <span className="tag tag-bad">anti-pattern</span>
+                    </div>
+                    {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
+                    <div
+                      className="demo-target fake-btn"
+                      id="fakeBtn"
+                      tabIndex={-1}
+                      ref={fakeBtnRef}
+                      onClick={handleFakeBtnClick}
+                    >
+                      Save changes
+                    </div>
+                    <dl className="readout">
+                      <div className="readout-row">
+                        <dt>Role</dt>
+                        <dd>none</dd>
+                      </div>
+                      <div className="readout-row">
+                        <dt>Accessible name</dt>
+                        <dd>— not exposed</dd>
+                      </div>
+                      <div className="readout-row">
+                        <dt>Reachable by Tab</dt>
+                        <dd>no</dd>
+                      </div>
+                      <div className="readout-row">
+                        <dt>Enter / Space</dt>
+                        <dd>does nothing</dd>
+                      </div>
+                    </dl>
+                  </div>
+
+                  <div className="element-card" data-kind="good">
+                    <div className="element-card-head">
+                      <span className="selector">button</span>
+                      <span className="tag tag-good">accessible</span>
+                    </div>
+                    <button
+                      type="button"
+                      className="demo-target real-btn"
+                      id="realBtn"
+                      onClick={handleRealBtnClick}
+                    >
+                      Save changes
+                    </button>
+                    <dl className="readout">
+                      <div className="readout-row">
+                        <dt>Role</dt>
+                        <dd>button</dd>
+                      </div>
+                      <div className="readout-row">
+                        <dt>Accessible name</dt>
+                        <dd>&quot;Save changes&quot;</dd>
+                      </div>
+                      <div className="readout-row">
+                        <dt>Reachable by Tab</dt>
+                        <dd>yes</dd>
+                      </div>
+                      <div className="readout-row">
+                        <dt>Enter / Space</dt>
+                        <dd>activates</dd>
+                      </div>
+                    </dl>
+                  </div>
+                </div>
+
+                <div className="announce-strip">
+                  <span className="label">Screen reader hears</span>
+                  <span
+                    className="value"
+                    id="announceValue"
+                    style={{
+                      color: flashColor,
+                      transition: isFlashing ? "none" : "color 1.4s ease",
+                    }}
+                  >
+                    {announceValue}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <p className="inspector-caption">
+              Try pressing <kbd>Tab</kbd> from the buttons above — notice the
+              left one is physically impossible to reach. That&apos;s not a bug
+              in this demo. That&apos;s the bug.
+            </p>
           </div>
-        </section>
-      </PageContainer>
+        </div>
+      </section>
+
+      {/* Capabilities */}
+      <section className="capabilities">
+        <div className="wrap">
+          <div className="cap-heading">
+            <h2>What the inspector shows you</h2>
+            <p>
+              Six views into the same markup, each answering a question a screen
+              reader user is already asking.
+            </p>
+          </div>
+          <div className="cap-list">
+            <div className="cap-row">
+              <div>
+                <h3>Computed accessibility tree</h3>
+                <p>
+                  The hierarchy a screen reader actually constructs from your
+                  markup — not the visual DOM you see in the inspector.
+                </p>
+              </div>
+              <span className="cap-sc">SC 1.3.1</span>
+            </div>
+
+            <div className="cap-row">
+              <div>
+                <h3>ARIA validity</h3>
+                <p>
+                  Every attribute checked against its role model, and flagged
+                  the moment it&apos;s invalid, redundant, or missing something
+                  required.
+                </p>
+              </div>
+              <span className="cap-sc">SC 4.1.2</span>
+            </div>
+
+            <div className="cap-row">
+              <div>
+                <h3>Accessible name trace</h3>
+                <p>
+                  Step through the exact algorithm a browser runs to decide what
+                  gets spoken aloud for any element you select.
+                </p>
+              </div>
+              <span className="cap-sc">SC 4.1.2</span>
+            </div>
+
+            <div className="cap-row">
+              <div>
+                <h3>Keyboard &amp; focus order</h3>
+                <p>
+                  See the real tab sequence your markup produces, and catch a
+                  focus trap before a keyboard user finds it for you.
+                </p>
+              </div>
+              <span className="cap-sc">SC 2.1.1</span>
+            </div>
+
+            <div className="cap-row">
+              <div>
+                <h3>Contrast engine</h3>
+                <p>
+                  Exact ratios for any two colors against AA and AAA thresholds,
+                  with a one-click nearest passing suggestion.
+                </p>
+              </div>
+              <span className="cap-sc">SC 1.4.3</span>
+            </div>
+
+            <div className="cap-row">
+              <div>
+                <h3>Sandboxed axe-core scan</h3>
+                <p>
+                  Automated checks run locally against the rendered preview,
+                  isolated in a sandboxed frame with no external calls.
+                </p>
+              </div>
+              <span className="cap-sc">Automated</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Band */}
+      <section className="cta-band">
+        <div className="wrap">
+          <div>
+            <h2>See what&apos;s invisible in your own markup.</h2>
+            <p>No signup. Paste HTML, get an answer in under a second.</p>
+          </div>
+          <Link className="btn btn-primary" href="/playground">
+            Open the Playground
+          </Link>
+        </div>
+      </section>
+
+      {/* Footer */}
       <Footer />
     </div>
   );

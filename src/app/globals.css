@@ -5,38 +5,38 @@
 
 :root {
   color-scheme: light;
-  --color-canvas: #fafafb;
+  --color-canvas: #fafaf9;
   --color-surface: #ffffff;
-  --color-surface-raised: #f6f6f8;
-  --color-surface-sunken: #eeeff2;
-  --color-surface-inverse: #0e1014;
+  --color-surface-raised: #f6f5f3;
+  --color-surface-sunken: #eceae6;
+  --color-surface-inverse: #14161b;
 
-  --color-text-primary: #0e1014;
-  --color-text-secondary: #464a53;
-  --color-text-disabled: #8b8e98;
+  --color-text-primary: #14161b;
+  --color-text-secondary: #4b5563;
+  --color-text-disabled: #8a8f99;
   --color-text-inverse: #ffffff;
 
-  --color-accent: #5b21b6;
-  --color-accent-default: #5b21b6;
-  --color-accent-hover: #4c1d95;
-  --color-accent-active: #3b0764;
-  --color-accent-subtle: #f5f3ff;
+  --color-accent: #1d4ed8;
+  --color-accent-default: #1d4ed8;
+  --color-accent-hover: #1e40af;
+  --color-accent-active: #1e3a8a;
+  --color-accent-subtle: #eef3fd;
 
-  --color-focus-ring: #4338ca;
+  --color-focus-ring: #1d4ed8;
 
-  --color-border: #e6e7eb;
-  --color-border-strong: #d3d5dc;
+  --color-border: #e2e4e9;
+  --color-border-strong: #c9ccd3;
   --color-border-control: #8a8e99;
 
   --color-danger-default: #b91c1c;
   --color-danger-hover: #991b1b;
   --color-danger-subtle: #fef2f2;
-  --color-success-default: #15803d;
+  --color-success-default: #065f46;
   --color-success-hover: #166534;
-  --color-success-subtle: #f0fdf4;
-  --color-warning-default: #a16207;
+  --color-success-subtle: #ecfdf5;
+  --color-warning-default: #92400e;
   --color-warning-hover: #854d0e;
-  --color-warning-subtle: #fefce8;
+  --color-warning-subtle: #fff7e8;
 
   --success: var(--color-success-default);
   --success-subtle: var(--color-success-subtle);
@@ -56,8 +56,11 @@
 
 @theme {
   --font-sans:
-    var(--font-sans), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, sans-serif;
+    var(--font-sans), "Public Sans", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, sans-serif;
+  --font-display:
+    var(--font-display), "Space Grotesk", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, sans-serif;
   --font-mono:
     var(--font-mono), "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo,
     Monaco, Consolas, monospace;
@@ -108,4 +111,10 @@
 :focus-visible {
   outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
 }

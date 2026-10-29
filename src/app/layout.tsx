@@ -1,9 +1,16 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Space_Grotesk, Public_Sans, JetBrains_Mono } from "next/font/google";
 import { Providers } from "@/components/Providers";
 import "./globals.css";
+import "./homepage.css";
 
-const inter = Inter({
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
+});
+
+const publicSans = Public_Sans({
   subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
@@ -16,9 +23,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Accessibility Playground — Learn & Test WCAG 2.2 Patterns",
+  title: "Accessibility Playground — a WCAG 2.2 inspector for developers",
   description:
-    "Interactive developer tool for testing WCAG 2.2 accessibility: live HTML preview, computed a11y tree, ARIA validation, accessible names, axe-core scans, and contrast checking.",
+    "Paste HTML into a live editor and watch its accessibility tree, ARIA state, and screen-reader announcement compute in real time.",
 };
 
 export default function RootLayout({
@@ -31,7 +38,7 @@ export default function RootLayout({
       lang="en"
       data-theme="light"
       style={{ colorScheme: "light" }}
-      className={`${inter.variable} ${jetbrainsMono.variable}`}
+      className={`${spaceGrotesk.variable} ${publicSans.variable} ${jetbrainsMono.variable}`}
     >
       <body className="flex min-h-screen flex-col bg-[var(--color-canvas)] font-sans text-sm text-[var(--color-text-primary)] antialiased">
         <a

@@ -71,6 +71,17 @@ export type IframeMessage = z.infer<typeof IframeMessageSchema>;
 
 export function safeParseIframeMessage(data: unknown): IframeMessage | null {
   const result = IframeMessageSchema.safeParse(data);
+  if (
+    !result.success &&
+    process.env.NODE_ENV !== "production" &&
+    process.env.NODE_ENV !== "test"
+  ) {
+    console.warn(
+      "Iframe message schema validation failed:",
+      result.error,
+      data
+    );
+  }
   return result.success ? result.data : null;
 }
 

@@ -32,7 +32,7 @@ export function PatternDetailView({
       {/* Header and WCAG mapping */}
       <div className="flex flex-col gap-2 border-b border-[var(--color-border)] pb-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-xl font-bold tracking-tight text-[var(--color-text-primary)] sm:text-2xl">
+          <h1 className="font-[family-name:var(--font-display)] text-xl font-bold tracking-tight text-[var(--color-text-primary)] sm:text-2xl">
             {pattern.title}
           </h1>
           <ButtonLink

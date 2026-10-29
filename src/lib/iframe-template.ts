@@ -25,9 +25,9 @@ export function generatePreviewSrcDoc(
     }
     /* Selected element inspection outline */
     .a11y-inspect-selected {
-      outline: 2px dashed #5b21b6 !important;
+      outline: 2px dashed #1d4ed8 !important;
       outline-offset: 4px !important;
-      box-shadow: 0 0 0 6px rgba(91, 33, 182, 0.15) !important;
+      box-shadow: 0 0 0 6px rgba(29, 78, 216, 0.15) !important;
     }
     /* Subtle hover indicator for clickable inspection */
     [data-a11y-id] {
@@ -107,19 +107,22 @@ export function generatePreviewSrcDoc(
             if (v.tags && Array.isArray(v.tags)) {
               for (var i = 0; i < v.tags.length; i++) {
                 var t = v.tags[i];
-                var m = t.match(/^wcag(\\d)(\\d+)?$/);
+                var m = t.match(/^wcag(\\d)(\\d)(\\d{1,2})$/);
                 if (m) {
-                  wcag.push(m[1] + (m[2] ? "." + m[2] : ""));
+                  wcag.push(m[1] + "." + m[2] + "." + m[3]);
                 }
               }
             }
 
+            var validImpacts = ["critical", "serious", "moderate", "minor"];
+            var impact = (v.impact && validImpacts.indexOf(v.impact) !== -1) ? v.impact : "minor";
+
             return {
               id: v.id,
-              impact: v.impact || "minor",
-              description: v.description,
-              help: v.help,
-              helpUrl: v.helpUrl,
+              impact: impact,
+              description: v.description || "",
+              help: v.help || "",
+              helpUrl: v.helpUrl || "",
               wcag: wcag.length > 0 ? wcag : undefined,
               source: "axe-core",
               type: type,
@@ -127,7 +130,10 @@ export function generatePreviewSrcDoc(
                 var targetId = undefined;
                 try {
                   if (n.target && n.target.length > 0) {
-                    var el = document.querySelector(n.target.join(", "));
+                    var sel = Array.isArray(n.target)
+                      ? n.target.map(function(t) { return Array.isArray(t) ? t.join(" ") : String(t); }).join(", ")
+                      : String(n.target);
+                    var el = document.querySelector(sel);
                     if (el) {
                       var a11yEl = el.getAttribute("data-a11y-id") ? el : (el.closest ? el.closest("[data-a11y-id]") : null);
                       if (a11yEl) {
@@ -137,11 +143,15 @@ export function generatePreviewSrcDoc(
                   }
                 } catch (err) {}
 
+                var normalizedTarget = (n.target || []).map(function(t) {
+                  return Array.isArray(t) ? t.join(" ") : String(t);
+                });
+
                 return {
-                  html: n.html,
-                  target: n.target || [],
+                  html: n.html || "",
+                  target: normalizedTarget,
                   targetId: targetId,
-                  failureSummary: n.failureSummary
+                  failureSummary: n.failureSummary || undefined
                 };
               })
             };

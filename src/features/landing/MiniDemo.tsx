@@ -65,7 +65,7 @@ export function MiniDemo() {
         <div
           className={`flex flex-col rounded-lg border p-4 transition-all ${
             activeElement === "div"
-              ? "border-[var(--color-warning-default)] bg-[var(--color-warning-subtle)]/30 ring-1 ring-[var(--color-warning-default)]"
+              ? "border-[var(--color-border-strong)] bg-[var(--color-surface-sunken)] ring-1 ring-[var(--color-border-strong)]"
               : "border-[var(--color-border)] bg-[var(--color-surface-raised)]"
           }`}
         >
@@ -133,7 +133,7 @@ export function MiniDemo() {
         <div
           className={`flex flex-col rounded-lg border p-4 transition-all ${
             activeElement === "button"
-              ? "border-[var(--color-success-default)] bg-[var(--color-success-subtle)]/30 ring-1 ring-[var(--color-success-default)]"
+              ? "border-[var(--color-border-strong)] bg-[var(--color-surface-sunken)] ring-1 ring-[var(--color-border-strong)]"
               : "border-[var(--color-border)] bg-[var(--color-surface-raised)]"
           }`}
         >

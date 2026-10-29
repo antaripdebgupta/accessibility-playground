@@ -75,8 +75,8 @@ export function IssuesPanel({
           No violations found
         </p>
         <p className="max-w-md text-xs text-[var(--color-text-secondary)]">
-          Automated tools catch only 30–40% of WCAG criteria. Always test
-          manually with keyboard navigation, screen readers, and zoom.
+          Automated checks passed. Always test manually with keyboard
+          navigation, screen readers, and zoom for comprehensive conformance.
         </p>
       </div>
     );

@@ -4,7 +4,7 @@ import * as React from "react";
 import { generatePreviewSrcDoc } from "@/lib/iframe-template";
 import { safeParseIframeMessage } from "@/lib/postmessage-schema";
 import type { AxeFinding, FocusOrderPosition } from "@/types/a11y";
-import { ShieldCheck, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 
 export interface PreviewFrameProps {
   instrumentedHtml: string;

@@ -206,43 +206,60 @@ export function PlaygroundView() {
     return runCustomRules(ast, debouncedCss);
   }, [ast, debouncedCss]);
 
-  // Merge custom findings + focus order findings + axe-core findings
+  // Merge axe-core findings + custom findings
+  // Axe-core findings are canonical and preserved with source: "axe-core".
+  // Overlapping custom checks are suppressed, but their actionable fix suggestions are copied to the axe finding.
   const mergedViolations = React.useMemo(() => {
-    const seen = new Set<string>();
     const list: AxeFinding[] = [];
+    const suppressedCustomKeys = new Set<string>();
 
-    // 1. Add custom rules findings
-    for (const f of customFindings) {
-      const key = `${f.id}:${f.nodes[0]?.targetId || f.nodes[0]?.html}`;
-      seen.add(key);
-      list.push(f);
+    // 1. Add all axe-core findings
+    for (const af of axeViolations) {
+      const targetId = af.nodes[0]?.targetId;
+      const targetHtml = af.nodes[0]?.html;
+
+      // Find if any custom finding has an actionable fix suggestion for this issue
+      let fix = af.fix;
+      const matchingCustom = customFindings.find((cf) => {
+        const cfTargetId = cf.nodes[0]?.targetId;
+        const cfHtml = cf.nodes[0]?.html;
+        const targetMatch = Boolean(
+          (targetId && cfTargetId && targetId === cfTargetId) ||
+          (targetHtml && cfHtml && targetHtml === cfHtml)
+        );
+        if (!targetMatch) return false;
+
+        return (
+          cf.id === af.id ||
+          (af.id === "image-alt" && cf.id === "img-missing-alt") ||
+          (af.id === "tabindex" && cf.id === "positive-tabindex") ||
+          ((af.id === "link-name" || af.id === "button-name") &&
+            cf.id === "empty-interactive-name") ||
+          (af.id === "label" && cf.id === "input-no-label") ||
+          (af.id === "duplicate-id" && cf.id === "duplicate-id")
+        );
+      });
+
+      if (matchingCustom) {
+        if (!fix && matchingCustom.fix) {
+          fix = matchingCustom.fix;
+        }
+        const cfTargetId = matchingCustom.nodes[0]?.targetId;
+        const cfHtml = matchingCustom.nodes[0]?.html;
+        suppressedCustomKeys.add(
+          `${matchingCustom.id}:${cfTargetId || cfHtml}`
+        );
+      }
+
+      list.push(fix ? { ...af, fix } : af);
     }
 
-    // 2. Add axe findings without duplicating overlapping custom checks
-    for (const f of axeViolations) {
-      const targetId = f.nodes[0]?.targetId;
-      const key = `${f.id}:${targetId || f.nodes[0]?.html}`;
-      const altKey =
-        f.id === "image-alt" ? `img-missing-alt:${targetId}` : null;
-      const tabKey =
-        f.id === "tabindex" ? `positive-tabindex:${targetId}` : null;
-      const linkKey =
-        f.id === "link-name" ? `empty-interactive-name:${targetId}` : null;
-      const buttonKey =
-        f.id === "button-name" ? `empty-interactive-name:${targetId}` : null;
-      const labelKey = f.id === "label" ? `input-no-label:${targetId}` : null;
-
-      const isDuplicated =
-        seen.has(key) ||
-        (altKey && seen.has(altKey)) ||
-        (tabKey && seen.has(tabKey)) ||
-        (linkKey && seen.has(linkKey)) ||
-        (buttonKey && seen.has(buttonKey)) ||
-        (labelKey && seen.has(labelKey));
-
-      if (!isDuplicated) {
-        seen.add(key);
-        list.push(f);
+    // 2. Add custom findings that do not duplicate axe-core findings
+    for (const cf of customFindings) {
+      const targetId = cf.nodes[0]?.targetId;
+      const key = `${cf.id}:${targetId || cf.nodes[0]?.html}`;
+      if (!suppressedCustomKeys.has(key)) {
+        list.push(cf);
       }
     }
 

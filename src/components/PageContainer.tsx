@@ -18,7 +18,7 @@ export function PageContainer({
   return (
     <Component
       className={cn(
-        "w-full px-3 sm:px-4 lg:px-5",
+        "mx-auto w-full max-w-7xl px-3 sm:px-4 lg:px-5",
         prose && "[&_p]:max-w-prose",
         className
       )}
