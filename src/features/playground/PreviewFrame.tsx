@@ -4,7 +4,7 @@ import * as React from "react";
 import { generatePreviewSrcDoc } from "@/lib/iframe-template";
 import { safeParseIframeMessage } from "@/lib/postmessage-schema";
 import type { AxeFinding, FocusOrderPosition } from "@/types/a11y";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, Maximize2, Minimize2 } from "lucide-react";
 
 export interface PreviewFrameProps {
   instrumentedHtml: string;
@@ -22,8 +22,9 @@ export interface PreviewFrameProps {
   onFocusPositionsChange?: (positions: readonly FocusOrderPosition[]) => void;
   focusedElementId?: string | null;
   showFocusBadges?: boolean;
-  isDragging?: boolean;
   useTailwind?: boolean;
+  isMaximized?: boolean;
+  onToggleMaximize?: () => void;
 }
 
 export function PreviewFrame({
@@ -39,8 +40,9 @@ export function PreviewFrame({
   onFocusPositionsChange,
   focusedElementId,
   showFocusBadges = true,
-  isDragging = false,
   useTailwind = false,
+  isMaximized = false,
+  onToggleMaximize,
 }: PreviewFrameProps) {
   const [iframeKey, setIframeKey] = React.useState(0);
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
@@ -63,6 +65,8 @@ export function PreviewFrame({
   }, [instrumentedHtml, css, axeUrl, useTailwind]);
 
   // Synchronize selection without reloading the iframe
+  // Note: With sandbox="allow-scripts" and no allow-same-origin, the iframe has an opaque origin ("null"),
+  // so targetOrigin "*" is required. Inbound messages are strictly verified via event.source === iframe.contentWindow.
   React.useEffect(() => {
     if (iframeRef.current?.contentWindow) {
       iframeRef.current.contentWindow.postMessage(
@@ -143,7 +147,7 @@ export function PreviewFrame({
     <div
       role="region"
       aria-label="Interactive sandboxed HTML preview"
-      className="flex flex-col overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xs"
+      className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xs"
     >
       {/* Preview Header */}
       <div className="flex items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface-raised)]/60 px-3 py-2">
@@ -153,18 +157,40 @@ export function PreviewFrame({
           </span>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setIframeKey((k) => k + 1)}
-          aria-label="Reload preview frame"
-          className="inline-flex h-6 w-6 items-center justify-center rounded text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
-        >
-          <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
-        </button>
+        <div className="flex items-center gap-1">
+          {onToggleMaximize && (
+            <button
+              type="button"
+              onClick={onToggleMaximize}
+              aria-label={
+                isMaximized
+                  ? "Restore pane size (Esc)"
+                  : "Maximize live preview"
+              }
+              aria-pressed={isMaximized}
+              className="inline-flex h-6 w-6 items-center justify-center rounded text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
+            >
+              {isMaximized ? (
+                <Minimize2 className="h-3.5 w-3.5" aria-hidden="true" />
+              ) : (
+                <Maximize2 className="h-3.5 w-3.5" aria-hidden="true" />
+              )}
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setIframeKey((k) => k + 1)}
+            aria-label="Reload preview frame"
+            className="inline-flex h-6 w-6 items-center justify-center rounded text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
+          >
+            <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
+          </button>
+        </div>
       </div>
 
       {/* Frame Container */}
-      <div className="relative max-h-[360px] min-h-[220px] w-full bg-white">
+      <div className="relative min-h-0 w-full flex-1 bg-white">
         {parseError ? (
           <div className="text-md flex h-full min-h-[220px] flex-col items-center justify-center p-6 text-center text-[var(--color-danger-default)]">
             <p className="font-semibold">{parseError}</p>
@@ -183,9 +209,7 @@ export function PreviewFrame({
               srcDoc={srcDoc}
               title="Safe sandboxed HTML preview"
               sandbox="allow-scripts"
-              className={`h-full min-h-[220px] w-full border-0 ${
-                isDragging ? "pointer-events-none" : ""
-              }`}
+              className="h-full w-full border-0"
             />
 
             {/* Overlaid Tab Sequence Badges (Visual only, aria-hidden, pointer-events-none) */}

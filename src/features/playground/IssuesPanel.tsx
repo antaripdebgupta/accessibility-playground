@@ -16,6 +16,7 @@ import {
   Wrench,
 } from "lucide-react";
 import { isAutoFixable, computeFixPreview } from "@/lib/auto-fix";
+import { getImpactMeta } from "@/lib/impact";
 
 export interface IssuesPanelProps {
   violations: readonly AxeFinding[];
@@ -116,27 +117,21 @@ export function IssuesPanel({
         {/* Card Header: Impact, Title, Source, Wcag */}
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div className="flex flex-wrap items-center gap-1.5">
-            {finding.impact === "critical" ? (
-              <Badge variant="critical">
-                <AlertOctagon className="h-3 w-3" aria-hidden="true" />
-                Critical
-              </Badge>
-            ) : finding.impact === "serious" ? (
-              <Badge variant="serious">
-                <AlertTriangle className="h-3 w-3" aria-hidden="true" />
-                Serious
-              </Badge>
-            ) : finding.impact === "moderate" ? (
-              <Badge variant="moderate">
-                <AlertTriangle className="h-3 w-3" aria-hidden="true" />
-                Moderate
-              </Badge>
-            ) : (
-              <Badge variant="minor">
-                <Info className="h-3 w-3" aria-hidden="true" />
-                Minor
-              </Badge>
-            )}
+            {(() => {
+              const meta = getImpactMeta(finding.impact);
+              const Icon =
+                meta.variant === "critical"
+                  ? AlertOctagon
+                  : meta.variant === "minor"
+                    ? Info
+                    : AlertTriangle;
+              return (
+                <Badge variant={meta.variant}>
+                  <Icon className="h-3 w-3" aria-hidden="true" />
+                  {meta.label}
+                </Badge>
+              );
+            })()}
 
             <Badge variant="outline" className="font-mono text-[10px]">
               {isAxe ? "axe-core" : "Playground rule"}

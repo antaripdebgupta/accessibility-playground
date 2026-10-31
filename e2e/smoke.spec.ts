@@ -1,9 +1,10 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
-const ROUTES = ["/", "/playground", "/contrast", "/about"];
+const ALL_ROUTES = ["/", "/playground", "/contrast", "/about"];
+const SITE_ROUTES = ["/", "/contrast", "/about"];
 
-for (const route of ROUTES) {
+for (const route of ALL_ROUTES) {
   test.describe(`Route: ${route}`, () => {
     test("has 0 WCAG 2.2 AA axe violations", async ({ page }) => {
       await page.goto(route);
@@ -15,7 +16,11 @@ for (const route of ROUTES) {
 
       expect(accessibilityScanResults.violations).toEqual([]);
     });
+  });
+}
 
+for (const route of SITE_ROUTES) {
+  test.describe(`Site Nav: ${route}`, () => {
     test("header has exactly one nav landmark with all 3 items", async ({
       page,
     }) => {
@@ -36,18 +41,37 @@ for (const route of ROUTES) {
       expect(hrefs).toContain("/contrast");
       expect(hrefs).toContain("/about");
     });
-
-    test("footer landmark exists only on home route ('/')", async ({
-      page,
-    }) => {
-      await page.goto(route);
-
-      const footer = page.locator("footer");
-      if (route === "/") {
-        await expect(footer).toHaveCount(1);
-      } else {
-        await expect(footer).toHaveCount(0);
-      }
-    });
   });
 }
+
+test.describe("Workbench chrome-less shell", () => {
+  test("/playground has no marketing nav or footer, but has workbench toolbar", async ({
+    page,
+  }) => {
+    await page.goto("/playground");
+
+    // No marketing header nav
+    const siteNav = page.locator("header nav");
+    await expect(siteNav).toHaveCount(0);
+
+    // No footer
+    const footer = page.locator("footer");
+    await expect(footer).toHaveCount(0);
+
+    // Has workbench home link
+    const homeLink = page.getByRole("link", {
+      name: "Accessibility Playground — back to home",
+    });
+    await expect(homeLink).toBeVisible();
+  });
+});
+
+test.describe("Footer landmark", () => {
+  test("footer landmark exists only on home route ('/')", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("footer")).toHaveCount(1);
+
+    await page.goto("/about");
+    await expect(page.locator("footer")).toHaveCount(0);
+  });
+});

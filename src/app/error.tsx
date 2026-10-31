@@ -4,6 +4,7 @@ import * as React from "react";
 import { Button } from "@accessly-ui/react";
 import { RotateCcw } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
+import { reportError } from "@/lib/report-error";
 
 export default function GlobalError({
   error,
@@ -13,7 +14,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   React.useEffect(() => {
-    console.error("Application error caught by boundary:", error);
+    reportError(error, { digest: error.digest, context: "GlobalError" });
   }, [error]);
 
   return (

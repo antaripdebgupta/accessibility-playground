@@ -8,8 +8,7 @@ import {
   normalizeHex,
   suggestPassingColor,
 } from "@/lib/contrast";
-import { cn } from "@/lib/utils";
-import { Pipette } from "lucide-react";
+import { ColorField } from "./ColorField";
 
 export function ContrastChecker() {
   const [fgHex, setFgHex] = React.useState("#1e293b");
@@ -26,8 +25,7 @@ export function ContrastChecker() {
 
   const handleEyeDropper = async (target: "fg" | "bg") => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const EyeDropperClass = (window as any).EyeDropper;
+      const EyeDropperClass = window.EyeDropper;
       if (!EyeDropperClass) return;
       const eyeDropper = new EyeDropperClass();
       const result = await eyeDropper.open();
@@ -177,103 +175,33 @@ export function ContrastChecker() {
             </div>
           </div>
 
-          <div className="field">
-            <label htmlFor="fg-hex">Text color</label>
-            <div className="field-row">
-              <div
-                className="swatch"
-                id="fgSwatch"
-                aria-hidden="true"
-                style={{
-                  backgroundColor: isFgValid ? normalizedFg! : "transparent",
-                }}
-              />
-              <input
-                id="fg-hex"
-                className={cn("hex-input", !isFgValid && "is-invalid")}
-                type="text"
-                value={fgHex}
-                onChange={(e) => setFgHex(e.target.value)}
-                aria-invalid={!isFgValid}
-                aria-describedby={!isFgValid ? "fg-error" : undefined}
-                spellCheck={false}
-                autoComplete="off"
-              />
-              <input
-                id="fg-picker"
-                className="color-picker"
-                type="color"
-                value={normalizedFg ?? "#000000"}
-                onChange={(e) => setFgHex(e.target.value)}
-                aria-label="Text color picker"
-              />
-              {supportsEyeDropper && (
-                <button
-                  type="button"
-                  onClick={() => handleEyeDropper("fg")}
-                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
-                  title="Sample text color from screen"
-                  aria-label="Sample text color from screen"
-                >
-                  <Pipette className="h-4 w-4" aria-hidden="true" />
-                </button>
-              )}
-            </div>
-            {!isFgValid && (
-              <span className="field-error" id="fg-error" role="alert">
-                Enter a valid 3- or 6-digit hex color.
-              </span>
-            )}
-          </div>
+          <ColorField
+            id="fg"
+            label="Text color"
+            hex={fgHex}
+            normalizedHex={normalizedFg}
+            isValid={isFgValid}
+            onHexChange={setFgHex}
+            supportsEyeDropper={supportsEyeDropper}
+            onEyeDropper={() => handleEyeDropper("fg")}
+            pickerAriaLabel="Text color picker"
+            eyeDropperTitle="Sample text color from screen"
+            defaultPickerColor="#000000"
+          />
 
-          <div className="field">
-            <label htmlFor="bg-hex">Background color</label>
-            <div className="field-row">
-              <div
-                className="swatch"
-                id="bgSwatch"
-                aria-hidden="true"
-                style={{
-                  backgroundColor: isBgValid ? normalizedBg! : "transparent",
-                }}
-              />
-              <input
-                id="bg-hex"
-                className={cn("hex-input", !isBgValid && "is-invalid")}
-                type="text"
-                value={bgHex}
-                onChange={(e) => setBgHex(e.target.value)}
-                aria-invalid={!isBgValid}
-                aria-describedby={!isBgValid ? "bg-error" : undefined}
-                spellCheck={false}
-                autoComplete="off"
-              />
-              <input
-                id="bg-picker"
-                className="color-picker"
-                type="color"
-                value={normalizedBg ?? "#ffffff"}
-                onChange={(e) => setBgHex(e.target.value)}
-                aria-label="Background color picker"
-              />
-              {supportsEyeDropper && (
-                <button
-                  type="button"
-                  onClick={() => handleEyeDropper("bg")}
-                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
-                  title="Sample background color from screen"
-                  aria-label="Sample background color from screen"
-                >
-                  <Pipette className="h-4 w-4" aria-hidden="true" />
-                </button>
-              )}
-            </div>
-            {!isBgValid && (
-              <span className="field-error" id="bg-error" role="alert">
-                Enter a valid 3- or 6-digit hex color.
-              </span>
-            )}
-          </div>
+          <ColorField
+            id="bg"
+            label="Background color"
+            hex={bgHex}
+            normalizedHex={normalizedBg}
+            isValid={isBgValid}
+            onHexChange={setBgHex}
+            supportsEyeDropper={supportsEyeDropper}
+            onEyeDropper={() => handleEyeDropper("bg")}
+            pickerAriaLabel="Background color picker"
+            eyeDropperTitle="Sample background color from screen"
+            defaultPickerColor="#ffffff"
+          />
 
           <p className="preview-label">Preview</p>
           <div

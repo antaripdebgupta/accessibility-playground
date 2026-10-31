@@ -1,3 +1,5 @@
+import { storage, STORAGE_KEYS } from "@/lib/storage";
+
 export interface SavedSnippet {
   id: string;
   name: string;
@@ -6,19 +8,22 @@ export interface SavedSnippet {
   savedAt: number;
 }
 
-const STORAGE_KEY = "a11y-playground:snippets";
+function isSavedSnippetArray(x: unknown): x is SavedSnippet[] {
+  return (
+    Array.isArray(x) &&
+    x.every(
+      (item) =>
+        item &&
+        typeof item === "object" &&
+        "id" in item &&
+        "name" in item &&
+        "html" in item
+    )
+  );
+}
 
 export function listSnippets(): SavedSnippet[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed;
-  } catch {
-    return [];
-  }
+  return storage.getJSON(STORAGE_KEYS.snippets, isSavedSnippetArray) ?? [];
 }
 
 export function saveSnippet(
@@ -36,13 +41,7 @@ export function saveSnippet(
   };
 
   const updated = [newSnippet, ...snippets];
-  if (typeof window !== "undefined") {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-    } catch {
-      // Ignore quota error
-    }
-  }
+  storage.set(STORAGE_KEYS.snippets, JSON.stringify(updated));
 
   return newSnippet;
 }
@@ -50,13 +49,7 @@ export function saveSnippet(
 export function deleteSnippet(id: string): void {
   const snippets = listSnippets();
   const updated = snippets.filter((s) => s.id !== id);
-  if (typeof window !== "undefined") {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-    } catch {
-      // Ignore quota error
-    }
-  }
+  storage.set(STORAGE_KEYS.snippets, JSON.stringify(updated));
 }
 
 export function formatRelativeTime(timestamp: number): string {

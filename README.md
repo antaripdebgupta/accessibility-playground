@@ -69,23 +69,22 @@ npm run start
 
 ## Architecture & Folder Structure
 
+> **Rule:** Browser-only reads (e.g. `localStorage`, `window`) must go through `useSyncExternalStore` or live under an `ssr:false` boundary.
+
 ```
-├── .vscode/               # Editor configurations (settings, extensions recommendations)
 ├── public/                # Static assets, including vendored axe.min.js
 ├── src/
 │   ├── app/               # Next.js App Router routes, layouts, error, and loading states
-│   │   ├── (root)         # Home page with live interactive mini-demo
-│   │   ├── playground/    # Core workbench (editor + preview + analysis panels)
-│   │   ├── patterns/      # WCAG 2.2 pattern library index and detail routes
-│   │   ├── contrast/      # Standalone color contrast checker
-│   │   └── about/         # Architecture notes & security sandbox documentation
-│   ├── components/        # Shared application components (Header, Footer, ThemeToggle, WcagBadge)
-│   │   └── ui/            # Accessly UI re-exports and local primitives (Card, Badge, Label, Separator)
-│   ├── data/              # Static, hand-authored typed content (WCAG criteria, patterns, starter templates)
-│   ├── features/          # Feature-specific components (playground panels, pattern comparators, contrast engine)
-│   ├── hooks/             # Reusable custom React hooks (useDebounce)
-│   ├── lib/               # Pure business logic (AST parser, contrast math, AccName trace, ARIA validation, postMessage schema)
-│   └── types/             # Shared TypeScript declarations (type-only files)
+│   │   ├── (site)/        # Public routes: home (/), /about, /contrast
+│   │   └── (workbench)/   # Playground route with client-only ssr:false boundary
+│   ├── components/        # Shared application components (Header, Footer, ThemeToggle, PanelBoundary)
+│   │   ├── ui/            # Shared UI components (Badge, CodeSnippet)
+│   │   └── workbench/     # Workbench layout primitives (SplitPane)
+│   ├── data/              # Static typed content (WCAG criteria, starter templates, editor snippets)
+│   ├── features/          # Feature components (Playground, ContrastChecker)
+│   ├── hooks/             # Custom React hooks (useWorkbenchLayout, usePlaygroundDocument, useScanState)
+│   ├── lib/               # Pure business logic (AST parser, rules registry, AccName trace, storage, postmessage)
+│   └── types/             # Shared TypeScript declarations
 ```
 
 ---

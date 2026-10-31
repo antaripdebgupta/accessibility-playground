@@ -2,60 +2,23 @@
 
 import * as React from "react";
 import CodeMirror, { type ReactCodeMirrorRef } from "@uiw/react-codemirror";
-import { html as langHtml } from "@codemirror/lang-html";
-import { css as langCss } from "@codemirror/lang-css";
+import { html as langHtml, htmlLanguage } from "@codemirror/lang-html";
+import { css as langCss, cssLanguage } from "@codemirror/lang-css";
 import { EditorView, ViewPlugin, keymap } from "@codemirror/view";
+import { syntaxHighlighting } from "@codemirror/language";
+import { autocompletion } from "@codemirror/autocomplete";
 import { indentWithTab as indentWithTabCommand } from "@codemirror/commands";
-import { syntaxHighlighting, HighlightStyle } from "@codemirror/language";
-import { tags as t } from "@lezer/highlight";
 
-// Accessible syntax highlight style driven by CSS variables for >= 4.5:1 contrast in light & dark modes
-const accessibleHighlightStyle = HighlightStyle.define([
-  { tag: t.tagName, color: "var(--color-code-tag)", fontWeight: "600" },
-  { tag: t.attributeName, color: "var(--color-code-attr)" },
-  { tag: t.attributeValue, color: "var(--color-code-val)" },
-  { tag: t.string, color: "var(--color-code-val)" },
-  { tag: t.angleBracket, color: "var(--color-code-punct)" },
-  { tag: t.definitionOperator, color: "var(--color-code-punct)" },
-  { tag: t.punctuation, color: "var(--color-code-punct)" },
-  { tag: t.comment, color: "var(--color-code-comment)", fontStyle: "italic" },
-  { tag: t.propertyName, color: "var(--color-code-attr)" },
-  { tag: t.keyword, color: "var(--color-code-tag)", fontWeight: "600" },
-  { tag: t.number, color: "var(--color-code-num)" },
-  { tag: t.className, color: "var(--color-code-num)" },
-  { tag: t.definition(t.propertyName), color: "var(--color-code-attr)" },
-]);
-
-const editorTheme = EditorView.theme({
-  "&": {
-    height: "280px",
-    fontSize: "13px",
-    fontFamily: "var(--font-mono), monospace",
-    backgroundColor: "var(--color-surface)",
-    color: "var(--color-text-primary)",
-  },
-  ".cm-content": {
-    caretColor: "var(--color-focus-ring)",
-    padding: "8px 0",
-  },
-  "&.cm-focused": {
-    outline: "2px solid var(--color-focus-ring) !important",
-    outlineOffset: "-1px",
-  },
-  ".cm-gutters": {
-    backgroundColor: "var(--color-surface-raised)",
-    color: "var(--color-text-secondary)",
-    borderRight: "1px solid var(--color-border)",
-  },
-  ".cm-activeLine": {
-    backgroundColor: "var(--color-surface-raised)",
-  },
-  ".cm-activeLineGutter": {
-    backgroundColor: "var(--color-surface-raised)",
-    color: "var(--color-text-primary)",
-    fontWeight: "bold",
-  },
-});
+import {
+  editorTheme,
+  accessibleHighlightStyle,
+} from "./editor/extensions/theme";
+import { ariaCompletionSource } from "./editor/extensions/completions/aria";
+import { idRefCompletionSource } from "./editor/extensions/completions/id-refs";
+import { a11ySnippetsCompletionSource } from "./editor/extensions/completions/a11y-snippets";
+import { cssA11yCompletionSource } from "./editor/extensions/completions/css-a11y";
+import { tailwindCompletionSource } from "./editor/extensions/completions/tailwind";
+import { useEditorSettings } from "./editor/useEditorSettings";
 
 export interface CodeEditorProps {
   value: string;
@@ -65,6 +28,7 @@ export interface CodeEditorProps {
   onForceScan?: () => void;
   indentWithTab?: boolean;
   ariaLabel: string;
+  useTailwind?: boolean;
 }
 
 export function CodeEditor({
@@ -75,8 +39,10 @@ export function CodeEditor({
   onForceScan,
   indentWithTab = false,
   ariaLabel,
+  useTailwind = false,
 }: CodeEditorProps) {
   const editorRef = React.useRef<ReactCodeMirrorRef>(null);
+  const { settings } = useEditorSettings();
 
   // Sync cursor selection when a node is selected in tree
   React.useEffect(() => {
@@ -95,10 +61,9 @@ export function CodeEditor({
 
   const extensions = React.useMemo(() => {
     const exts = [
-      language === "html" ? langHtml() : langCss(),
       editorTheme,
       syntaxHighlighting(accessibleHighlightStyle),
-      EditorView.lineWrapping,
+      settings.lineWrapping ? EditorView.lineWrapping : [],
       EditorView.contentAttributes.of({
         "aria-label": ariaLabel,
       }),
@@ -124,37 +89,85 @@ export function CodeEditor({
       exts.push(keymap.of([indentWithTabCommand]));
     }
 
+    if (language === "html") {
+      exts.push(
+        langHtml({ autoCloseTags: true, matchClosingTags: true }),
+        htmlLanguage.data.of({
+          autocomplete: ariaCompletionSource,
+        }),
+        htmlLanguage.data.of({
+          autocomplete: idRefCompletionSource,
+        }),
+        htmlLanguage.data.of({
+          autocomplete: a11ySnippetsCompletionSource,
+        })
+      );
+      if (useTailwind) {
+        exts.push(
+          htmlLanguage.data.of({
+            autocomplete: tailwindCompletionSource,
+          })
+        );
+      }
+    } else {
+      exts.push(
+        langCss(),
+        cssLanguage.data.of({
+          autocomplete: cssA11yCompletionSource,
+        })
+      );
+    }
+
+    if (settings.autocomplete) {
+      exts.push(
+        autocompletion({
+          activateOnTyping: true,
+          maxRenderedOptions: 30,
+          icons: false,
+          defaultKeymap: true, // Enter accept, Esc close, ↑↓ navigate, Ctrl-Space open. (No Tab trap!)
+        })
+      );
+    }
+
     return exts;
-  }, [language, onForceScan, indentWithTab, ariaLabel]);
+  }, [
+    language,
+    onForceScan,
+    indentWithTab,
+    ariaLabel,
+    useTailwind,
+    settings.autocomplete,
+    settings.lineWrapping,
+  ]);
 
   return (
-    <div className="relative">
+    <div className="relative h-full min-h-0">
       <CodeMirror
         ref={editorRef}
         value={value}
         onChange={onChange}
         extensions={extensions}
         basicSetup={{
-          lineNumbers: true,
+          lineNumbers: settings.lineNumbers,
           highlightActiveLineGutter: true,
           highlightSpecialChars: true,
-          foldGutter: false,
+          foldGutter: true,
           drawSelection: true,
           dropCursor: true,
-          allowMultipleSelections: false,
+          allowMultipleSelections: true,
           indentOnInput: true,
           syntaxHighlighting: false,
           bracketMatching: true,
           closeBrackets: true,
-          autocompletion: false,
-          rectangularSelection: false,
+          autocompletion: false, // We control autocompletion through our extension config above
+          rectangularSelection: true,
           crosshairCursor: false,
           highlightActiveLine: true,
           highlightSelectionMatches: true,
           closeBracketsKeymap: true,
-          searchKeymap: false,
-          foldKeymap: false,
-          completionKeymap: false,
+          searchKeymap: true,
+          foldKeymap: true,
+          completionKeymap: settings.autocomplete,
           lintKeymap: false,
         }}
         aria-label={ariaLabel}

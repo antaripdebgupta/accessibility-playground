@@ -4,152 +4,79 @@ import * as React from "react";
 import { useSearchParams } from "next/navigation";
 import { Editor } from "./Editor";
 import { PreviewFrame } from "./PreviewFrame";
-import { A11yTreePanel } from "./A11yTreePanel";
-import { AriaExplorerPanel } from "./AriaExplorerPanel";
-import { AccessibleNamePanel } from "./AccessibleNamePanel";
-import { FocusOrderPanel } from "./FocusOrderPanel";
-import { AnnouncementPanel } from "./AnnouncementPanel";
-import { IssuesPanel } from "./IssuesPanel";
-import { useDebounce } from "@/hooks/useDebounce";
+import { WorkbenchToolbar } from "./WorkbenchToolbar";
+import { SplitPane } from "@/components/workbench/SplitPane";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { useWorkbenchLayout } from "@/hooks/useWorkbenchLayout";
+import { usePlaygroundDocument } from "@/hooks/usePlaygroundDocument";
+import { useScanState } from "@/hooks/useScanState";
 import { parseHtmlToA11yTree, findA11yNodeById } from "@/lib/a11y-tree";
 import { computeFocusOrder } from "@/lib/focus-order";
 import { runCustomRules } from "@/lib/custom-rules";
-import { STARTER_TEMPLATES, type StarterTemplate } from "@/data/templates";
-import { PATTERNS } from "@/data/patterns";
-import type { AxeFinding, FocusOrderPosition } from "@/types/a11y";
-import { encodeSnippet, decodeSnippet } from "@/lib/snippet-share";
+import { mergeFindings } from "@/lib/merge-findings";
+import type { FocusOrderPosition } from "@/types/a11y";
+import { encodeSnippet } from "@/lib/snippet-share";
 import {
   setAttributeInSource,
   removeAttributeFromSource,
 } from "@/lib/mutate-html";
 import { applyAutoFixToHtml } from "@/lib/auto-fix";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@accessly-ui/react";
-import { Badge } from "@/components/ui/Badge";
-
-const SESSION_STORAGE_KEY = "a11y-playground:last-html";
-const SESSION_CSS_KEY = "a11y-playground:last-css";
-const SPLIT_STORAGE_KEY = "a11y-playground:split-percent";
-const TAILWIND_STORAGE_KEY = "a11y-playground:use-tailwind";
+import { AnalysisTabs } from "./AnalysisTabs";
 
 export function PlaygroundView() {
   const searchParams = useSearchParams();
-  const patternParam = searchParams.get("pattern");
+  const tabParam = searchParams.get("tab");
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
 
-  // Initial HTML and CSS resolution
-  const sharedParam =
-    typeof window !== "undefined" ? searchParams.get("s") : null;
+  const {
+    outerPercent,
+    innerPercent,
+    direction,
+    maximizedPane,
+    setOuterPercent,
+    setInnerPercent,
+    toggleMaximize,
+    setMaximizedPane,
+  } = useWorkbenchLayout();
 
-  const [rawHtml, setRawHtml] = React.useState<string>(() => {
-    if (typeof window !== "undefined") {
-      if (sharedParam) {
-        const decoded = decodeSnippet(sharedParam);
-        if (decoded) return decoded.html;
-      }
-      if (patternParam) {
-        const foundPattern = PATTERNS.find((p) => p.slug === patternParam);
-        if (foundPattern) return foundPattern.badCode;
-      }
-      try {
-        const saved = localStorage.getItem(SESSION_STORAGE_KEY);
-        if (saved) return saved;
-      } catch {
-        // Ignore localStorage error
-      }
-    }
-    return STARTER_TEMPLATES[0]?.html ?? "";
-  });
+  const {
+    scanId,
+    isScanning,
+    setIsScanning,
+    scanError,
+    axeViolations,
+    axeIncomplete,
+    triggerScan,
+    handleScanResults,
+    handleScanError,
+  } = useScanState();
 
-  const [rawCss, setRawCss] = React.useState<string>(() => {
-    if (typeof window !== "undefined") {
-      if (sharedParam) {
-        const decoded = decodeSnippet(sharedParam);
-        if (decoded) return decoded.css;
-      }
-      if (patternParam) {
-        const foundTemplate = STARTER_TEMPLATES.find(
-          (t) => t.id === patternParam
-        );
-        if (foundTemplate?.css) return foundTemplate.css;
-      }
-      try {
-        const saved = localStorage.getItem(SESSION_CSS_KEY);
-        if (saved) return saved;
-      } catch {
-        // Ignore localStorage error
-      }
-    }
-    return STARTER_TEMPLATES[0]?.css ?? "";
-  });
+  const handleDocumentChange = React.useCallback(() => {
+    setIsScanning(true);
+  }, [setIsScanning]);
 
-  const [restoredNotice, setRestoredNotice] = React.useState(() => {
-    if (typeof window !== "undefined") {
-      if (sharedParam) return false;
-      try {
-        return Boolean(localStorage.getItem(SESSION_STORAGE_KEY));
-      } catch {
-        return false;
-      }
-    }
-    return false;
-  });
+  const {
+    rawHtml,
+    rawCss,
+    debouncedHtml,
+    debouncedCss,
+    useTailwind,
+    setRawHtml,
+    setRawCss,
+    setUseTailwind,
+    handleSelectTemplate,
+    handleStartFresh,
+    isOverSizeLimit,
+  } = usePlaygroundDocument(handleDocumentChange);
 
-  const debouncedHtml = useDebounce(rawHtml, 400);
-  const debouncedCss = useDebounce(rawCss, 400);
-
-  const [useTailwind, setUseTailwind] = React.useState<boolean>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        return localStorage.getItem(TAILWIND_STORAGE_KEY) === "true";
-      } catch {
-        return false;
-      }
-    }
-    return false;
-  });
-
-  React.useEffect(() => {
-    if (typeof window !== "undefined") {
-      try {
-        localStorage.setItem(TAILWIND_STORAGE_KEY, String(useTailwind));
-      } catch {
-        // Ignore quota
-      }
-    }
-  }, [useTailwind]);
-
-  // Persist session to localStorage
-  React.useEffect(() => {
-    if (typeof window !== "undefined" && debouncedHtml) {
-      try {
-        localStorage.setItem(SESSION_STORAGE_KEY, debouncedHtml);
-      } catch {
-        // Ignore quota
-      }
-    }
-  }, [debouncedHtml]);
-
-  React.useEffect(() => {
-    if (typeof window !== "undefined") {
-      try {
-        localStorage.setItem(SESSION_CSS_KEY, debouncedCss);
-      } catch {
-        // Ignore quota
-      }
-    }
-  }, [debouncedCss]);
+  // Active analysis tab (supports ?tab= in URL, e.g. ?tab=issues)
+  const [analysisTab, setAnalysisTab] = React.useState<string>(
+    tabParam || "tree"
+  );
 
   const [selectedNodeId, setSelectedNodeId] = React.useState<string | null>(
     null
   );
-  const [axeViolations, setAxeViolations] = React.useState<
-    readonly AxeFinding[]
-  >([]);
-  const [axeIncomplete, setAxeIncomplete] = React.useState<
-    readonly AxeFinding[]
-  >([]);
-  const [scanId, setScanId] = React.useState<string>("initial");
-  const [isScanning, setIsScanning] = React.useState(false);
-  const [scanError, setScanError] = React.useState<string | null>(null);
   const [focusPositions, setFocusPositions] = React.useState<
     readonly FocusOrderPosition[]
   >([]);
@@ -157,154 +84,42 @@ export function PlaygroundView() {
     null
   );
 
-  // Split pane state & persistence (25% - 75%)
-  const [splitPercent, setSplitPercent] = React.useState<number>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const savedSplit = localStorage.getItem(SPLIT_STORAGE_KEY);
-        if (savedSplit) {
-          const val = parseFloat(savedSplit);
-          if (!isNaN(val) && val >= 25 && val <= 75) {
-            return val;
-          }
-        }
-      } catch {
-        // Ignore
-      }
-    }
-    return 50;
-  });
-  const [isDragging, setIsDragging] = React.useState(false);
-  const containerRef = React.useRef<HTMLDivElement>(null);
+  // Mobile pane selector (used below lg breakpoint)
+  const [mobilePane, setMobilePane] = React.useState<
+    "editor" | "preview" | "analysis"
+  >("editor");
 
-  const updateSplit = React.useCallback((percent: number) => {
-    const clamped = Math.max(25, Math.min(75, percent));
-    setSplitPercent(clamped);
-    try {
-      localStorage.setItem(SPLIT_STORAGE_KEY, clamped.toFixed(1));
-    } catch {
-      // Ignore
-    }
-  }, []);
-
-  // Pointer events for drag (unified mouse + touch)
-  const handleSeparatorPointerDown = (
-    e: React.PointerEvent<HTMLDivElement>
-  ) => {
-    e.preventDefault();
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
-    setIsDragging(true);
-  };
-
-  const handleSeparatorPointerMove = (
-    e: React.PointerEvent<HTMLDivElement>
-  ) => {
-    if (!isDragging || !containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const newPercent = ((e.clientX - rect.left) / rect.width) * 100;
-    updateSplit(newPercent);
-  };
-
-  const handleSeparatorPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
-    (e.target as HTMLElement).releasePointerCapture(e.pointerId);
-    setIsDragging(false);
-  };
-
-  // Keyboard navigation for separator
-  const handleSeparatorKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    const step = e.shiftKey ? 5 : 2;
-    if (e.key === "ArrowLeft") {
-      e.preventDefault();
-      updateSplit(splitPercent - step);
-    } else if (e.key === "ArrowRight") {
-      e.preventDefault();
-      updateSplit(splitPercent + step);
-    } else if (e.key === "Home") {
-      e.preventDefault();
-      updateSplit(25);
-    } else if (e.key === "End") {
-      e.preventDefault();
-      updateSplit(75);
-    }
-  };
-
-  // Parse AST whenever debouncedHtml changes
+  // Parse AST whenever debouncedHtml changes (skip if over size limit §B.4)
   const {
     ast,
     instrumentedHtml,
     error: parseError,
   } = React.useMemo(() => {
+    if (isOverSizeLimit) {
+      return {
+        ast: null,
+        instrumentedHtml: rawHtml,
+        error: "Document too large for live AST parsing.",
+      };
+    }
     return parseHtmlToA11yTree(debouncedHtml);
-  }, [debouncedHtml]);
+  }, [debouncedHtml, isOverSizeLimit, rawHtml]);
 
   // Derive computed focus sequence & findings
   const computedFocusOrder = React.useMemo(() => {
+    if (!ast) return null;
     return computeFocusOrder(ast);
   }, [ast]);
 
   // Run custom playground rules host-side immediately
   const customFindings = React.useMemo(() => {
+    if (!ast || isOverSizeLimit) return [];
     return runCustomRules(ast, debouncedCss);
-  }, [ast, debouncedCss]);
+  }, [ast, debouncedCss, isOverSizeLimit]);
 
   // Merge axe-core findings + custom findings
-  // Axe-core findings are canonical and preserved with source: "axe-core".
-  // Overlapping custom checks are suppressed, but their actionable fix suggestions are copied to the axe finding.
   const mergedViolations = React.useMemo(() => {
-    const list: AxeFinding[] = [];
-    const suppressedCustomKeys = new Set<string>();
-
-    // 1. Add all axe-core findings
-    for (const af of axeViolations) {
-      const targetId = af.nodes[0]?.targetId;
-      const targetHtml = af.nodes[0]?.html;
-
-      // Find if any custom finding has an actionable fix suggestion for this issue
-      let fix = af.fix;
-      const matchingCustom = customFindings.find((cf) => {
-        const cfTargetId = cf.nodes[0]?.targetId;
-        const cfHtml = cf.nodes[0]?.html;
-        const targetMatch = Boolean(
-          (targetId && cfTargetId && targetId === cfTargetId) ||
-          (targetHtml && cfHtml && targetHtml === cfHtml)
-        );
-        if (!targetMatch) return false;
-
-        return (
-          cf.id === af.id ||
-          (af.id === "image-alt" && cf.id === "img-missing-alt") ||
-          (af.id === "tabindex" && cf.id === "positive-tabindex") ||
-          ((af.id === "link-name" || af.id === "button-name") &&
-            cf.id === "empty-interactive-name") ||
-          (af.id === "label" && cf.id === "input-no-label") ||
-          (af.id === "duplicate-id" && cf.id === "duplicate-id")
-        );
-      });
-
-      if (matchingCustom) {
-        if (!fix && matchingCustom.fix) {
-          fix = matchingCustom.fix;
-        }
-        const cfTargetId = matchingCustom.nodes[0]?.targetId;
-        const cfHtml = matchingCustom.nodes[0]?.html;
-        suppressedCustomKeys.add(
-          `${matchingCustom.id}:${cfTargetId || cfHtml}`
-        );
-      }
-
-      list.push(fix ? { ...af, fix } : af);
-    }
-
-    // 2. Add custom findings that do not duplicate axe-core findings
-    for (const cf of customFindings) {
-      const targetId = cf.nodes[0]?.targetId;
-      const key = `${cf.id}:${targetId || cf.nodes[0]?.html}`;
-      if (!suppressedCustomKeys.has(key)) {
-        list.push(cf);
-      }
-    }
-
-    return list;
+    return mergeFindings(customFindings, axeViolations);
   }, [customFindings, axeViolations]);
 
   // Derive effective selected node ID
@@ -320,262 +135,264 @@ export function PlaygroundView() {
     return findA11yNodeById(ast, activeNodeId ?? "");
   }, [ast, activeNodeId]);
 
-  const handleSelectTemplate = (template: StarterTemplate) => {
-    setRawHtml(template.html);
-    setRawCss(template.css ?? "");
-    setRestoredNotice(false);
-    setIsScanning(true);
-    setScanId(`scan-${Date.now()}`);
-  };
-
-  const handleStartFresh = () => {
-    try {
-      localStorage.removeItem(SESSION_STORAGE_KEY);
-      localStorage.removeItem(SESSION_CSS_KEY);
-    } catch {
-      // Ignore
-    }
-    setRawHtml(STARTER_TEMPLATES[0]?.html ?? "");
-    setRawCss(STARTER_TEMPLATES[0]?.css ?? "");
-    setRestoredNotice(false);
-    setIsScanning(true);
-    setScanId(`scan-${Date.now()}`);
-  };
-
-  const handleForceScan = React.useCallback(() => {
-    setIsScanning(true);
-    setScanId(`scan-${Date.now()}`);
-  }, []);
-
-  const handleScanResults = React.useCallback(
-    (results: readonly AxeFinding[], inc?: readonly AxeFinding[]) => {
-      setAxeViolations(results);
-      setAxeIncomplete(inc || []);
-      setIsScanning(false);
-      setScanError(null);
-    },
-    []
-  );
-
-  const handleScanError = React.useCallback((error: string) => {
-    setScanError(error);
-    setIsScanning(false);
-  }, []);
-
   const handleSimulateFocus = React.useCallback((id: string) => {
     setSimulatedFocusId(id);
     setSelectedNodeId(id);
   }, []);
 
-  // Track desktop viewport for split pane
-  const [isDesktop, setIsDesktop] = React.useState(false);
+  // F6 / Shift+F6 keyboard cycling between panes and Esc to exit maximize (§2.5)
   React.useEffect(() => {
-    const checkDesktop = () => setIsDesktop(window.innerWidth >= 1024);
-    checkDesktop();
-    window.addEventListener("resize", checkDesktop);
-    return () => window.removeEventListener("resize", checkDesktop);
-  }, []);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && maximizedPane !== null) {
+        setMaximizedPane(null);
+        e.preventDefault();
+        return;
+      }
+
+      if (e.key === "F6") {
+        e.preventDefault();
+        const targets = [
+          document.querySelector<HTMLElement>("#code-editor-pane .cm-content"),
+          document.querySelector<HTMLElement>(
+            "button[aria-label*='Reload preview']"
+          ),
+          document.querySelector<HTMLElement>(
+            "[role='tablist'] [role='tab'][aria-selected='true']"
+          ),
+        ].filter(Boolean) as HTMLElement[];
+
+        if (targets.length === 0) return;
+
+        const activeIndex = targets.findIndex(
+          (t) =>
+            t === document.activeElement || t.contains(document.activeElement)
+        );
+        let nextIndex = 0;
+        if (e.shiftKey) {
+          nextIndex = activeIndex <= 0 ? targets.length - 1 : activeIndex - 1;
+        } else {
+          nextIndex = activeIndex >= targets.length - 1 ? 0 : activeIndex + 1;
+        }
+        targets[nextIndex]?.focus();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [maximizedPane, setMaximizedPane]);
+
+  const editorPane = (
+    <section
+      id="code-editor-pane"
+      aria-label="Code editor"
+      className="flex h-full min-h-0 flex-col"
+    >
+      <Editor
+        html={rawHtml}
+        css={rawCss}
+        onHtmlChange={(val) => setRawHtml(val)}
+        onCssChange={(val) => setRawCss(val)}
+        onSelectTemplate={handleSelectTemplate}
+        onCopyLink={() => {
+          const encoded = encodeSnippet(rawHtml, rawCss);
+          return `${location.origin}/playground?s=${encoded}`;
+        }}
+        useTailwind={useTailwind}
+        onToggleTailwind={setUseTailwind}
+        selectionRange={selectedNode?.sourceRange ?? null}
+        onForceScan={triggerScan}
+        isMaximized={maximizedPane === "editor"}
+        onToggleMaximize={() => toggleMaximize("editor")}
+      />
+    </section>
+  );
+
+  const previewPane = (
+    <section
+      id="live-preview-pane"
+      aria-label="Live preview"
+      className="flex h-full min-h-0 flex-col"
+    >
+      <PreviewFrame
+        instrumentedHtml={instrumentedHtml}
+        css={rawCss}
+        useTailwind={useTailwind}
+        selectedNodeId={activeNodeId}
+        scanId={scanId}
+        onSelectNodeId={(id) => setSelectedNodeId(id)}
+        onScanResults={handleScanResults}
+        onScanError={handleScanError}
+        parseError={parseError}
+        focusPositions={focusPositions}
+        onFocusPositionsChange={setFocusPositions}
+        focusedElementId={simulatedFocusId}
+        showFocusBadges={true}
+        isMaximized={maximizedPane === "preview"}
+        onToggleMaximize={() => toggleMaximize("preview")}
+      />
+    </section>
+  );
+
+  const analysisPane = (
+    <section
+      id="analysis-pane"
+      aria-label="Analysis"
+      className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xs"
+    >
+      <AnalysisTabs
+        analysisTab={analysisTab}
+        onTabChange={setAnalysisTab}
+        maximizedPane={maximizedPane}
+        onToggleMaximize={() => toggleMaximize("analysis")}
+        ast={ast}
+        selectedNode={selectedNode}
+        activeNodeId={activeNodeId}
+        onSelectNode={(id) => setSelectedNodeId(id)}
+        onUpdateAttribute={(attr, value) => {
+          if (!selectedNode) return;
+          setRawHtml((html) =>
+            setAttributeInSource(html, selectedNode, attr, value)
+          );
+        }}
+        onRemoveAttribute={(attr) => {
+          if (!selectedNode) return;
+          setRawHtml((html) =>
+            removeAttributeFromSource(html, selectedNode, attr)
+          );
+        }}
+        computedFocusOrder={computedFocusOrder}
+        onSimulateFocus={handleSimulateFocus}
+        mergedViolations={mergedViolations}
+        axeIncomplete={axeIncomplete}
+        isScanning={isScanning}
+        scanError={scanError}
+        hasHtml={rawHtml.trim().length > 0}
+        onApplyFix={(finding) => {
+          const targetId = finding.nodes[0]?.targetId ?? "";
+          const node = findA11yNodeById(ast, targetId);
+          if (!node) return;
+          setRawHtml((html) => applyAutoFixToHtml(html, finding, node));
+        }}
+        isOverSizeLimit={isOverSizeLimit}
+      />
+    </section>
+  );
 
   return (
-    <div className="flex min-h-[calc(100dvh-3.5rem)] w-full flex-1 flex-col gap-4 px-3 py-3 sm:px-4 sm:py-4 lg:px-5">
+    <div className="flex min-h-0 flex-1 flex-col">
       <h1 className="sr-only">Accessibility Playground — Live Workbench</h1>
+      <WorkbenchToolbar
+        onForceScan={triggerScan}
+        isScanning={isScanning}
+        onStartFresh={handleStartFresh}
+      />
 
-      {/* Dismissible Session Restore Notice */}
-      {restoredNotice && (
-        <div className="flex items-center justify-between rounded-md border border-[var(--color-border)] bg-[var(--color-surface-sunken)]/60 px-3 py-2 text-sm text-[var(--color-text-secondary)]">
-          <span>
-            Restored your last session —{" "}
-            <button
-              type="button"
-              onClick={handleStartFresh}
-              className="font-medium text-[var(--color-text-primary)] underline hover:text-[var(--color-accent)]"
-            >
-              Start fresh
-            </button>
-          </span>
-          <button
-            type="button"
-            onClick={() => setRestoredNotice(false)}
-            aria-label="Dismiss restored session notice"
-            className="rounded px-1.5 py-0.5 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-surface)] hover:text-[var(--color-text-primary)]"
+      {/* Main Workspace Body */}
+      {isDesktop ? (
+        maximizedPane === "editor" ? (
+          <div className="min-h-0 flex-1 p-2">{editorPane}</div>
+        ) : maximizedPane === "preview" ? (
+          <div className="min-h-0 flex-1 p-2">{previewPane}</div>
+        ) : maximizedPane === "analysis" ? (
+          <div className="min-h-0 flex-1 p-2">{analysisPane}</div>
+        ) : (
+          <SplitPane
+            direction={direction}
+            size={outerPercent}
+            onSizeChange={setOuterPercent}
+            min={25}
+            max={75}
+            primaryId="pane-left"
+            primaryLabel="Editor and Preview"
+            secondaryLabel="Analysis"
+            className="min-h-0 flex-1"
+            primary={
+              <SplitPane
+                direction="column"
+                size={innerPercent}
+                onSizeChange={setInnerPercent}
+                min={25}
+                max={80}
+                primaryId="pane-editor"
+                primaryLabel="Code editor"
+                secondaryLabel="Live preview"
+                className="h-full"
+                primary={editorPane}
+                secondary={previewPane}
+              />
+            }
+            secondary={analysisPane}
+          />
+        )
+      ) : (
+        /* Mobile: one pane at a time with segmented control (SC 1.4.10 Reflow) */
+        <div className="flex min-h-0 flex-1 flex-col">
+          <div
+            role="tablist"
+            aria-label="Workbench panes"
+            className="flex flex-none items-center gap-1 border-b border-[var(--color-border)] bg-[var(--color-surface-raised)]/60 px-3 py-1.5"
           >
-            ✕
-          </button>
+            {(["editor", "preview", "analysis"] as const).map((pane) => (
+              <button
+                key={pane}
+                type="button"
+                role="tab"
+                aria-selected={mobilePane === pane}
+                onClick={() => setMobilePane(pane)}
+                className={`rounded-md px-3 py-1.5 text-xs font-semibold capitalize transition-colors focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)] ${
+                  mobilePane === pane
+                    ? "bg-[var(--color-surface)] text-[var(--color-text-primary)] shadow-xs"
+                    : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+                }`}
+              >
+                {pane}
+              </button>
+            ))}
+          </div>
+
+          <div className="min-h-0 flex-1 overflow-auto p-2">
+            {mobilePane === "editor" && editorPane}
+            {mobilePane === "preview" && previewPane}
+            {mobilePane === "analysis" && analysisPane}
+          </div>
         </div>
       )}
 
-      {/* Main Resizable Split Workbench Container */}
-      <div
-        ref={containerRef}
-        className="flex flex-1 flex-col gap-4 lg:flex-row lg:gap-0"
-      >
-        {/* Left Column: Editor & Preview */}
+      {/* Status bar (§3.3) */}
+      <div className="flex h-7 flex-none items-center justify-between border-t border-[var(--color-border)] bg-[var(--color-surface-sunken)]/50 px-3 text-[11px] text-[var(--color-text-secondary)]">
+        {/* Only scan state is polite live region (SC 4.1.3: No live-region spam) */}
         <div
-          className="flex w-full flex-col gap-4 overflow-hidden lg:shrink-0 lg:grow-0"
-          style={{
-            width: isDesktop ? `calc(${splitPercent}% - 8px)` : "100%",
-          }}
+          role="status"
+          aria-live="polite"
+          className="flex items-center gap-2"
         >
-          <Editor
-            html={rawHtml}
-            css={rawCss}
-            onHtmlChange={(val) => {
-              setRawHtml(val);
-              setIsScanning(true);
+          <span>{isScanning ? "Scanning…" : "Ready"}</span>
+          <span>·</span>
+          <button
+            type="button"
+            onClick={() => {
+              setAnalysisTab("issues");
+              if (!isDesktop) setMobilePane("analysis");
             }}
-            onCssChange={(val) => {
-              setRawCss(val);
-              setIsScanning(true);
-            }}
-            onSelectTemplate={handleSelectTemplate}
-            onCopyLink={() => {
-              const encoded = encodeSnippet(rawHtml, rawCss);
-              return `${location.origin}/playground?s=${encoded}`;
-            }}
-            useTailwind={useTailwind}
-            onToggleTailwind={setUseTailwind}
-            selectionRange={selectedNode?.sourceRange ?? null}
-            onForceScan={handleForceScan}
-          />
-
-          <PreviewFrame
-            instrumentedHtml={instrumentedHtml}
-            css={rawCss}
-            useTailwind={useTailwind}
-            selectedNodeId={activeNodeId}
-            scanId={scanId}
-            onSelectNodeId={(id) => setSelectedNodeId(id)}
-            onScanResults={handleScanResults}
-            onScanError={handleScanError}
-            parseError={parseError}
-            focusPositions={focusPositions}
-            onFocusPositionsChange={setFocusPositions}
-            focusedElementId={simulatedFocusId}
-            showFocusBadges={true}
-            isDragging={isDragging}
-          />
+            className="font-medium text-[var(--color-text-primary)] hover:underline focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
+          >
+            {mergedViolations.length} issue
+            {mergedViolations.length === 1 ? "" : "s"}
+          </button>
         </div>
 
-        {/* Resizable Separator Divider (Desktop) */}
-        {/* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex -- WAI-ARIA 1.2 window splitter specification requires focusable role="separator" with aria-valuenow, aria-valuemin, aria-valuemax */}
-        <div
-          role="separator"
-          tabIndex={0}
-          aria-orientation="vertical"
-          aria-valuenow={Math.round(splitPercent)}
-          aria-valuemin={25}
-          aria-valuemax={75}
-          aria-label="Resize editor and analysis panels"
-          onKeyDown={handleSeparatorKeyDown}
-          onPointerDown={handleSeparatorPointerDown}
-          onPointerMove={handleSeparatorPointerMove}
-          onPointerUp={handleSeparatorPointerUp}
-          className="hidden touch-none items-center justify-center select-none focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)] lg:flex lg:w-4 lg:cursor-col-resize lg:hover:bg-[var(--color-accent)]/10"
-        >
-          <div className="h-12 w-1 rounded-full bg-[var(--color-border-strong)] transition-colors hover:bg-[var(--color-accent)]" />
-        </div>
-        {/* eslint-enable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-noninteractive-tabindex */}
-
-        {/* Right Column: Analysis Tabs Panel */}
-        <div
-          className={`flex w-full flex-1 flex-col overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xs lg:min-w-0 ${isDragging ? "pointer-events-none" : ""}`}
-          style={{
-            width: isDesktop ? `calc(${100 - splitPercent}% - 8px)` : "100%",
-          }}
-        >
-          <Tabs defaultValue="tree" className="flex h-full flex-col">
-            <div className="border-b border-[var(--color-border)] bg-[var(--color-surface-raised)]/60 px-3 pt-2">
-              <TabsList className="flex-wrap gap-1">
-                <TabsTrigger value="tree">A11y Tree</TabsTrigger>
-                <TabsTrigger value="aria">ARIA Explorer</TabsTrigger>
-                <TabsTrigger value="accname">Accessible Name</TabsTrigger>
-                <TabsTrigger value="focus">Focus Order</TabsTrigger>
-                <TabsTrigger value="announce">Announcement</TabsTrigger>
-                <TabsTrigger
-                  value="issues"
-                  badge={
-                    mergedViolations.length > 0 ? (
-                      <Badge
-                        variant="warning"
-                        className="ml-1 px-1 py-0 text-[10px]"
-                      >
-                        {mergedViolations.length}
-                      </Badge>
-                    ) : undefined
-                  }
-                >
-                  Issues
-                </TabsTrigger>
-              </TabsList>
-            </div>
-
-            <div className="min-h-[400px] flex-1 overflow-y-auto">
-              <TabsContent value="tree" className="m-0 h-full">
-                <A11yTreePanel
-                  ast={ast}
-                  selectedNodeId={activeNodeId}
-                  onSelectNode={(id) => setSelectedNodeId(id)}
-                />
-              </TabsContent>
-
-              <TabsContent value="aria" className="m-0 h-full">
-                <AriaExplorerPanel
-                  selectedNode={selectedNode}
-                  onUpdateAttribute={(attr, value) => {
-                    if (!selectedNode) return;
-                    setRawHtml((html) =>
-                      setAttributeInSource(html, selectedNode, attr, value)
-                    );
-                    setIsScanning(true);
-                  }}
-                  onRemoveAttribute={(attr) => {
-                    if (!selectedNode) return;
-                    setRawHtml((html) =>
-                      removeAttributeFromSource(html, selectedNode, attr)
-                    );
-                    setIsScanning(true);
-                  }}
-                />
-              </TabsContent>
-
-              <TabsContent value="accname" className="m-0 h-full">
-                <AccessibleNamePanel selectedNode={selectedNode} />
-              </TabsContent>
-
-              <TabsContent value="focus" className="m-0 h-full">
-                <FocusOrderPanel
-                  computedOrder={computedFocusOrder}
-                  selectedNodeId={activeNodeId}
-                  onSelectNode={(id) => setSelectedNodeId(id)}
-                  onSimulateFocus={handleSimulateFocus}
-                />
-              </TabsContent>
-
-              <TabsContent value="announce" className="m-0 h-full">
-                <AnnouncementPanel selectedNode={selectedNode} />
-              </TabsContent>
-
-              <TabsContent value="issues" className="m-0 h-full">
-                <IssuesPanel
-                  violations={mergedViolations}
-                  incomplete={axeIncomplete}
-                  isScanning={isScanning}
-                  scanError={scanError}
-                  hasHtml={rawHtml.trim().length > 0}
-                  onSelectNode={(id) => setSelectedNodeId(id)}
-                  onApplyFix={(finding) => {
-                    const targetId = finding.nodes[0]?.targetId ?? "";
-                    const node = findA11yNodeById(ast, targetId);
-                    if (!node) return;
-                    setRawHtml((html) =>
-                      applyAutoFixToHtml(html, finding, node)
-                    );
-                    setIsScanning(true);
-                  }}
-                />
-              </TabsContent>
-            </div>
-          </Tabs>
+        <div className="flex items-center gap-3">
+          {maximizedPane && (
+            <span className="font-medium text-[var(--color-accent)]">
+              Maximized: {maximizedPane} (Esc to exit)
+            </span>
+          )}
+          <span className="hidden sm:inline">
+            Layout:{" "}
+            {direction === "column"
+              ? "Stacked"
+              : `${Math.round(outerPercent)}/${Math.round(100 - outerPercent)}`}
+          </span>
         </div>
       </div>
     </div>

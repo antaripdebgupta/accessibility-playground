@@ -118,3 +118,11 @@ h2,
 h3 {
   text-wrap: balance;
 }
+
+/* SplitPane drag: prevent iframe from swallowing pointer events */
+[data-dragging="true"] {
+  user-select: none;
+}
+[data-dragging="true"] iframe {
+  pointer-events: none;
+}

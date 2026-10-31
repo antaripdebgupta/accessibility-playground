@@ -1,13 +1,13 @@
 import { z } from "zod";
 
-export const AxeFindingNodeSchema = z.object({
+const AxeFindingNodeSchema = z.object({
   html: z.string(),
   target: z.array(z.string()),
   failureSummary: z.string().optional(),
   targetId: z.string().optional(),
 });
 
-export const AxeFindingSchema = z.object({
+const AxeFindingSchema = z.object({
   id: z.string(),
   impact: z.enum(["critical", "serious", "moderate", "minor"]),
   description: z.string(),
@@ -20,29 +20,29 @@ export const AxeFindingSchema = z.object({
   nodes: z.array(AxeFindingNodeSchema),
 });
 
-export const IframeReadyMessageSchema = z.object({
+const IframeReadyMessageSchema = z.object({
   type: z.literal("ready"),
 });
 
-export const IframeElementClickedMessageSchema = z.object({
+const IframeElementClickedMessageSchema = z.object({
   type: z.literal("element-clicked"),
   id: z.string(),
 });
 
-export const IframeScanResultsMessageSchema = z.object({
+const IframeScanResultsMessageSchema = z.object({
   type: z.literal("scan-results"),
   scanId: z.string().optional(),
   violations: z.array(AxeFindingSchema),
   incomplete: z.array(AxeFindingSchema).optional(),
 });
 
-export const IframeScanErrorMessageSchema = z.object({
+const IframeScanErrorMessageSchema = z.object({
   type: z.literal("scan-error"),
   scanId: z.string().optional(),
   message: z.string(),
 });
 
-export const FocusOrderPositionSchema = z.object({
+const FocusOrderPositionSchema = z.object({
   id: z.string(),
   tabIndex: z.number(),
   orderIndex: z.number().optional(),
@@ -54,12 +54,12 @@ export const FocusOrderPositionSchema = z.object({
   }),
 });
 
-export const IframeFocusOrderMessageSchema = z.object({
+const IframeFocusOrderMessageSchema = z.object({
   type: z.literal("focus-order"),
   elements: z.array(FocusOrderPositionSchema),
 });
 
-export const IframeMessageSchema = z.discriminatedUnion("type", [
+const IframeMessageSchema = z.discriminatedUnion("type", [
   IframeReadyMessageSchema,
   IframeElementClickedMessageSchema,
   IframeScanResultsMessageSchema,

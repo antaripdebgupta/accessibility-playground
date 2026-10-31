@@ -37,7 +37,7 @@ export function hexToRgb(hex: string): RgbColor | null {
   return { r, g, b };
 }
 
-export function rgbToHex({ r, g, b }: RgbColor): string {
+function rgbToHex({ r, g, b }: RgbColor): string {
   const clamp = (v: number) => Math.max(0, Math.min(255, Math.round(v)));
   const toHex = (v: number) => clamp(v).toString(16).padStart(2, "0");
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase();
@@ -47,7 +47,7 @@ export function rgbToHex({ r, g, b }: RgbColor): string {
  * Calculates relative luminance following WCAG 2.2 formula:
  * https://www.w3.org/WAI/GL/wiki/Relative_luminance
  */
-export function getRelativeLuminance(rgb: RgbColor): number {
+function getRelativeLuminance(rgb: RgbColor): number {
   const sRgb = [rgb.r / 255, rgb.g / 255, rgb.b / 255];
   const linear = sRgb.map((val) => {
     return val <= 0.04045 ? val / 12.92 : Math.pow((val + 0.055) / 1.055, 2.4);

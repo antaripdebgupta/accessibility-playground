@@ -12,9 +12,17 @@ const eslintConfig = defineConfig([
       "jsx-a11y/no-noninteractive-tabindex": [
         "error",
         {
-          roles: ["tabpanel", "region"],
+          roles: ["tabpanel", "region", "separator"],
         },
       ],
+      "no-console": ["error", { allow: ["warn", "error"] }],
+      "@typescript-eslint/no-explicit-any": "error",
+    },
+  },
+  {
+    files: ["scripts/**", "tests/**"],
+    rules: {
+      "no-console": "off",
     },
   },
   globalIgnores([

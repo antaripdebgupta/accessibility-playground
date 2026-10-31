@@ -198,8 +198,7 @@ export function AriaExplorerPanel({
                       <td className="p-2.5 font-mono text-[var(--color-text-secondary)]">
                         {isEditing ? (
                           <input
-                            // eslint-disable-next-line jsx-a11y/no-autofocus
-                            autoFocus
+                            ref={(el) => el?.focus()}
                             type="text"
                             value={editingValue}
                             onChange={(e) => setEditingValue(e.target.value)}

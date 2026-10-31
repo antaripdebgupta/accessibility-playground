@@ -39,4 +39,14 @@ describe("Snippet sharing permalink", () => {
     // Valid JSON but missing required fields
     expect(decodeSnippet(btoa(JSON.stringify({ notH: 123 })))).toBeNull();
   });
+
+  it("safely round-trips HTML containing script tags and handles length caps", () => {
+    const html = "<script>alert('xss')</script>";
+    const encoded = encodeSnippet(html, "");
+    expect(decodeSnippet(encoded)).toEqual({ html, css: "" });
+
+    // Exceeding 20,000 chars rejected
+    const huge = "a".repeat(25000);
+    expect(decodeSnippet(huge)).toBeNull();
+  });
 });
