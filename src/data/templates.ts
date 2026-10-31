@@ -411,4 +411,79 @@ input:focus-visible {
 </button>
 <span id="notif-switch-label">Enable email notifications</span>`,
   },
+  {
+    id: "tailwind-form-field",
+    label: "Tailwind: Accessible Form Field",
+    description:
+      "Form input with floating label, validation error, and focus ring using Tailwind utility classes. (Requires the Tailwind preview toggle)",
+    html: `<form class="max-w-sm space-y-2 p-4 bg-white rounded-lg shadow-sm border border-slate-200" onsubmit="event.preventDefault()">
+  <label for="tw-email" class="block text-sm font-medium text-slate-700">
+    Email address
+  </label>
+  <input
+    id="tw-email"
+    name="email"
+    type="email"
+    aria-describedby="tw-email-hint tw-email-error"
+    aria-invalid="true"
+    required
+    class="w-full px-3 py-2 text-sm border border-red-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-slate-900 bg-white"
+    value="not-an-email"
+  />
+  <p id="tw-email-hint" class="text-xs text-slate-500">
+    We will never share your email.
+  </p>
+  <p id="tw-email-error" class="text-xs font-medium text-red-600" role="alert">
+    Please enter a valid email address.
+  </p>
+  <button
+    type="submit"
+    class="mt-2 w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 transition-colors"
+  >
+    Subscribe
+  </button>
+</form>`,
+  },
+  {
+    id: "tailwind-tabs",
+    label: "Tailwind: Accessible Tabs",
+    description:
+      "Accessible ARIA tabs with selection states and focus outlines styled with Tailwind CSS. (Requires the Tailwind preview toggle)",
+    html: `<div class="max-w-md p-4 bg-slate-50 rounded-xl border border-slate-200">
+  <div role="tablist" aria-label="Account settings" class="flex space-x-1 rounded-lg bg-slate-200/80 p-1">
+    <button
+      role="tab"
+      id="tab-profile"
+      aria-selected="true"
+      aria-controls="panel-profile"
+      tabindex="0"
+      class="w-full rounded-md py-1.5 text-sm font-semibold text-slate-900 bg-white shadow-xs focus:outline-none focus:ring-2 focus:ring-blue-600"
+    >
+      Profile
+    </button>
+    <button
+      role="tab"
+      id="tab-security"
+      aria-selected="false"
+      aria-controls="panel-security"
+      tabindex="-1"
+      class="w-full rounded-md py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
+    >
+      Security
+    </button>
+  </div>
+  <section
+    role="tabpanel"
+    id="panel-profile"
+    aria-labelledby="tab-profile"
+    tabindex="0"
+    class="mt-3 p-3 bg-white rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600"
+  >
+    <h3 class="text-sm font-semibold text-slate-900">Personal Information</h3>
+    <p class="mt-1 text-xs text-slate-600 leading-relaxed">
+      Manage your public display name, email preferences, and profile avatar.
+    </p>
+  </section>
+</div>`,
+  },
 ];

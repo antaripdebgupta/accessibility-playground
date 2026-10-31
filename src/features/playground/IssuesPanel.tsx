@@ -13,7 +13,9 @@ import {
   HelpCircle,
   Crosshair,
   CheckCircle2,
+  Wrench,
 } from "lucide-react";
+import { isAutoFixable, computeFixPreview } from "@/lib/auto-fix";
 
 export interface IssuesPanelProps {
   violations: readonly AxeFinding[];
@@ -22,6 +24,7 @@ export interface IssuesPanelProps {
   scanError: string | null;
   hasHtml: boolean;
   onSelectNode?: (id: string) => void;
+  onApplyFix?: (finding: AxeFinding) => void;
 }
 
 export function IssuesPanel({
@@ -31,7 +34,12 @@ export function IssuesPanel({
   scanError,
   hasHtml,
   onSelectNode,
+  onApplyFix,
 }: IssuesPanelProps) {
+  const [previewFindingKey, setPreviewFindingKey] = React.useState<
+    string | null
+  >(null);
+
   if (!hasHtml) {
     return (
       <div className="text-md flex h-48 items-center justify-center p-6 text-center text-[var(--color-text-secondary)]">
@@ -187,19 +195,91 @@ export function IssuesPanel({
           </div>
         )}
 
-        {/* Inspect action button */}
-        {targetId && onSelectNode && (
-          <div className="flex justify-end pt-1">
-            <button
-              type="button"
-              onClick={() => onSelectNode(targetId)}
-              className="inline-flex items-center gap-1.5 rounded-md border border-[var(--color-border)] bg-[var(--color-surface-raised)] px-2.5 py-1 text-xs font-medium text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-focus-ring)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
-            >
-              <Crosshair className="h-3 w-3" aria-hidden="true" />
-              <span>Inspect in tree</span>
-            </button>
+        {/* Inspect & Apply Fix action buttons */}
+        <div className="flex flex-col gap-2 pt-1">
+          <div className="flex items-center justify-end gap-2">
+            {isAutoFixable(finding.id) && onApplyFix && (
+              <button
+                type="button"
+                onClick={() =>
+                  setPreviewFindingKey(
+                    previewFindingKey === finding.id ? null : finding.id
+                  )
+                }
+                className="inline-flex items-center gap-1.5 rounded-md border border-[var(--color-success-default)]/40 bg-[var(--color-success-subtle)] px-2.5 py-1 text-xs font-semibold text-[var(--color-success-default)] transition-colors hover:bg-[var(--color-success-default)] hover:text-white focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
+              >
+                <Wrench className="h-3 w-3" aria-hidden="true" />
+                <span>
+                  {previewFindingKey === finding.id ? "Hide fix" : "Apply fix"}
+                </span>
+              </button>
+            )}
+
+            {targetId && onSelectNode && (
+              <button
+                type="button"
+                onClick={() => onSelectNode(targetId)}
+                className="inline-flex items-center gap-1.5 rounded-md border border-[var(--color-border)] bg-[var(--color-surface-raised)] px-2.5 py-1 text-xs font-medium text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-focus-ring)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
+              >
+                <Crosshair className="h-3 w-3" aria-hidden="true" />
+                <span>Inspect in tree</span>
+              </button>
+            )}
           </div>
-        )}
+
+          {/* Inline Before / After Diff View */}
+          {previewFindingKey === finding.id &&
+            isAutoFixable(finding.id) &&
+            (() => {
+              const diff = computeFixPreview(finding);
+              if (!diff) return null;
+              return (
+                <div className="flex flex-col gap-2 rounded-md border border-[var(--color-border)] bg-[var(--color-surface-sunken)]/60 p-3">
+                  <div className="flex items-center justify-between text-xs font-semibold text-[var(--color-text-primary)]">
+                    <span>Proposed Auto-Fix</span>
+                    <span className="text-[11px] font-normal text-[var(--color-text-secondary)]">
+                      Review tag modification
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] font-semibold tracking-wider text-[var(--color-danger-default)] uppercase">
+                        Before
+                      </span>
+                      <CodeSnippet code={diff.beforeTag} />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] font-semibold tracking-wider text-[var(--color-success-default)] uppercase">
+                        After
+                      </span>
+                      <CodeSnippet code={diff.afterTag} />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setPreviewFindingKey(null)}
+                      className="rounded px-2.5 py-1 text-xs font-medium text-[var(--color-text-secondary)] transition-colors hover:text-[var(--color-text-primary)]"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onApplyFix?.(finding);
+                        setPreviewFindingKey(null);
+                      }}
+                      className="inline-flex items-center gap-1 rounded bg-[var(--color-accent)] px-3 py-1 text-xs font-semibold text-white shadow-xs transition-opacity hover:opacity-90"
+                    >
+                      Confirm Fix
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
+        </div>
       </div>
     );
   };

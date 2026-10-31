@@ -23,6 +23,7 @@ export interface PreviewFrameProps {
   focusedElementId?: string | null;
   showFocusBadges?: boolean;
   isDragging?: boolean;
+  useTailwind?: boolean;
 }
 
 export function PreviewFrame({
@@ -39,6 +40,7 @@ export function PreviewFrame({
   focusedElementId,
   showFocusBadges = true,
   isDragging = false,
+  useTailwind = false,
 }: PreviewFrameProps) {
   const [iframeKey, setIframeKey] = React.useState(0);
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
@@ -55,10 +57,10 @@ export function PreviewFrame({
     return "/axe.min.js";
   }, []);
 
-  // srcDoc depends ONLY on HTML, CSS, axeUrl - NOT selectedNodeId!
+  // srcDoc depends on HTML, CSS, axeUrl, and useTailwind - NOT selectedNodeId!
   const srcDoc = React.useMemo(() => {
-    return generatePreviewSrcDoc(instrumentedHtml, css, axeUrl);
-  }, [instrumentedHtml, css, axeUrl]);
+    return generatePreviewSrcDoc(instrumentedHtml, css, axeUrl, useTailwind);
+  }, [instrumentedHtml, css, axeUrl, useTailwind]);
 
   // Synchronize selection without reloading the iframe
   React.useEffect(() => {

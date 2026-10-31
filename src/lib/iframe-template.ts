@@ -1,9 +1,13 @@
 export function generatePreviewSrcDoc(
   instrumentedHtml: string,
   css = "",
-  axeUrl = "/axe.min.js"
+  axeUrl = "/axe.min.js",
+  useTailwind = false
 ): string {
   const safeCss = (css || "").replace(/<\/style/gi, "<\\/style");
+  const tailwindScript = useTailwind
+    ? '<script src="https://cdn.tailwindcss.com" onerror="window.__tailwindFailed=true;"></script>'
+    : "";
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -38,6 +42,7 @@ export function generatePreviewSrcDoc(
       outline-offset: 2px;
     }
   </style>
+  ${tailwindScript}
   <style id="user-css">${safeCss}</style>
 </head>
 <body>
@@ -255,6 +260,19 @@ export function generatePreviewSrcDoc(
         });
       }
       window.addEventListener("resize", measureFocusOrder);
+
+      ${
+        useTailwind
+          ? `setTimeout(function() {
+        if (window.__tailwindFailed || typeof window.tailwind === "undefined") {
+          sendParent({
+            type: "scan-error",
+            message: "Tailwind CSS failed to load from cdn.tailwindcss.com. Check network/CSP connection."
+          });
+        }
+      }, 1500);`
+          : ""
+      }
     })();
   </script>
 </body>

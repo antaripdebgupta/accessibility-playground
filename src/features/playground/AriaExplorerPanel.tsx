@@ -2,15 +2,37 @@
 
 import * as React from "react";
 import type { A11yNode } from "@/types/a11y";
-import { validateAriaAttribute } from "@/lib/aria-explorer";
+import {
+  validateAriaAttribute,
+  getAllowedAriaAttributes,
+} from "@/lib/aria-explorer";
 import { Badge } from "@/components/ui/Badge";
-import { CheckCircle2, AlertTriangle, XCircle, Crosshair } from "lucide-react";
+import {
+  CheckCircle2,
+  AlertTriangle,
+  XCircle,
+  Crosshair,
+  Trash2,
+  Plus,
+} from "lucide-react";
+import { Button } from "@accessly-ui/react";
 
 export interface AriaExplorerPanelProps {
   selectedNode: A11yNode | null;
+  onUpdateAttribute?: (attr: string, value: string) => void;
+  onRemoveAttribute?: (attr: string) => void;
 }
 
-export function AriaExplorerPanel({ selectedNode }: AriaExplorerPanelProps) {
+export function AriaExplorerPanel({
+  selectedNode,
+  onUpdateAttribute,
+  onRemoveAttribute,
+}: AriaExplorerPanelProps) {
+  const [editingAttr, setEditingAttr] = React.useState<string | null>(null);
+  const [editingValue, setEditingValue] = React.useState<string>("");
+  const [newAttr, setNewAttr] = React.useState<string>("");
+  const [newValue, setNewValue] = React.useState<string>("");
+
   if (!selectedNode) {
     return (
       <div className="text-md flex h-64 flex-col items-center justify-center p-6 text-center text-[var(--color-text-secondary)]">
@@ -26,6 +48,43 @@ export function AriaExplorerPanel({ selectedNode }: AriaExplorerPanelProps) {
   }
 
   const ariaAttrEntries = Object.entries(selectedNode.ariaAttributes);
+  const allowedAttrs = getAllowedAriaAttributes(selectedNode.role);
+  const availableAttrs = allowedAttrs.filter(
+    (attr) => !(attr in selectedNode.ariaAttributes)
+  );
+
+  const handleStartEdit = (attr: string, val: string) => {
+    if (!onUpdateAttribute) return;
+    setEditingAttr(attr);
+    setEditingValue(val);
+  };
+
+  const handleCommitEdit = (attr: string) => {
+    if (onUpdateAttribute && editingAttr === attr) {
+      onUpdateAttribute(attr, editingValue);
+    }
+    setEditingAttr(null);
+  };
+
+  const handleKeyDownEdit = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    attr: string
+  ) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleCommitEdit(attr);
+    } else if (e.key === "Escape") {
+      setEditingAttr(null);
+    }
+  };
+
+  const handleAddAttribute = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newAttr || !onUpdateAttribute) return;
+    onUpdateAttribute(newAttr, newValue.trim() || "true");
+    setNewAttr("");
+    setNewValue("");
+  };
 
   return (
     <div className="flex flex-col gap-4 p-4">
@@ -59,7 +118,7 @@ export function AriaExplorerPanel({ selectedNode }: AriaExplorerPanelProps) {
             </span>
           </div>
 
-          <div className="flex flex-col gap-0.5 rounded border border-[var(--color-focus-ring)]/30 bg-[var(--color-accent-subtle)]/40 bg-[var(--color-surface)] p-2">
+          <div className="flex flex-col gap-0.5 rounded border border-[var(--color-focus-ring)]/30 bg-[var(--color-accent-subtle)]/40 p-2">
             <span className="flex items-center gap-1 text-[10px] font-semibold tracking-wider text-[var(--color-focus-ring)] uppercase">
               <Crosshair className="h-3 w-3" aria-hidden="true" />
               Computed Role
@@ -78,7 +137,7 @@ export function AriaExplorerPanel({ selectedNode }: AriaExplorerPanelProps) {
             Applied ARIA Attributes ({ariaAttrEntries.length})
           </h4>
           <span className="text-[11px] text-[var(--color-text-secondary)]">
-            WAI-ARIA 1.2 Validity
+            WAI-ARIA 1.2 Validity · Click value to edit
           </span>
         </div>
 
@@ -112,6 +171,11 @@ export function AriaExplorerPanel({ selectedNode }: AriaExplorerPanelProps) {
                   <th scope="col" className="p-2.5">
                     Explanation
                   </th>
+                  {onRemoveAttribute && (
+                    <th scope="col" className="p-2.5 text-right">
+                      Actions
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--color-border)] bg-[var(--color-surface)]">
@@ -121,6 +185,8 @@ export function AriaExplorerPanel({ selectedNode }: AriaExplorerPanelProps) {
                     val,
                     selectedNode.role
                   );
+                  const isEditing = editingAttr === attr;
+
                   return (
                     <tr
                       key={attr}
@@ -130,7 +196,28 @@ export function AriaExplorerPanel({ selectedNode }: AriaExplorerPanelProps) {
                         {attr}
                       </td>
                       <td className="p-2.5 font-mono text-[var(--color-text-secondary)]">
-                        &quot;{val}&quot;
+                        {isEditing ? (
+                          <input
+                            // eslint-disable-next-line jsx-a11y/no-autofocus
+                            autoFocus
+                            type="text"
+                            value={editingValue}
+                            onChange={(e) => setEditingValue(e.target.value)}
+                            onBlur={() => handleCommitEdit(attr)}
+                            onKeyDown={(e) => handleKeyDownEdit(e, attr)}
+                            className="rounded border border-[var(--color-focus-ring)] bg-[var(--color-surface)] px-1.5 py-0.5 font-mono text-xs text-[var(--color-text-primary)] ring-1 ring-[var(--color-focus-ring)] outline-none"
+                            aria-label={`Edit value for ${attr}`}
+                          />
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => handleStartEdit(attr, val)}
+                            title="Click to edit value"
+                            className="rounded px-1.5 py-0.5 text-left transition-colors hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
+                          >
+                            &quot;{val}&quot;
+                          </button>
+                        )}
                       </td>
                       <td className="p-2.5">
                         {validation.status === "valid" ? (
@@ -161,12 +248,86 @@ export function AriaExplorerPanel({ selectedNode }: AriaExplorerPanelProps) {
                       <td className="text-md p-2.5 leading-relaxed text-[var(--color-text-secondary)]">
                         {validation.explanation}
                       </td>
+                      {onRemoveAttribute && (
+                        <td className="p-2.5 text-right">
+                          <button
+                            type="button"
+                            onClick={() => onRemoveAttribute(attr)}
+                            title={`Remove ${attr}`}
+                            className="rounded p-1 text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-danger-subtle)] hover:text-[var(--color-danger-default)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
+                            aria-label={`Remove attribute ${attr}`}
+                          >
+                            <Trash2
+                              className="h-3.5 w-3.5"
+                              aria-hidden="true"
+                            />
+                          </button>
+                        </td>
+                      )}
                     </tr>
                   );
                 })}
               </tbody>
             </table>
           </div>
+        )}
+
+        {/* Add Attribute Row */}
+        {onUpdateAttribute && (
+          <form
+            onSubmit={handleAddAttribute}
+            className="flex flex-wrap items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-raised)]/60 p-2.5"
+          >
+            <div className="flex min-w-[160px] flex-1 items-center gap-1.5">
+              <label
+                htmlFor="new-aria-attr-select"
+                className="text-xs font-medium text-[var(--color-text-secondary)]"
+              >
+                Add:
+              </label>
+              <select
+                id="new-aria-attr-select"
+                value={newAttr}
+                onChange={(e) => setNewAttr(e.target.value)}
+                className="h-7 w-full rounded border border-[var(--color-border)] bg-[var(--color-surface)] px-2 font-mono text-xs text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
+              >
+                <option value="">Select ARIA attribute...</option>
+                {availableAttrs.map((attr) => (
+                  <option key={attr} value={attr}>
+                    {attr}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex min-w-[140px] flex-1 items-center gap-1.5">
+              <label
+                htmlFor="new-aria-attr-value"
+                className="text-xs font-medium text-[var(--color-text-secondary)]"
+              >
+                Value:
+              </label>
+              <input
+                id="new-aria-attr-value"
+                type="text"
+                placeholder="e.g. true"
+                value={newValue}
+                onChange={(e) => setNewValue(e.target.value)}
+                className="h-7 w-full rounded border border-[var(--color-border)] bg-[var(--color-surface)] px-2 font-mono text-xs text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
+              />
+            </div>
+
+            <Button
+              type="submit"
+              variant="secondary"
+              size="sm"
+              disabled={!newAttr}
+              className="h-7 gap-1 px-2.5 text-xs font-medium"
+            >
+              <Plus className="h-3 w-3" aria-hidden="true" />
+              <span>Add</span>
+            </Button>
+          </form>
         )}
       </div>
     </div>

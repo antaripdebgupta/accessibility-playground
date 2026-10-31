@@ -158,7 +158,10 @@ export default function AboutPage() {
               <p>
                 <code>axe-core</code> is vendored locally inside{" "}
                 <code>public/</code>. No external CDN request is made during
-                auditing, so scans work offline and stay private.
+                auditing, so scans work offline and stay private. Accessibility
+                scanning itself never leaves your browser. An optional Tailwind
+                CSS preview mode, off by default, does load Tailwind&apos;s
+                hosted script when explicitly enabled.
               </p>
             </div>
 

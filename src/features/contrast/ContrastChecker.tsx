@@ -9,6 +9,7 @@ import {
   suggestPassingColor,
 } from "@/lib/contrast";
 import { cn } from "@/lib/utils";
+import { Pipette } from "lucide-react";
 
 export function ContrastChecker() {
   const [fgHex, setFgHex] = React.useState("#1e293b");
@@ -16,6 +17,31 @@ export function ContrastChecker() {
 
   const isFgValid = isValidHex(fgHex);
   const isBgValid = isValidHex(bgHex);
+
+  const supportsEyeDropper = React.useSyncExternalStore(
+    () => () => {},
+    () => typeof window !== "undefined" && "EyeDropper" in window,
+    () => false
+  );
+
+  const handleEyeDropper = async (target: "fg" | "bg") => {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const EyeDropperClass = (window as any).EyeDropper;
+      if (!EyeDropperClass) return;
+      const eyeDropper = new EyeDropperClass();
+      const result = await eyeDropper.open();
+      if (result?.sRGBHex) {
+        if (target === "fg") {
+          setFgHex(result.sRGBHex);
+        } else {
+          setBgHex(result.sRGBHex);
+        }
+      }
+    } catch {
+      // User pressed Escape or eye dropper was dismissed
+    }
+  };
 
   const normalizedFg = isFgValid ? normalizeHex(fgHex) : null;
   const normalizedBg = isBgValid ? normalizeHex(bgHex) : null;
@@ -181,6 +207,17 @@ export function ContrastChecker() {
                 onChange={(e) => setFgHex(e.target.value)}
                 aria-label="Text color picker"
               />
+              {supportsEyeDropper && (
+                <button
+                  type="button"
+                  onClick={() => handleEyeDropper("fg")}
+                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
+                  title="Sample text color from screen"
+                  aria-label="Sample text color from screen"
+                >
+                  <Pipette className="h-4 w-4" aria-hidden="true" />
+                </button>
+              )}
             </div>
             {!isFgValid && (
               <span className="field-error" id="fg-error" role="alert">
@@ -219,6 +256,17 @@ export function ContrastChecker() {
                 onChange={(e) => setBgHex(e.target.value)}
                 aria-label="Background color picker"
               />
+              {supportsEyeDropper && (
+                <button
+                  type="button"
+                  onClick={() => handleEyeDropper("bg")}
+                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
+                  title="Sample background color from screen"
+                  aria-label="Sample background color from screen"
+                >
+                  <Pipette className="h-4 w-4" aria-hidden="true" />
+                </button>
+              )}
             </div>
             {!isBgValid && (
               <span className="field-error" id="bg-error" role="alert">

@@ -170,6 +170,14 @@ const ROLE_ALLOWED_ARIA: Record<string, string[]> = {
   ],
 };
 
+export function getAllowedAriaAttributes(role: string): string[] {
+  const roleAllowed = ROLE_ALLOWED_ARIA[role] ?? [];
+  const combined = Array.from(
+    new Set([...Array.from(GLOBAL_ARIA_ATTRIBUTES), ...roleAllowed])
+  );
+  return combined.sort();
+}
+
 export function validateAriaAttribute(
   attribute: string,
   value: string,

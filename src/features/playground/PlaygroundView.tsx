@@ -8,6 +8,7 @@ import { A11yTreePanel } from "./A11yTreePanel";
 import { AriaExplorerPanel } from "./AriaExplorerPanel";
 import { AccessibleNamePanel } from "./AccessibleNamePanel";
 import { FocusOrderPanel } from "./FocusOrderPanel";
+import { AnnouncementPanel } from "./AnnouncementPanel";
 import { IssuesPanel } from "./IssuesPanel";
 import { useDebounce } from "@/hooks/useDebounce";
 import { parseHtmlToA11yTree, findA11yNodeById } from "@/lib/a11y-tree";
@@ -16,20 +17,34 @@ import { runCustomRules } from "@/lib/custom-rules";
 import { STARTER_TEMPLATES, type StarterTemplate } from "@/data/templates";
 import { PATTERNS } from "@/data/patterns";
 import type { AxeFinding, FocusOrderPosition } from "@/types/a11y";
+import { encodeSnippet, decodeSnippet } from "@/lib/snippet-share";
+import {
+  setAttributeInSource,
+  removeAttributeFromSource,
+} from "@/lib/mutate-html";
+import { applyAutoFixToHtml } from "@/lib/auto-fix";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@accessly-ui/react";
 import { Badge } from "@/components/ui/Badge";
 
 const SESSION_STORAGE_KEY = "a11y-playground:last-html";
 const SESSION_CSS_KEY = "a11y-playground:last-css";
 const SPLIT_STORAGE_KEY = "a11y-playground:split-percent";
+const TAILWIND_STORAGE_KEY = "a11y-playground:use-tailwind";
 
 export function PlaygroundView() {
   const searchParams = useSearchParams();
   const patternParam = searchParams.get("pattern");
 
   // Initial HTML and CSS resolution
+  const sharedParam =
+    typeof window !== "undefined" ? searchParams.get("s") : null;
+
   const [rawHtml, setRawHtml] = React.useState<string>(() => {
     if (typeof window !== "undefined") {
+      if (sharedParam) {
+        const decoded = decodeSnippet(sharedParam);
+        if (decoded) return decoded.html;
+      }
       if (patternParam) {
         const foundPattern = PATTERNS.find((p) => p.slug === patternParam);
         if (foundPattern) return foundPattern.badCode;
@@ -46,6 +61,10 @@ export function PlaygroundView() {
 
   const [rawCss, setRawCss] = React.useState<string>(() => {
     if (typeof window !== "undefined") {
+      if (sharedParam) {
+        const decoded = decodeSnippet(sharedParam);
+        if (decoded) return decoded.css;
+      }
       if (patternParam) {
         const foundTemplate = STARTER_TEMPLATES.find(
           (t) => t.id === patternParam
@@ -64,6 +83,7 @@ export function PlaygroundView() {
 
   const [restoredNotice, setRestoredNotice] = React.useState(() => {
     if (typeof window !== "undefined") {
+      if (sharedParam) return false;
       try {
         return Boolean(localStorage.getItem(SESSION_STORAGE_KEY));
       } catch {
@@ -75,6 +95,27 @@ export function PlaygroundView() {
 
   const debouncedHtml = useDebounce(rawHtml, 400);
   const debouncedCss = useDebounce(rawCss, 400);
+
+  const [useTailwind, setUseTailwind] = React.useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        return localStorage.getItem(TAILWIND_STORAGE_KEY) === "true";
+      } catch {
+        return false;
+      }
+    }
+    return false;
+  });
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem(TAILWIND_STORAGE_KEY, String(useTailwind));
+      } catch {
+        // Ignore quota
+      }
+    }
+  }, [useTailwind]);
 
   // Persist session to localStorage
   React.useEffect(() => {
@@ -387,6 +428,12 @@ export function PlaygroundView() {
               setIsScanning(true);
             }}
             onSelectTemplate={handleSelectTemplate}
+            onCopyLink={() => {
+              const encoded = encodeSnippet(rawHtml, rawCss);
+              return `${location.origin}/playground?s=${encoded}`;
+            }}
+            useTailwind={useTailwind}
+            onToggleTailwind={setUseTailwind}
             selectionRange={selectedNode?.sourceRange ?? null}
             onForceScan={handleForceScan}
           />
@@ -394,6 +441,7 @@ export function PlaygroundView() {
           <PreviewFrame
             instrumentedHtml={instrumentedHtml}
             css={rawCss}
+            useTailwind={useTailwind}
             selectedNodeId={activeNodeId}
             scanId={scanId}
             onSelectNodeId={(id) => setSelectedNodeId(id)}
@@ -442,6 +490,7 @@ export function PlaygroundView() {
                 <TabsTrigger value="aria">ARIA Explorer</TabsTrigger>
                 <TabsTrigger value="accname">Accessible Name</TabsTrigger>
                 <TabsTrigger value="focus">Focus Order</TabsTrigger>
+                <TabsTrigger value="announce">Announcement</TabsTrigger>
                 <TabsTrigger
                   value="issues"
                   badge={
@@ -470,7 +519,23 @@ export function PlaygroundView() {
               </TabsContent>
 
               <TabsContent value="aria" className="m-0 h-full">
-                <AriaExplorerPanel selectedNode={selectedNode} />
+                <AriaExplorerPanel
+                  selectedNode={selectedNode}
+                  onUpdateAttribute={(attr, value) => {
+                    if (!selectedNode) return;
+                    setRawHtml((html) =>
+                      setAttributeInSource(html, selectedNode, attr, value)
+                    );
+                    setIsScanning(true);
+                  }}
+                  onRemoveAttribute={(attr) => {
+                    if (!selectedNode) return;
+                    setRawHtml((html) =>
+                      removeAttributeFromSource(html, selectedNode, attr)
+                    );
+                    setIsScanning(true);
+                  }}
+                />
               </TabsContent>
 
               <TabsContent value="accname" className="m-0 h-full">
@@ -486,6 +551,10 @@ export function PlaygroundView() {
                 />
               </TabsContent>
 
+              <TabsContent value="announce" className="m-0 h-full">
+                <AnnouncementPanel selectedNode={selectedNode} />
+              </TabsContent>
+
               <TabsContent value="issues" className="m-0 h-full">
                 <IssuesPanel
                   violations={mergedViolations}
@@ -494,6 +563,15 @@ export function PlaygroundView() {
                   scanError={scanError}
                   hasHtml={rawHtml.trim().length > 0}
                   onSelectNode={(id) => setSelectedNodeId(id)}
+                  onApplyFix={(finding) => {
+                    const targetId = finding.nodes[0]?.targetId ?? "";
+                    const node = findA11yNodeById(ast, targetId);
+                    if (!node) return;
+                    setRawHtml((html) =>
+                      applyAutoFixToHtml(html, finding, node)
+                    );
+                    setIsScanning(true);
+                  }}
                 />
               </TabsContent>
             </div>
