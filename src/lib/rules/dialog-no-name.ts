@@ -4,9 +4,10 @@ import { makeFinding } from "./make-finding";
 export const dialogNoNameRule: Rule = {
   id: "dialog-no-name",
   impact: "serious",
+  confidence: "high",
   wcag: ["4.1.2"],
   help: "Dialog is missing accessible name or aria-modal",
-  checkNode(node) {
+  checkNode(node, ctx) {
     const tag = node.tagName.toLowerCase();
     const attrs = node.attributes || {};
     if (
@@ -38,10 +39,12 @@ export const dialogNoNameRule: Rule = {
             wcag: ["4.1.2"],
             fix: 'Add aria-labelledby pointing to the dialog header title and add aria-modal="true".',
             node,
+            html: ctx?.html,
           }),
         ];
       }
     }
+
     return [];
   },
 };

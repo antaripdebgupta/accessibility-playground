@@ -4,9 +4,11 @@ import { makeFinding } from "./make-finding";
 export const emptyInteractiveNameRule: Rule = {
   id: "empty-interactive-name",
   impact: "critical",
+  confidence: "high",
   wcag: ["4.1.2"],
   help: "Interactive element has no accessible name",
-  checkNode(node) {
+  equivalentAxeIds: ["link-name", "button-name"],
+  checkNode(node, ctx) {
     const tag = node.tagName.toLowerCase();
     const attrs = node.attributes || {};
     const ariaAttrs = node.ariaAttributes || {};
@@ -32,10 +34,12 @@ export const emptyInteractiveNameRule: Rule = {
             wcag: ["4.1.2"],
             fix: 'Provide text content inside the control or add aria-label="Action description".',
             node,
+            html: ctx?.html,
           }),
         ];
       }
     }
+
     return [];
   },
 };

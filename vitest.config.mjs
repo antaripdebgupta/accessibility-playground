@@ -5,11 +5,17 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     globals: true,
+    fileParallelism: false,
     exclude: ["e2e/**", "node_modules/**"],
+    server: {
+      deps: {
+        inline: [/@accessly-ui/],
+      },
+    },
   },
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(import.meta.dirname, "./src"),
     },
   },
 });

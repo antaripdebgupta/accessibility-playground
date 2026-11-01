@@ -5,8 +5,10 @@ import type { AxeFinding } from "@/types/a11y";
 export const headingOrderRule: Rule = {
   id: "heading-order",
   impact: "moderate",
+  confidence: "high",
   wcag: ["1.3.1"],
   help: "Skipped heading level in document structure",
+  equivalentAxeIds: ["heading-order"],
   checkNode(node, ctx) {
     const tag = node.tagName.toLowerCase();
     if (/^h[1-6]$/.test(tag)) {
@@ -32,6 +34,7 @@ export const headingOrderRule: Rule = {
             wcag: ["1.3.1"],
             fix: `Change <h${curr.level}> to <h${prev.level + 1}>, and adjust font sizes with CSS instead of choosing heading tags for appearance.`,
             node: curr.node,
+            html: ctx.html,
           })
         );
       }

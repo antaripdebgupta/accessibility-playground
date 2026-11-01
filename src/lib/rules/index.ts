@@ -12,6 +12,7 @@ import { headingOrderRule } from "./heading-order";
 import { dialogNoNameRule } from "./dialog-no-name";
 import { tabPatternIncompleteRule } from "./tab-pattern-incomplete";
 import { duplicateIdRule } from "./duplicate-id";
+import { ariaBrokenReferenceRule } from "./aria-broken-reference";
 import { invalidAriaRule } from "./invalid-aria";
 import { outlineRemovedRule } from "./outline-removed";
 
@@ -33,6 +34,8 @@ export const RULES: readonly Rule[] = [
   dialogNoNameRule,
   tabPatternIncompleteRule,
   duplicateIdRule,
+  ariaBrokenReferenceRule,
   invalidAriaRule,
   outlineRemovedRule,
 ];
+

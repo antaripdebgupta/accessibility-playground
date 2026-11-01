@@ -1,8 +1,9 @@
 import type { AxeFinding } from "@/types/a11y";
+import { isEquivalentRule as isRuleEquivalent, normalizeHtmlSnippet } from "./findings/normalize";
 
 /**
  * Mapping between axe-core rule IDs and playground custom-rule IDs
- * for deduplicating findings reported on the same element.
+ * for backwards compatibility.
  */
 export const DEDUP_RULE_MAP: Readonly<Record<string, readonly string[]>> = {
   "image-alt": ["img-missing-alt"],
@@ -18,14 +19,12 @@ export function isEquivalentRule(
   axeRuleId: string,
   customRuleId: string
 ): boolean {
-  if (axeRuleId === customRuleId) return true;
-  const mapped = DEDUP_RULE_MAP[axeRuleId];
-  return Boolean(mapped && mapped.includes(customRuleId));
+  return isRuleEquivalent(axeRuleId, customRuleId);
 }
 
 /**
  * Pure function to merge axe-core violations and playground custom findings,
- * avoiding duplicate issues for the same DOM element while preserving custom fixes.
+ * deduplicating per-node while preserving custom fixes and fingerprints.
  */
 export function mergeFindings(
   customFindings: readonly AxeFinding[],
@@ -35,39 +34,47 @@ export function mergeFindings(
   const suppressedCustomKeys = new Set<string>();
 
   for (const af of axeViolations) {
-    const targetId = af.nodes[0]?.targetId;
-    const targetHtml = af.nodes[0]?.html;
-
     let fix = af.fix;
-    const matchingCustom = customFindings.find((cf) => {
-      const cfTargetId = cf.nodes[0]?.targetId;
-      const cfHtml = cf.nodes[0]?.html;
-      const targetMatch = Boolean(
-        (targetId && cfTargetId && targetId === cfTargetId) ||
-        (targetHtml && cfHtml && targetHtml === cfHtml)
-      );
-      if (!targetMatch) return false;
 
-      return isEquivalentRule(af.id, cf.id);
-    });
+    for (const afNode of af.nodes) {
+      for (const cf of customFindings) {
+        if (!isEquivalentRule(af.id, cf.id)) continue;
 
-    if (matchingCustom) {
-      if (!fix && matchingCustom.fix) {
-        fix = matchingCustom.fix;
+        for (const cfNode of cf.nodes) {
+          const targetMatch = Boolean(
+            (afNode.targetId &&
+              cfNode.targetId &&
+              afNode.targetId === cfNode.targetId) ||
+            normalizeHtmlSnippet(afNode.html) ===
+              normalizeHtmlSnippet(cfNode.html)
+          );
+
+          if (targetMatch) {
+            if (!fix && cf.fix) {
+              fix = cf.fix;
+            }
+            const key = `${cf.id}:${cfNode.targetId || normalizeHtmlSnippet(cfNode.html)}`;
+            suppressedCustomKeys.add(key);
+          }
+        }
       }
-      const cfTargetId = matchingCustom.nodes[0]?.targetId;
-      const cfHtml = matchingCustom.nodes[0]?.html;
-      suppressedCustomKeys.add(`${matchingCustom.id}:${cfTargetId || cfHtml}`);
     }
 
     list.push(fix ? { ...af, fix } : af);
   }
 
   for (const cf of customFindings) {
-    const targetId = cf.nodes[0]?.targetId;
-    const key = `${cf.id}:${targetId || cf.nodes[0]?.html}`;
-    if (!suppressedCustomKeys.has(key)) {
-      list.push(cf);
+    const unsuppressedNodes = cf.nodes.filter((node) => {
+      const key = `${cf.id}:${node.targetId || normalizeHtmlSnippet(node.html)}`;
+      return !suppressedCustomKeys.has(key);
+    });
+
+    if (unsuppressedNodes.length > 0) {
+      list.push(
+        unsuppressedNodes.length === cf.nodes.length
+          ? cf
+          : { ...cf, nodes: unsuppressedNodes }
+      );
     }
   }
 

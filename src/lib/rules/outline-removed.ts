@@ -4,6 +4,7 @@ import { makeFinding } from "./make-finding";
 export const outlineRemovedRule: Rule = {
   id: "outline-removed",
   impact: "serious",
+  confidence: "medium",
   wcag: ["2.4.7", "2.4.11"],
   help: "Focus outline removed without replacement style",
   checkEnd(ctx) {

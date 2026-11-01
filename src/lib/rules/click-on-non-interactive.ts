@@ -23,9 +23,10 @@ const NON_INTERACTIVE_TAGS = new Set([
 export const clickOnNonInteractiveRule: Rule = {
   id: "click-on-non-interactive",
   impact: "critical",
+  confidence: "medium",
   wcag: ["4.1.2", "2.1.1"],
   help: "Click handler attached to non-interactive element",
-  checkNode(node) {
+  checkNode(node, ctx) {
     const attrs = node.attributes || {};
     const tag = node.tagName.toLowerCase();
     const hasClick =
@@ -52,6 +53,7 @@ export const clickOnNonInteractiveRule: Rule = {
           wcag: ["4.1.2", "2.1.1"],
           fix: 'Replace with a native <button type="button"> or <a> element, or add role="button" with tabindex="0" and keyboard listeners for Enter/Space.',
           node,
+          html: ctx.html,
         }),
       ];
     }

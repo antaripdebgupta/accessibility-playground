@@ -15,7 +15,8 @@ export { RULES } from "./rules";
  */
 export function runCustomRules(
   root: A11yNode | null,
-  css = ""
+  css = "",
+  html = ""
 ): readonly AxeFinding[] {
   if (!root) return [];
 
@@ -71,6 +72,7 @@ export function runCustomRules(
     idMap,
     headings,
     css,
+    html,
     isInsideTablist,
     isFocusable,
     isNaturalFocusable,

@@ -3,6 +3,10 @@
 import * as React from "react";
 import type { A11yNode } from "@/types/a11y";
 import { Badge } from "@/components/ui/Badge";
+import {
+  InspectorSelectedHeader,
+  InspectorEmptyState,
+} from "./InspectorSelectedHeader";
 import { CheckCircle2, Circle, AlertCircle, Tag } from "lucide-react";
 
 export interface AccessibleNamePanelProps {
@@ -14,15 +18,10 @@ export function AccessibleNamePanel({
 }: AccessibleNamePanelProps) {
   if (!selectedNode) {
     return (
-      <div className="text-md flex h-64 flex-col items-center justify-center p-6 text-center text-[var(--color-text-secondary)]">
-        <p className="mb-1 font-medium text-[var(--color-text-primary)]">
-          No Element Selected
-        </p>
-        <p>
-          Click an element in the preview or tree to trace its accessible name
-          calculation.
-        </p>
-      </div>
+      <InspectorEmptyState
+        title="No Element Selected"
+        description="Select an element in the preview or tree to trace its accessible name computation."
+      />
     );
   }
 
@@ -101,7 +100,9 @@ export function AccessibleNamePanel({
   ];
 
   return (
-    <div className="flex flex-col gap-5 p-4">
+    <div className="flex flex-col">
+      <InspectorSelectedHeader selectedNode={selectedNode} />
+      <div className="flex flex-col gap-5 p-4">
       {/* Final Winning Name Card */}
       <div className="rounded-lg border border-[var(--color-focus-ring)]/30 bg-[var(--color-accent-subtle)]/40 p-4">
         <div className="mb-1.5 flex items-center justify-between">
@@ -189,10 +190,16 @@ export function AccessibleNamePanel({
                     >
                       {step.title}
                     </span>
-                    {isWinner && (
+                    {isWinner ? (
                       <Badge variant="success" className="text-[10px]">
-                        Determining Step
+                        Winning Step
                       </Badge>
+                    ) : (
+                      <span className="text-[11px] italic text-[var(--color-text-secondary)]">
+                        {step.output
+                          ? "Ignored because higher-precedence step won"
+                          : "Not provided on element"}
+                      </span>
                     )}
                   </div>
 
@@ -217,5 +224,6 @@ export function AccessibleNamePanel({
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 }

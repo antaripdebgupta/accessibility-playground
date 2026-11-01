@@ -25,6 +25,7 @@ export interface CodeEditorProps {
   onChange: (val: string) => void;
   language: "html" | "css";
   selectionRange?: readonly [number, number] | null;
+  onCaretChange?: (offset: number) => void;
   onForceScan?: () => void;
   indentWithTab?: boolean;
   ariaLabel: string;
@@ -36,6 +37,7 @@ export function CodeEditor({
   onChange,
   language,
   selectionRange,
+  onCaretChange,
   onForceScan,
   indentWithTab = false,
   ariaLabel,
@@ -83,6 +85,12 @@ export function CodeEditor({
           },
         },
       ]),
+      EditorView.updateListener.of((update) => {
+        if (update.selectionSet && !update.docChanged && onCaretChange) {
+          const head = update.state.selection.main.head;
+          onCaretChange(head);
+        }
+      }),
     ];
 
     if (indentWithTab) {
@@ -132,6 +140,7 @@ export function CodeEditor({
     return exts;
   }, [
     language,
+    onCaretChange,
     onForceScan,
     indentWithTab,
     ariaLabel,

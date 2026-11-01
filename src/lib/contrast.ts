@@ -115,37 +115,56 @@ export function suggestPassingColor(
   const currentRatio = calculateContrastRatio(fg, bg);
   if (currentRatio >= targetRatio) return fgHex;
 
-  const bgLum = getRelativeLuminance(bg);
-  // If background is light, darken foreground; if dark, lighten foreground
-  const shouldDarken = bgLum > 0.5;
+  const blackContrast = calculateContrastRatio({ r: 0, g: 0, b: 0 }, bg);
+  const whiteContrast = calculateContrastRatio({ r: 255, g: 255, b: 255 }, bg);
 
-  let bestHex = shouldDarken ? "#000000" : "#FFFFFF";
-  let low = 0;
-  let high = 100;
-
-  for (let i = 0; i < 20; i++) {
-    const mid = (low + high) / 2;
-    const factor = mid / 100;
-    const candidateRgb: RgbColor = shouldDarken
-      ? {
-          r: fg.r * (1 - factor),
-          g: fg.g * (1 - factor),
-          b: fg.b * (1 - factor),
-        }
-      : {
-          r: fg.r + (255 - fg.r) * factor,
-          g: fg.g + (255 - fg.g) * factor,
-          b: fg.b + (255 - fg.b) * factor,
-        };
-
-    const ratio = calculateContrastRatio(candidateRgb, bg);
-    if (ratio >= targetRatio) {
-      bestHex = rgbToHex(candidateRgb);
-      high = mid; // Try to stay closer to original color
-    } else {
-      low = mid;
-    }
+  if (Math.max(blackContrast, whiteContrast) < targetRatio) {
+    return null;
   }
 
-  return bestHex;
+  function searchDirection(darken: boolean): string | null {
+    let best: string | null = null;
+    let low = 0;
+    let high = 100;
+    // fg is guaranteed non-null here (checked above), but TS can't narrow
+    // across closure boundaries, so capture explicitly.
+    const fgColor: RgbColor = fg!;
+    const bgColor: RgbColor = bg!;
+
+    for (let i = 0; i < 24; i++) {
+      const mid = (low + high) / 2;
+      const factor = mid / 100;
+      const candidateRgb: RgbColor = darken
+        ? {
+            r: fgColor.r * (1 - factor),
+            g: fgColor.g * (1 - factor),
+            b: fgColor.b * (1 - factor),
+          }
+        : {
+            r: fgColor.r + (255 - fgColor.r) * factor,
+            g: fgColor.g + (255 - fgColor.g) * factor,
+            b: fgColor.b + (255 - fgColor.b) * factor,
+          };
+
+      const candidateHex = rgbToHex(candidateRgb);
+      const rounded = hexToRgb(candidateHex);
+      const ratio = rounded ? calculateContrastRatio(rounded, bgColor) : 0;
+      if (ratio >= targetRatio) {
+        best = candidateHex;
+        high = mid; // Try to stay closer to original color
+      } else {
+        low = mid;
+      }
+    }
+
+    return best;
+  }
+
+  const preferDarken = blackContrast >= whiteContrast;
+  const primaryResult = searchDirection(preferDarken);
+  if (primaryResult) return primaryResult;
+
+  const fallbackResult = searchDirection(!preferDarken);
+  return fallbackResult;
+
 }

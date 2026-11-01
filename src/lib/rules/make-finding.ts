@@ -1,6 +1,21 @@
 import type { A11yNode, AxeFinding, AxeImpactLevel } from "@/types/a11y";
+import { fnv1a } from "../hash";
 
-export function getNodeSnippet(node: A11yNode): string {
+/**
+ * Extracts element snippet. If html and sourceRange are present, extracts real source slice
+ * up to 300 characters. Otherwise falls back to the opening tag.
+ */
+export function getNodeSnippet(node: A11yNode, html?: string): string {
+  if (html && node.sourceRange) {
+    const [start, end] = node.sourceRange;
+    if (start >= 0 && end > start && end <= html.length) {
+      const slice = html.slice(start, end).trim();
+      if (slice) {
+        return slice.length > 300 ? slice.slice(0, 300) + "…" : slice;
+      }
+    }
+  }
+
   const attrs = node.attributes || {};
   const attrStrings = Object.entries(attrs)
     .filter(([k]) => k !== "data-a11y-id")
@@ -19,7 +34,11 @@ export function makeFinding(params: {
   fix: string;
   node: A11yNode;
   failureSummary?: string;
+  html?: string;
 }): AxeFinding {
+  const snippet = getNodeSnippet(params.node, params.html);
+  const fingerprint = fnv1a(`${params.id}:${params.node.id}:${snippet.trim()}`);
+
   return {
     id: params.id,
     impact: params.impact,
@@ -30,9 +49,10 @@ export function makeFinding(params: {
     source: "playground",
     type: "violation",
     fix: params.fix,
+    fingerprint,
     nodes: [
       {
-        html: getNodeSnippet(params.node),
+        html: snippet,
         target: [`[data-a11y-id="${params.node.id}"]`],
         targetId: params.node.id,
         failureSummary: params.failureSummary || params.description,

@@ -5,30 +5,30 @@ import { NATURAL_FORM_CONTROLS } from "./helpers";
 export const inputPlaceholderOnlyRule: Rule = {
   id: "input-placeholder-only",
   impact: "critical",
+  confidence: "high",
   wcag: ["1.3.1", "4.1.2", "3.3.2"],
   help: "Form input labeled only by placeholder or title",
-  checkNode(node) {
+  checkNode(node, ctx) {
     const tag = node.tagName.toLowerCase();
     const attrs = node.attributes || {};
     if (NATURAL_FORM_CONTROLS.has(tag) && attrs["type"] !== "hidden") {
       const hasPlaceholder = Boolean(attrs["placeholder"]?.trim());
       const hasTitle = Boolean(attrs["title"]?.trim());
-      const hasLabelFor =
-        node.accessibleNameSource === "<label for>" ||
-        node.accessibleNameSource === "label[for]";
       const hasAriaLabel = Boolean(attrs["aria-label"]?.trim());
       const hasAriaLabelledby = Boolean(attrs["aria-labelledby"]?.trim());
+      const hasNativeLabel =
+        node.accessibleNameSource === "<label for>" ||
+        node.accessibleNameSource === "label[for]" ||
+        node.accessibleNameSource === "enclosing <label>" ||
+        node.accessibleNameSource.includes("label");
 
-      const onlyPlaceholderOrTitle =
-        (hasPlaceholder || hasTitle) &&
-        !hasLabelFor &&
-        !hasAriaLabel &&
-        !hasAriaLabelledby &&
-        (node.accessibleNameSource === "placeholder" ||
-          node.accessibleNameSource === "title" ||
-          !node.hasAccessibleName);
+      const hasLegitimateLabel =
+        hasNativeLabel || hasAriaLabel || hasAriaLabelledby;
 
-      if (onlyPlaceholderOrTitle) {
+      const reliesOnPlaceholderOrTitle =
+        (hasPlaceholder || hasTitle) && !hasLegitimateLabel;
+
+      if (reliesOnPlaceholderOrTitle) {
         return [
           makeFinding({
             id: "input-placeholder-only",
@@ -40,6 +40,7 @@ export const inputPlaceholderOnlyRule: Rule = {
             wcag: ["1.3.1", "4.1.2", "3.3.2"],
             fix: 'Add a persistent <label for="input-id"> element or aria-label attribute. Do not rely on placeholder as the sole label.',
             node,
+            html: ctx?.html,
           }),
         ];
       }

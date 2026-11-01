@@ -1,12 +1,49 @@
+export interface PreviewSimulations {
+  readonly reducedMotion?: boolean;
+  readonly forcedColors?: boolean;
+}
+
 export function generatePreviewSrcDoc(
   instrumentedHtml: string,
   css = "",
   axeUrl = "/axe.min.js",
-  useTailwind = false
+  useTailwind = false,
+  simulations?: PreviewSimulations
 ): string {
   const safeCss = (css || "").replace(/<\/style/gi, "<\\/style");
   const tailwindScript = useTailwind
     ? '<script src="https://cdn.tailwindcss.com" onerror="window.__tailwindFailed=true;"></script>'
+    : "";
+
+  const reducedMotionCss = simulations?.reducedMotion
+    ? `
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+    `
+    : "";
+
+  const forcedColorsCss = simulations?.forcedColors
+    ? `
+    html, body {
+      background-color: Canvas !important;
+      color: CanvasText !important;
+    }
+    a {
+      color: LinkText !important;
+    }
+    button, input, select, textarea {
+      background-color: ButtonFace !important;
+      color: ButtonText !important;
+      border: 1px solid ButtonText !important;
+    }
+    :focus-visible {
+      outline: 2px solid Highlight !important;
+    }
+    `
     : "";
 
   return `<!DOCTYPE html>
@@ -41,6 +78,8 @@ export function generatePreviewSrcDoc(
       outline: 1px dotted #93c5fd;
       outline-offset: 2px;
     }
+    ${reducedMotionCss}
+    ${forcedColorsCss}
   </style>
   ${tailwindScript}
   <style id="user-css">${safeCss}</style>
@@ -58,6 +97,27 @@ export function generatePreviewSrcDoc(
           console.error("Failed to post message to parent:", e);
         }
       }
+
+      // Catch uncaught runtime exceptions and forward to workbench
+      window.addEventListener("error", function(event) {
+        sendParent({
+          type: "runtime-error",
+          message: event.message || "Uncaught runtime exception",
+          source: event.filename || undefined,
+          lineno: event.lineno || undefined,
+          colno: event.colno || undefined,
+          timestamp: new Date().toISOString()
+        });
+      });
+
+      window.addEventListener("unhandledrejection", function(event) {
+        var reasonMsg = event.reason ? (event.reason.message || String(event.reason)) : "Promise rejected";
+        sendParent({
+          type: "runtime-error",
+          message: "Unhandled Promise Rejection: " + reasonMsg,
+          timestamp: new Date().toISOString()
+        });
+      });
 
       // 1. Click-to-inspect listener
       document.body.addEventListener("click", function(e) {
@@ -223,6 +283,7 @@ export function generatePreviewSrcDoc(
             var targetEl = document.querySelector('[data-a11y-id="' + e.data.id + '"]');
             if (targetEl) {
               targetEl.classList.add("a11y-inspect-selected");
+              try { targetEl.scrollIntoView({ block: "nearest", inline: "nearest" }); } catch (err) {}
             }
           }
         } else if (e.data.type === "run-scan") {

@@ -10,6 +10,11 @@ import { A11yTreePanel } from "./A11yTreePanel";
 import { IssuesPanel } from "./IssuesPanel";
 import type { A11yNode, AxeFinding } from "@/types/a11y";
 import type { ComputedFocusOrder } from "@/lib/focus-order";
+import { normalizeFindings } from "@/lib/findings/normalize";
+import { CompareView } from "./CompareView";
+import { ManualTestsPanel } from "./ManualTestsPanel";
+import type { BaselineData } from "@/hooks/useBaseline";
+import type { CompareResult } from "@/lib/compare";
 
 // Lazy-load heavy tab-gated panels (§B.6)
 const AriaExplorerPanel = dynamic(
@@ -72,6 +77,12 @@ export interface AnalysisTabsProps {
   hasHtml: boolean;
   onApplyFix: (finding: AxeFinding) => void;
   isOverSizeLimit?: boolean;
+  baseline?: BaselineData | null;
+  comparison?: CompareResult | null;
+  rawHtml?: string;
+  onSetBaseline?: () => void;
+  onClearBaseline?: () => void;
+  templateOrSnippetId?: string;
 }
 
 export const AnalysisTabs = React.memo(function AnalysisTabs({
@@ -94,7 +105,17 @@ export const AnalysisTabs = React.memo(function AnalysisTabs({
   hasHtml,
   onApplyFix,
   isOverSizeLimit = false,
+  baseline = null,
+  comparison = null,
+  rawHtml = "",
+  onSetBaseline,
+  onClearBaseline,
+  templateOrSnippetId = "default",
 }: AnalysisTabsProps) {
+  const normalizedFindings = React.useMemo(() => {
+    return normalizeFindings([], mergedViolations, axeIncomplete);
+  }, [mergedViolations, axeIncomplete]);
+
   return (
     <Tabs
       value={analysisTab}
@@ -111,15 +132,40 @@ export const AnalysisTabs = React.memo(function AnalysisTabs({
           <TabsTrigger
             value="issues"
             badge={
-              mergedViolations.length > 0 ? (
-                <Badge variant="warning" className="ml-1 px-1 py-0 text-[10px]">
-                  {mergedViolations.length}
+              mergedViolations.length > 0 || axeIncomplete.length > 0 ? (
+                <Badge
+                  variant={mergedViolations.length > 0 ? "warning" : "default"}
+                  className="ml-1 px-1 py-0 text-[10px]"
+                >
+                  {mergedViolations.length > 0 && axeIncomplete.length > 0
+                    ? `${mergedViolations.length} · ${axeIncomplete.length}`
+                    : mergedViolations.length > 0
+                    ? `${mergedViolations.length}`
+                    : `${axeIncomplete.length} to review`}
                 </Badge>
               ) : undefined
             }
           >
             Issues
           </TabsTrigger>
+          <TabsTrigger
+            value="compare"
+            badge={
+              comparison && (comparison.resolved.length > 0 || comparison.introduced.length > 0) ? (
+                <Badge
+                  variant={comparison.introduced.length > 0 ? "warning" : "default"}
+                  className="ml-1 px-1 py-0 text-[10px]"
+                >
+                  {comparison.resolved.length > 0 && `-${comparison.resolved.length}`}
+                  {comparison.resolved.length > 0 && comparison.introduced.length > 0 && " "}
+                  {comparison.introduced.length > 0 && `+${comparison.introduced.length}`}
+                </Badge>
+              ) : undefined
+            }
+          >
+            Compare
+          </TabsTrigger>
+          <TabsTrigger value="manual">Manual Tests</TabsTrigger>
         </TabsList>
 
         <button
@@ -159,8 +205,10 @@ export const AnalysisTabs = React.memo(function AnalysisTabs({
           <PanelBoundary name="A11y Tree">
             <A11yTreePanel
               ast={ast}
+              selectedNode={selectedNode}
               selectedNodeId={activeNodeId}
               onSelectNode={onSelectNode}
+              findings={normalizedFindings}
             />
           </PanelBoundary>
         </TabsContent>
@@ -171,6 +219,7 @@ export const AnalysisTabs = React.memo(function AnalysisTabs({
               selectedNode={selectedNode}
               onUpdateAttribute={onUpdateAttribute}
               onRemoveAttribute={onRemoveAttribute}
+              findings={normalizedFindings}
             />
           </PanelBoundary>
         </TabsContent>
@@ -191,9 +240,11 @@ export const AnalysisTabs = React.memo(function AnalysisTabs({
                   findings: [],
                 }
               }
+              selectedNode={selectedNode}
               selectedNodeId={activeNodeId}
               onSelectNode={onSelectNode}
               onSimulateFocus={onSimulateFocus}
+              findings={normalizedFindings}
             />
           </PanelBoundary>
         </TabsContent>
@@ -207,14 +258,39 @@ export const AnalysisTabs = React.memo(function AnalysisTabs({
         <TabsContent value="issues" className="m-0 h-full">
           <PanelBoundary name="Issues">
             <IssuesPanel
+              findings={normalizedFindings}
               violations={mergedViolations}
               incomplete={axeIncomplete}
               isScanning={isScanning}
               scanError={scanError}
               hasHtml={hasHtml}
               onSelectNode={onSelectNode}
+              onOpenInspector={(inspector, nodeId) => {
+                onTabChange(inspector);
+                if (nodeId) onSelectNode(nodeId);
+              }}
               onApplyFix={onApplyFix}
             />
+          </PanelBoundary>
+        </TabsContent>
+
+        <TabsContent value="compare" className="m-0 h-full">
+          <PanelBoundary name="Compare">
+            <CompareView
+              baseline={baseline}
+              comparison={comparison}
+              currentFindings={normalizedFindings}
+              currentHtml={rawHtml}
+              onSetBaseline={onSetBaseline ?? (() => {})}
+              onClearBaseline={onClearBaseline ?? (() => {})}
+              onSelectNode={onSelectNode}
+            />
+          </PanelBoundary>
+        </TabsContent>
+
+        <TabsContent value="manual" className="m-0 h-full">
+          <PanelBoundary name="Manual Tests">
+            <ManualTestsPanel templateOrSnippetId={templateOrSnippetId} />
           </PanelBoundary>
         </TabsContent>
       </div>

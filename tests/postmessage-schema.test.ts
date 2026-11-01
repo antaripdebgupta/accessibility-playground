@@ -90,6 +90,23 @@ describe("PostMessage Schema Validation (Task 5d)", () => {
     expect(msg!.type).toBe("focus-order");
   });
 
+  it("parses 'runtime-error' message with error details", () => {
+    const payload = {
+      type: "runtime-error",
+      message: "Uncaught ReferenceError: foo is not defined",
+      lineno: 12,
+      colno: 5,
+      timestamp: new Date().toISOString(),
+    };
+    const msg = safeParseIframeMessage(payload);
+    expect(msg).not.toBeNull();
+    expect(msg!.type).toBe("runtime-error");
+    if (msg?.type === "runtime-error") {
+      expect(msg.message).toContain("foo is not defined");
+      expect(msg.lineno).toBe(12);
+    }
+  });
+
   it("returns null for malformed or unknown message types", () => {
     expect(safeParseIframeMessage(null)).toBeNull();
     expect(safeParseIframeMessage({})).toBeNull();

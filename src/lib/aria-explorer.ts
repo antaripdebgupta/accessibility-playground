@@ -124,18 +124,21 @@ const GLOBAL_ARIA_ATTRIBUTES = new Set([
 ]);
 
 const ROLE_ALLOWED_ARIA: Record<string, string[]> = {
-  button: ["aria-expanded", "aria-pressed"],
+  button: ["aria-expanded", "aria-pressed", "aria-haspopup"],
   checkbox: ["aria-checked", "aria-required", "aria-readonly"],
+  switch: ["aria-checked", "aria-readonly", "aria-required"],
   combobox: [
     "aria-autocomplete",
     "aria-expanded",
     "aria-required",
     "aria-activedescendant",
+    "aria-controls",
+    "aria-haspopup",
   ],
   dialog: ["aria-modal"],
   alertdialog: ["aria-modal"],
   heading: ["aria-level"],
-  link: ["aria-expanded"],
+  link: ["aria-expanded", "aria-haspopup"],
   progressbar: [
     "aria-valuenow",
     "aria-valuemin",
@@ -168,6 +171,81 @@ const ROLE_ALLOWED_ARIA: Record<string, string[]> = {
     "aria-readonly",
     "aria-required",
   ],
+  table: ["aria-colcount", "aria-rowcount"],
+  grid: [
+    "aria-multiselectable",
+    "aria-readonly",
+    "aria-colcount",
+    "aria-rowcount",
+  ],
+  treegrid: [
+    "aria-multiselectable",
+    "aria-readonly",
+    "aria-colcount",
+    "aria-rowcount",
+    "aria-orientation",
+  ],
+  row: ["aria-colindex", "aria-rowindex", "aria-selected", "aria-expanded"],
+  cell: ["aria-colindex", "aria-colspan", "aria-rowspan"],
+  gridcell: [
+    "aria-colindex",
+    "aria-colspan",
+    "aria-rowspan",
+    "aria-readonly",
+    "aria-required",
+    "aria-selected",
+    "aria-expanded",
+  ],
+  columnheader: [
+    "aria-sort",
+    "aria-colindex",
+    "aria-colspan",
+    "aria-rowspan",
+    "aria-required",
+    "aria-readonly",
+    "aria-selected",
+  ],
+  rowheader: [
+    "aria-sort",
+    "aria-colindex",
+    "aria-colspan",
+    "aria-rowspan",
+    "aria-required",
+    "aria-readonly",
+    "aria-selected",
+  ],
+  listbox: [
+    "aria-multiselectable",
+    "aria-required",
+    "aria-orientation",
+    "aria-activedescendant",
+  ],
+  option: [
+    "aria-selected",
+    "aria-checked",
+    "aria-posinset",
+    "aria-setsize",
+  ],
+  menu: ["aria-orientation", "aria-activedescendant"],
+  menubar: ["aria-orientation", "aria-activedescendant"],
+  menuitem: ["aria-expanded", "aria-haspopup"],
+  menuitemcheckbox: ["aria-checked"],
+  menuitemradio: ["aria-checked"],
+  tree: [
+    "aria-multiselectable",
+    "aria-orientation",
+    "aria-required",
+    "aria-activedescendant",
+  ],
+  treeitem: [
+    "aria-expanded",
+    "aria-selected",
+    "aria-checked",
+    "aria-level",
+    "aria-posinset",
+    "aria-setsize",
+  ],
+  radiogroup: ["aria-required", "aria-readonly", "aria-orientation"],
 };
 
 export function getAllowedAriaAttributes(role: string): string[] {
@@ -217,6 +295,9 @@ export function validateAriaAttribute(
       "aria-busy",
       "aria-modal",
       "aria-required",
+      "aria-readonly",
+      "aria-multiline",
+      "aria-multiselectable",
     ].includes(attr)
   ) {
     if (value !== "true" && value !== "false") {
@@ -267,6 +348,49 @@ export function validateAriaAttribute(
     }
   }
 
+  if (attr === "aria-sort") {
+    if (
+      value !== "ascending" &&
+      value !== "descending" &&
+      value !== "none" &&
+      value !== "other"
+    ) {
+      return {
+        attribute,
+        value,
+        status: "invalid-value",
+        explanation: `${attr} requires 'ascending', 'descending', 'none', or 'other'. Got '${value}'.`,
+      };
+    }
+  }
+
+  if (attr === "aria-autocomplete") {
+    if (
+      value !== "inline" &&
+      value !== "list" &&
+      value !== "both" &&
+      value !== "none"
+    ) {
+      return {
+        attribute,
+        value,
+        status: "invalid-value",
+        explanation: `${attr} requires 'inline', 'list', 'both', or 'none'. Got '${value}'.`,
+      };
+    }
+  }
+
+  if (attr === "aria-orientation") {
+    if (value !== "horizontal" && value !== "vertical") {
+      return {
+        attribute,
+        value,
+        status: "invalid-value",
+        explanation: `${attr} requires 'horizontal' or 'vertical'. Got '${value}'.`,
+      };
+    }
+  }
+
   return {
     attribute,
     value,
@@ -274,6 +398,7 @@ export function validateAriaAttribute(
     explanation: `${attr}='${value}' is valid and supported on role='${role}'.`,
   };
 }
+
 
 export const ROLES: readonly { name: string; description: string }[] = [
   {

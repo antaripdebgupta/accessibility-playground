@@ -1,3 +1,5 @@
+import type { WcagLevel } from "./wcag";
+
 export type AxeImpactLevel = "critical" | "serious" | "moderate" | "minor";
 
 export interface A11yNode {
@@ -74,6 +76,34 @@ export interface AxeFindingNode {
   readonly targetId?: string;
 }
 
+export type FindingStatus =
+  | "violation" // automatically detected failure
+  | "needs-review" // axe "incomplete" or low-confidence custom rule
+  | "manual-required"; // cannot be automated, shown as a checklist hint
+
+export type FindingConfidence = "high" | "medium" | "low";
+
+export interface WcagRef {
+  readonly id: string;
+  readonly version: "2.0" | "2.1" | "2.2";
+  readonly level: WcagLevel;
+}
+
+export interface Finding {
+  readonly fingerprint: string; // stable: hash(ruleId + target node structural id + normalized html)
+  readonly ruleId: string;
+  readonly engine: "axe-core" | "playground";
+  readonly status: FindingStatus;
+  readonly confidence: FindingConfidence;
+  readonly impact: AxeImpactLevel; // severity — NOT derived from WCAG level
+  readonly wcag: readonly WcagRef[];
+  readonly help: string;
+  readonly description: string;
+  readonly helpUrl: string;
+  readonly nodes: readonly AxeFindingNode[];
+  readonly fix?: string;
+}
+
 export interface AxeFinding {
   readonly id: string;
   readonly impact: AxeImpactLevel;
@@ -85,6 +115,7 @@ export interface AxeFinding {
   readonly type?: "violation" | "incomplete";
   readonly fix?: string;
   readonly nodes: readonly AxeFindingNode[];
+  readonly fingerprint?: string;
 }
 
 export interface AnalysisState {
@@ -95,3 +126,4 @@ export interface AnalysisState {
   readonly scanError: string | null;
   readonly parseError: string | null;
 }
+

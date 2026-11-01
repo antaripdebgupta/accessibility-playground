@@ -6,6 +6,7 @@ export interface RuleContext {
   readonly idMap: ReadonlyMap<string, A11yNode[]>;
   readonly headings: Array<{ level: number; node: A11yNode }>;
   readonly css: string;
+  readonly html?: string;
   isInsideTablist(node: A11yNode): boolean;
   isFocusable(node: A11yNode): boolean;
   isNaturalFocusable(node: A11yNode): boolean;
@@ -17,6 +18,9 @@ export interface Rule {
   readonly impact: AxeImpactLevel;
   readonly wcag: readonly string[];
   readonly help: string;
+  readonly confidence?: "high" | "medium" | "low";
+  readonly equivalentAxeIds?: readonly string[];
   checkNode?(node: A11yNode, ctx: RuleContext): AxeFinding[];
   checkEnd?(ctx: RuleContext): AxeFinding[];
 }
+

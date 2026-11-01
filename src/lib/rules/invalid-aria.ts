@@ -6,9 +6,15 @@ import type { AxeFinding } from "@/types/a11y";
 export const invalidAriaRule: Rule = {
   id: "invalid-aria",
   impact: "serious",
+  confidence: "high",
   wcag: ["4.1.2"],
   help: "Invalid ARIA attribute or value",
-  checkNode(node) {
+  equivalentAxeIds: [
+    "aria-valid-attr-value",
+    "aria-allowed-attr",
+    "aria-valid-attr",
+  ],
+  checkNode(node, ctx) {
     const findings: AxeFinding[] = [];
     const ariaAttrs = node.ariaAttributes || {};
 
@@ -28,10 +34,12 @@ export const invalidAriaRule: Rule = {
             wcag: ["4.1.2"],
             fix: `Use valid WAI-ARIA attributes and value types compatible with role="${node.role}".`,
             node,
+            html: ctx?.html,
           })
         );
       }
     }
+
     return findings;
   },
 };

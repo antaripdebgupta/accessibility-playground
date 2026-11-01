@@ -73,4 +73,44 @@ describe("Contrast Calculation (WCAG 2.2)", () => {
     const evalSuggested = evaluateContrast(suggested!, "#ffffff");
     expect(evalSuggested!.normalTextAA).toBe(true);
   });
+
+  it("property test: for 200 random fg/bg pairs, suggested color ratio >= target when it passes", () => {
+    // Deterministic pseudo-random generator
+    let seed = 42;
+    function pseudoRandom() {
+      seed = (seed * 9301 + 49297) % 233280;
+      return seed / 233280;
+    }
+    function randomHex() {
+      const r = Math.floor(pseudoRandom() * 256)
+        .toString(16)
+        .padStart(2, "0");
+      const g = Math.floor(pseudoRandom() * 256)
+        .toString(16)
+        .padStart(2, "0");
+      const b = Math.floor(pseudoRandom() * 256)
+        .toString(16)
+        .padStart(2, "0");
+      return `#${r}${g}${b}`;
+    }
+
+    const targets = [3.0, 4.5, 7.0];
+    for (let i = 0; i < 200; i++) {
+      const fg = randomHex();
+      const bg = randomHex();
+      const target = targets[i % targets.length]!;
+
+      const suggested = suggestPassingColor(fg, bg, target);
+      if (suggested) {
+        const bgRgb = hexToRgb(bg)!;
+        const suggestedRgb = hexToRgb(suggested)!;
+        const ratio = calculateContrastRatio(suggestedRgb, bgRgb);
+        expect(
+          ratio,
+          `Suggested ${suggested} against ${bg} must have ratio >= ${target}, got ${ratio}`
+        ).toBeGreaterThanOrEqual(target);
+      }
+    }
+  });
 });
+

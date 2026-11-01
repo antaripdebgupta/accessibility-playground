@@ -4,9 +4,10 @@ import { makeFinding } from "./make-finding";
 export const linkAsButtonRule: Rule = {
   id: "link-as-button",
   impact: "serious",
+  confidence: "medium",
   wcag: ["4.1.2"],
   help: "Anchor element used as button",
-  checkNode(node) {
+  checkNode(node, ctx) {
     const tag = node.tagName.toLowerCase();
     if (tag !== "a") return [];
     const attrs = node.attributes || {};
@@ -29,9 +30,11 @@ export const linkAsButtonRule: Rule = {
           wcag: ["4.1.2"],
           fix: 'Use a <button type="button"> for script-driven actions. If this is a real link, provide a valid URL in href.',
           node,
+          html: ctx?.html,
         }),
       ];
     }
+
     return [];
   },
 };

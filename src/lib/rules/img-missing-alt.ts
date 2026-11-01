@@ -4,9 +4,11 @@ import { makeFinding } from "./make-finding";
 export const imgMissingAltRule: Rule = {
   id: "img-missing-alt",
   impact: "critical",
+  confidence: "high",
   wcag: ["1.1.1"],
   help: "Image is missing alt attribute",
-  checkNode(node) {
+  equivalentAxeIds: ["image-alt"],
+  checkNode(node, ctx) {
     const tag = node.tagName.toLowerCase();
     const attrs = node.attributes || {};
     if (tag === "img" && attrs["alt"] === undefined) {
@@ -20,9 +22,11 @@ export const imgMissingAltRule: Rule = {
           wcag: ["1.1.1"],
           fix: 'Add alt="descriptive text" explaining the visual image, or alt="" if the image is decorative.',
           node,
+          html: ctx?.html,
         }),
       ];
     }
+
     return [];
   },
 };

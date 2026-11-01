@@ -1,4 +1,5 @@
 import type { A11yNode } from "@/types/a11y";
+import { fnv1a } from "./hash";
 import { computeAccessibleName } from "./accessible-name";
 import { getComputedRole } from "./aria-explorer";
 
@@ -77,6 +78,45 @@ function extractTagRanges(html: string): {
   };
 }
 
+/**
+ * Calculates a deterministic structural path for an element within doc.body.
+ * Format: tag[index]>tag[index] from the root down to the element,
+ * where index is the 0-based index of the element among siblings of the same tag.
+ *
+ * Limitation note:
+ * Node IDs are stable across edits in other parts of the document.
+ * However, inserting a sibling before an element of the same tag shifts that tag's index.
+ * Selection drift is mitigated via rematchA11yNode.
+ */
+export function getElementStructuralPath(element: Element): string {
+  const segments: string[] = [];
+  let current: Element | null = element;
+
+  while (
+    current &&
+    current.parentElement &&
+    current !== current.ownerDocument.body
+  ) {
+    const parent: Element = current.parentElement!;
+    const tag = current.tagName.toLowerCase();
+    let sameTagIndex = 0;
+    for (const sibling of Array.from(parent.children) as Element[]) {
+      if (sibling === current) break;
+      if (sibling.tagName.toLowerCase() === tag) {
+        sameTagIndex++;
+      }
+    }
+    segments.unshift(`${tag}[${sameTagIndex}]`);
+    current = parent;
+  }
+
+  if (segments.length === 0) {
+    segments.push(`${element.tagName.toLowerCase()}[0]`);
+  }
+
+  return segments.join(">");
+}
+
 export function parseHtmlToA11yTree(html: string): ParseResult {
   const trimmed = html.trim();
   if (!trimmed) {
@@ -100,11 +140,10 @@ export function parseHtmlToA11yTree(html: string): ParseResult {
   }
 
   let tagRangeIndex = 0;
-  let counter = 0;
 
   function processElement(element: Element): A11yNode {
-    counter += 1;
-    const a11yId = `a11y-${counter}`;
+    const path = getElementStructuralPath(element);
+    const a11yId = `a11y-${fnv1a(path)}`;
     element.setAttribute("data-a11y-id", a11yId);
 
     const elTagName = element.tagName.toLowerCase();
@@ -183,8 +222,7 @@ export function parseHtmlToA11yTree(html: string): ParseResult {
     rootNode = processElement(bodyChildren[0]);
   } else {
     // If multiple root elements, wrap in virtual container node
-    counter += 1;
-    const virtualId = `a11y-${counter}`;
+    const virtualId = "a11y-root";
     const childrenNodes = bodyChildren.map((el) => processElement(el));
     rootNode = {
       id: virtualId,
@@ -222,3 +260,121 @@ export function findA11yNodeById(
   }
   return null;
 }
+
+export interface RematchCriteria {
+  readonly id?: string;
+  readonly tagName: string;
+  readonly accessibleName?: string;
+  readonly sourceRange?: readonly [number, number];
+}
+
+/**
+ * Best-effort node re-matching across document mutations.
+ * When a previously selected node ID disappears (e.g. after editing sibling markup),
+ * this function tries matching candidates by:
+ * 1. Matching tagName
+ * 2. Matching accessible name (highest priority)
+ * 3. Proximity of source range start offset
+ */
+export function rematchA11yNode(
+  previous: RematchCriteria | null | undefined,
+  root: A11yNode | null
+): A11yNode | null {
+  if (!previous || !root) return null;
+
+  const allNodes: A11yNode[] = [];
+  function collect(node: A11yNode) {
+    if (node.tagName !== "fragment") {
+      allNodes.push(node);
+    }
+    for (const child of node.children) {
+      collect(child);
+    }
+  }
+  collect(root);
+
+  // Exact ID match first if characteristics still match
+  if (previous.id) {
+    const exact = allNodes.find((n) => n.id === previous.id);
+    if (exact) {
+      if (
+        !previous.accessibleName ||
+        exact.accessibleName.toLowerCase() ===
+          previous.accessibleName.toLowerCase()
+      ) {
+        return exact;
+      }
+      // If accessibleName differed, exact structural index was occupied by an inserted sibling!
+      // Fall through to characteristic scoring.
+    }
+  }
+
+  // Filter candidates by same tag name
+  const sameTag = allNodes.filter(
+    (n) => n.tagName.toLowerCase() === previous.tagName.toLowerCase()
+  );
+  if (sameTag.length === 0) return null;
+  if (sameTag.length === 1) return sameTag[0]!;
+
+  // Score each candidate
+  let bestCandidate: A11yNode | null = null;
+  let bestScore = -Infinity;
+
+  const prevOffset = previous.sourceRange ? previous.sourceRange[0] : null;
+  const prevName = previous.accessibleName?.trim().toLowerCase();
+
+  for (const candidate of sameTag) {
+    let score = 0;
+
+    // Accessible name match: high confidence
+    const candidateName = candidate.accessibleName?.trim().toLowerCase();
+    if (prevName && candidateName) {
+      if (candidateName === prevName) {
+        score += 1000;
+      }
+    }
+
+    // Source offset proximity
+    if (prevOffset !== null && candidate.sourceRange) {
+      const distance = Math.abs(candidate.sourceRange[0] - prevOffset);
+      score += Math.max(0, 500 - distance);
+    }
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestCandidate = candidate;
+    }
+  }
+
+  return bestCandidate || sameTag[0] || null;
+}
+
+/**
+ * Finds the deepest A11yNode in the AST whose sourceRange contains the given text offset.
+ */
+export function findA11yNodeAtOffset(
+  root: A11yNode | null,
+  offset: number
+): A11yNode | null {
+  if (!root) return null;
+
+  let candidate: A11yNode | null = null;
+  if (
+    root.sourceRange &&
+    offset >= root.sourceRange[0] &&
+    offset <= root.sourceRange[1]
+  ) {
+    candidate = root;
+  }
+
+  for (const child of root.children) {
+    const childMatch = findA11yNodeAtOffset(child, offset);
+    if (childMatch) {
+      return childMatch;
+    }
+  }
+
+  return candidate;
+}
+
+

@@ -113,6 +113,34 @@ export function usePlaygroundDocument(onDocumentChange?: () => void) {
     });
   }, [onDocumentChange, toast]);
 
+  const handleResetExample = React.useCallback(() => {
+    let targetHtml = STARTER_TEMPLATES[0]?.html ?? "";
+    let targetCss = STARTER_TEMPLATES[0]?.css ?? "";
+
+    if (patternParam) {
+      const tmpl = STARTER_TEMPLATES.find((t) => t.id === patternParam);
+      if (tmpl) {
+        targetHtml = tmpl.html;
+        targetCss = tmpl.css ?? "";
+      }
+    } else if (sharedParam) {
+      const decoded = decodeSnippet(sharedParam);
+      if (decoded) {
+        targetHtml = decoded.html;
+        targetCss = decoded.css;
+      }
+    }
+
+    setRawHtml(targetHtml);
+    setRawCss(targetCss);
+    onDocumentChange?.();
+    toast.push({
+      title: "Example reset",
+      description: "Restored code to original starter state.",
+      variant: "info",
+    });
+  }, [patternParam, sharedParam, onDocumentChange, toast]);
+
   const updateHtml = React.useCallback(
     (valOrUpdater: string | ((prev: string) => string)) => {
       setRawHtml(valOrUpdater);
@@ -142,6 +170,7 @@ export function usePlaygroundDocument(onDocumentChange?: () => void) {
     setUseTailwind,
     handleSelectTemplate,
     handleStartFresh,
+    handleResetExample,
     isOverSizeLimit,
   };
 }

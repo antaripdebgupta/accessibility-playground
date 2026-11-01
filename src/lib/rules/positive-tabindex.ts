@@ -4,9 +4,11 @@ import { makeFinding } from "./make-finding";
 export const positiveTabindexRule: Rule = {
   id: "positive-tabindex",
   impact: "serious",
+  confidence: "high",
   wcag: ["2.4.3"],
   help: "Positive tabindex attribute disrupts natural tab order",
-  checkNode(node) {
+  equivalentAxeIds: ["tabindex"],
+  checkNode(node, ctx) {
     const attrs = node.attributes || {};
     const tag = node.tagName.toLowerCase();
     const rawTab = attrs["tabindex"];
@@ -23,10 +25,12 @@ export const positiveTabindexRule: Rule = {
             wcag: ["2.4.3"],
             fix: 'Change to tabindex="0" to respect DOM order, or remove tabindex if the element is natively focusable.',
             node,
+            html: ctx?.html,
           }),
         ];
       }
     }
+
     return [];
   },
 };

@@ -4,8 +4,10 @@ import { makeFinding } from "./make-finding";
 export const ariaHiddenFocusableRule: Rule = {
   id: "aria-hidden-focusable",
   impact: "serious",
+  confidence: "high",
   wcag: ["4.1.2"],
   help: "aria-hidden element is or contains focusable element",
+  equivalentAxeIds: ["aria-hidden-focus"],
   checkNode(node, ctx) {
     const attrs = node.attributes || {};
     const ariaAttrs = node.ariaAttributes || {};
@@ -27,10 +29,12 @@ export const ariaHiddenFocusableRule: Rule = {
             wcag: ["4.1.2"],
             fix: 'Remove aria-hidden="true" or make the element non-focusable using tabindex="-1" or disabled.',
             node,
+            html: ctx.html,
           }),
         ];
       }
     }
+
     return [];
   },
 };

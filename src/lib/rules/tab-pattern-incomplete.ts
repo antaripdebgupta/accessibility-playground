@@ -5,6 +5,7 @@ import type { AxeFinding } from "@/types/a11y";
 export const tabPatternIncompleteRule: Rule = {
   id: "tab-pattern-incomplete",
   impact: "serious",
+  confidence: "high",
   wcag: ["4.1.2"],
   help: "Incomplete WAI-ARIA tab pattern",
   checkNode(node, ctx) {
@@ -38,6 +39,7 @@ export const tabPatternIncompleteRule: Rule = {
             wcag: ["4.1.2"],
             fix: 'Ensure tabs are contained in a role="tablist", and declare aria-selected="true|false" and aria-controls="panel-id".',
             node,
+            html: ctx.html,
           })
         );
       }
@@ -59,10 +61,12 @@ export const tabPatternIncompleteRule: Rule = {
             wcag: ["4.1.2"],
             fix: 'Add aria-labelledby="tab-id" linking this tabpanel to its controlling tab.',
             node,
+            html: ctx.html,
           })
         );
       }
     }
+
 
     return findings;
   },

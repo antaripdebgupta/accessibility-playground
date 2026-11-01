@@ -18,6 +18,13 @@ import {
   Play,
   FileX,
   Maximize2,
+  BookmarkCheck,
+  Download,
+  FileCode,
+  Table,
+  FileText,
+  Copy,
+  Undo2,
 } from "lucide-react";
 import {
   useWorkbenchLayout,
@@ -28,12 +35,26 @@ interface WorkbenchToolbarProps {
   onForceScan?: () => void;
   isScanning?: boolean;
   onStartFresh?: () => void;
+  onSetBaseline?: () => void;
+  hasBaseline?: boolean;
+  onExportJson?: () => void;
+  onExportCsv?: () => void;
+  onExportMarkdown?: () => void;
+  onCopyReport?: () => void;
+  onResetExample?: () => void;
 }
 
 export function WorkbenchToolbar({
   onForceScan,
   isScanning = false,
   onStartFresh,
+  onSetBaseline,
+  hasBaseline = false,
+  onExportJson,
+  onExportCsv,
+  onExportMarkdown,
+  onCopyReport,
+  onResetExample,
 }: WorkbenchToolbarProps) {
   const {
     direction,
@@ -44,6 +65,7 @@ export function WorkbenchToolbar({
   } = useWorkbenchLayout();
 
   const [isLayoutOpen, setIsLayoutOpen] = React.useState(false);
+  const [isExportOpen, setIsExportOpen] = React.useState(false);
 
   const handlePresetSelect = (preset: WorkbenchLayoutPreset) => {
     applyPreset(preset);
@@ -208,6 +230,111 @@ export function WorkbenchToolbar({
           <FileX className="h-3.5 w-3.5" aria-hidden="true" />
           <span>Start Fresh</span>
         </Button>
+      )}
+
+      {/* Reset Example Action */}
+      {onResetExample && (
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={onResetExample}
+          className="hidden h-7 gap-1 px-2 text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] md:inline-flex"
+          aria-label="Reset current example to its original state"
+        >
+          <Undo2 className="h-3.5 w-3.5" aria-hidden="true" />
+          <span>Reset Example</span>
+        </Button>
+      )}
+
+      {/* Set Baseline Button */}
+      {onSetBaseline && (
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={onSetBaseline}
+          className="h-7 gap-1.5 px-2.5 text-xs font-medium"
+          aria-label={hasBaseline ? "Update baseline snapshot" : "Snapshot current findings as baseline"}
+        >
+          <BookmarkCheck
+            className={`h-3.5 w-3.5 ${hasBaseline ? "text-[var(--color-accent)]" : "opacity-70"}`}
+            aria-hidden="true"
+          />
+          <span className="hidden sm:inline">{hasBaseline ? "Baseline Set" : "Set Baseline"}</span>
+        </Button>
+      )}
+
+      {/* Export Report Menu */}
+      {(onExportJson || onExportCsv || onExportMarkdown || onCopyReport) && (
+        <DropdownMenu open={isExportOpen} onOpenChange={setIsExportOpen}>
+          <DropdownMenuTrigger>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="h-7 gap-1.5 px-2.5 text-xs font-medium"
+              aria-label="Export accessibility report"
+            >
+              <Download className="h-3.5 w-3.5 opacity-70" aria-hidden="true" />
+              <span className="hidden sm:inline">Export</span>
+              <ChevronDown className="h-3 w-3 opacity-60" aria-hidden="true" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-48">
+            <DropdownMenuLabel className="text-[11px] font-semibold text-[var(--color-text-secondary)]">
+              Export Report
+            </DropdownMenuLabel>
+            {onExportJson && (
+              <DropdownMenuItem
+                onClick={() => {
+                  onExportJson();
+                  setIsExportOpen(false);
+                }}
+                className="text-xs"
+              >
+                <FileCode className="mr-1.5 h-3.5 w-3.5 text-[var(--color-text-secondary)]" aria-hidden="true" />
+                JSON (.json)
+              </DropdownMenuItem>
+            )}
+            {onExportCsv && (
+              <DropdownMenuItem
+                onClick={() => {
+                  onExportCsv();
+                  setIsExportOpen(false);
+                }}
+                className="text-xs"
+              >
+                <Table className="mr-1.5 h-3.5 w-3.5 text-[var(--color-text-secondary)]" aria-hidden="true" />
+                Spreadsheet (.csv)
+              </DropdownMenuItem>
+            )}
+            {onExportMarkdown && (
+              <DropdownMenuItem
+                onClick={() => {
+                  onExportMarkdown();
+                  setIsExportOpen(false);
+                }}
+                className="text-xs"
+              >
+                <FileText className="mr-1.5 h-3.5 w-3.5 text-[var(--color-text-secondary)]" aria-hidden="true" />
+                Markdown (.md)
+              </DropdownMenuItem>
+            )}
+            {onCopyReport && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => {
+                    onCopyReport();
+                    setIsExportOpen(false);
+                  }}
+                  className="text-xs"
+                >
+                  <Copy className="mr-1.5 h-3.5 w-3.5 text-[var(--color-text-secondary)]" aria-hidden="true" />
+                  Copy Markdown
+                </DropdownMenuItem>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       )}
 
       {/* Spacer */}

@@ -1,12 +1,16 @@
 "use client";
 
 import * as React from "react";
-import type { A11yNode } from "@/types/a11y";
+import type { A11yNode, Finding } from "@/types/a11y";
 import {
   validateAriaAttribute,
   getAllowedAriaAttributes,
 } from "@/lib/aria-explorer";
 import { Badge } from "@/components/ui/Badge";
+import {
+  InspectorSelectedHeader,
+  InspectorEmptyState,
+} from "./InspectorSelectedHeader";
 import {
   CheckCircle2,
   AlertTriangle,
@@ -14,6 +18,8 @@ import {
   Crosshair,
   Trash2,
   Plus,
+  AlertOctagon,
+  Tag,
 } from "lucide-react";
 import { Button } from "@accessly-ui/react";
 
@@ -21,12 +27,14 @@ export interface AriaExplorerPanelProps {
   selectedNode: A11yNode | null;
   onUpdateAttribute?: (attr: string, value: string) => void;
   onRemoveAttribute?: (attr: string) => void;
+  findings?: readonly Finding[];
 }
 
 export function AriaExplorerPanel({
   selectedNode,
   onUpdateAttribute,
   onRemoveAttribute,
+  findings = [],
 }: AriaExplorerPanelProps) {
   const [editingAttr, setEditingAttr] = React.useState<string | null>(null);
   const [editingValue, setEditingValue] = React.useState<string>("");
@@ -35,15 +43,10 @@ export function AriaExplorerPanel({
 
   if (!selectedNode) {
     return (
-      <div className="text-md flex h-64 flex-col items-center justify-center p-6 text-center text-[var(--color-text-secondary)]">
-        <p className="mb-1 font-medium text-[var(--color-text-primary)]">
-          No Element Selected
-        </p>
-        <p>
-          Click an element in the preview or tree to inspect its role, name, and
-          ARIA state here.
-        </p>
-      </div>
+      <InspectorEmptyState
+        title="No Element Selected"
+        description="Select an element in the preview or tree to inspect its role, name, and ARIA state."
+      />
     );
   }
 
@@ -51,6 +54,10 @@ export function AriaExplorerPanel({
   const allowedAttrs = getAllowedAriaAttributes(selectedNode.role);
   const availableAttrs = allowedAttrs.filter(
     (attr) => !(attr in selectedNode.ariaAttributes)
+  );
+
+  const nodeFindings = findings.filter((f) =>
+    f.nodes.some((n) => n.targetId === selectedNode.id)
   );
 
   const handleStartEdit = (attr: string, val: string) => {
@@ -87,50 +94,106 @@ export function AriaExplorerPanel({
   };
 
   return (
-    <div className="flex flex-col gap-4 p-4">
-      {/* Role Summary Card */}
-      <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-3">
-        <h4 className="text-md mb-2 flex items-center justify-between font-mono font-semibold text-[var(--color-text-primary)]">
-          <span>&lt;{selectedNode.tagName}&gt; Role Mapping</span>
-          <span className="text-[11px] font-normal text-[var(--color-text-secondary)]">
-            ID: {selectedNode.id}
-          </span>
-        </h4>
+    <div className="flex flex-col">
+      <InspectorSelectedHeader selectedNode={selectedNode} />
 
-        <div className="text-md grid grid-cols-1 gap-2 font-mono sm:grid-cols-3">
-          <div className="flex flex-col gap-0.5 rounded border border-[var(--color-border)] bg-[var(--color-surface)] p-2">
-            <span className="text-[10px] tracking-wider text-[var(--color-text-secondary)] uppercase">
-              Implicit Role
+      <div className="flex flex-col gap-4 p-4">
+        {/* Role Summary Card */}
+        <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-3">
+          <h4 className="text-md mb-2 flex items-center justify-between font-mono font-semibold text-[var(--color-text-primary)]">
+            <span>&lt;{selectedNode.tagName}&gt; Role Mapping</span>
+            <span className="text-[11px] font-normal text-[var(--color-text-secondary)]">
+              ID: {selectedNode.id}
             </span>
-            <span className="font-semibold text-[var(--color-text-primary)]">
-              {selectedNode.implicitRole}
-            </span>
-          </div>
+          </h4>
 
-          <div className="flex flex-col gap-0.5 rounded border border-[var(--color-border)] bg-[var(--color-surface)] p-2">
-            <span className="text-[10px] tracking-wider text-[var(--color-text-secondary)] uppercase">
-              Explicit Role
-            </span>
-            <span className="font-semibold text-[var(--color-text-primary)]">
-              {selectedNode.explicitRole
-                ? `role="${selectedNode.explicitRole}"`
-                : "(none specified)"}
-            </span>
-          </div>
+          <div className="text-md grid grid-cols-1 gap-2 font-mono sm:grid-cols-3">
+            <div className="flex flex-col gap-0.5 rounded border border-[var(--color-border)] bg-[var(--color-surface)] p-2">
+              <span className="text-[10px] tracking-wider text-[var(--color-text-secondary)] uppercase">
+                Implicit Role
+              </span>
+              <span className="font-semibold text-[var(--color-text-primary)]">
+                {selectedNode.implicitRole}
+              </span>
+            </div>
 
-          <div className="flex flex-col gap-0.5 rounded border border-[var(--color-focus-ring)]/30 bg-[var(--color-accent-subtle)]/40 p-2">
-            <span className="flex items-center gap-1 text-[10px] font-semibold tracking-wider text-[var(--color-focus-ring)] uppercase">
-              <Crosshair className="h-3 w-3" aria-hidden="true" />
-              Computed Role
-            </span>
-            <span className="font-bold text-[var(--color-focus-ring)]">
-              {selectedNode.role}
-            </span>
+            <div className="flex flex-col gap-0.5 rounded border border-[var(--color-border)] bg-[var(--color-surface)] p-2">
+              <span className="text-[10px] tracking-wider text-[var(--color-text-secondary)] uppercase">
+                Explicit Role
+              </span>
+              <span className="font-semibold text-[var(--color-text-primary)]">
+                {selectedNode.explicitRole
+                  ? `role="${selectedNode.explicitRole}"`
+                  : "(none specified)"}
+              </span>
+            </div>
+
+            <div className="flex flex-col gap-0.5 rounded border border-[var(--color-focus-ring)]/30 bg-[var(--color-accent-subtle)]/40 p-2">
+              <span className="flex items-center gap-1 text-[10px] font-semibold tracking-wider text-[var(--color-focus-ring)] uppercase">
+                <Crosshair className="h-3 w-3" aria-hidden="true" />
+                Computed Role
+              </span>
+              <span className="font-bold text-[var(--color-focus-ring)]">
+                {selectedNode.role}
+              </span>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* ARIA Attributes Table */}
+        {/* Related Name Info (§C2) */}
+        <div className="flex flex-col gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-3 text-xs">
+          <div className="flex items-center gap-1.5 font-semibold text-[var(--color-text-primary)]">
+            <Tag className="h-3.5 w-3.5 text-[var(--color-focus-ring)]" aria-hidden="true" />
+            <span>Related Name Information</span>
+          </div>
+          <div className="flex flex-col gap-1 text-[var(--color-text-secondary)]">
+            <p>
+              <strong className="text-[var(--color-text-primary)]">Accessible Name:</strong>{" "}
+              {selectedNode.accessibleName ? (
+                <span>&quot;{selectedNode.accessibleName}&quot;</span>
+              ) : (
+                <span className="italic">None</span>
+              )}
+            </p>
+            <p>
+              <strong className="text-[var(--color-text-primary)]">Source:</strong>{" "}
+              {selectedNode.accessibleNameSource || "None"}
+            </p>
+            {selectedNode.ariaAttributes["aria-labelledby"] && (
+              <p>
+                <strong className="text-[var(--color-text-primary)]">aria-labelledby targets:</strong>{" "}
+                <code className="font-mono text-[var(--color-focus-ring)]">
+                  {selectedNode.ariaAttributes["aria-labelledby"]}
+                </code>
+              </p>
+            )}
+            {selectedNode.ariaAttributes["aria-describedby"] && (
+              <p>
+                <strong className="text-[var(--color-text-primary)]">aria-describedby targets:</strong>{" "}
+                <code className="font-mono text-[var(--color-focus-ring)]">
+                  {selectedNode.ariaAttributes["aria-describedby"]}
+                </code>
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Related Issues (§C2) */}
+        {nodeFindings.length > 0 && (
+          <div className="flex flex-col gap-1.5 rounded-lg border border-[var(--color-danger-border)] bg-[var(--color-danger-subtle)] p-3 text-xs">
+            <div className="flex items-center gap-1.5 font-semibold text-[var(--color-danger-text)]">
+              <AlertOctagon className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>Related Issues ({nodeFindings.length})</span>
+            </div>
+            <ul className="list-disc space-y-0.5 pl-4 text-[11px] text-[var(--color-danger-text)]">
+              {nodeFindings.map((f) => (
+                <li key={f.fingerprint}>{f.help}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* ARIA Attributes Table */}
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <h4 className="text-md font-semibold text-[var(--color-text-primary)]">
@@ -330,5 +393,6 @@ export function AriaExplorerPanel({
         )}
       </div>
     </div>
-  );
+  </div>
+);
 }

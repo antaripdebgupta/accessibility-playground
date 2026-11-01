@@ -5,6 +5,7 @@ import { INTERACTIVE_ROLES } from "./helpers";
 export const interactiveRoleNotFocusableRule: Rule = {
   id: "interactive-role-not-focusable",
   impact: "critical",
+  confidence: "high",
   wcag: ["2.1.1", "4.1.2"],
   help: "Interactive role is not focusable by keyboard",
   checkNode(node, ctx) {
@@ -32,10 +33,12 @@ export const interactiveRoleNotFocusableRule: Rule = {
             wcag: ["2.1.1", "4.1.2"],
             fix: 'Add tabindex="0" to include this element in the tab sequence, or use a native interactive HTML element like <button>.',
             node,
+            html: ctx.html,
           }),
         ];
       }
     }
+
     return [];
   },
 };

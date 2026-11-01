@@ -10,4 +10,5 @@ export interface WcagCriterion {
   readonly principle: WcagPrinciple;
   readonly summary: string;
   readonly url: string;
+  readonly since: "2.0" | "2.1" | "2.2";
 }

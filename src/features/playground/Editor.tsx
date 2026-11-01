@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { SnippetsMenu } from "./editor/SnippetsMenu";
 import { EditorStatusBar } from "./editor/EditorStatusBar";
+import { Badge } from "@/components/ui/Badge";
 
 const CodeEditor = dynamic(() => import("./CodeEditor"), {
   ssr: false,
@@ -42,6 +43,7 @@ export interface EditorProps {
   useTailwind?: boolean;
   onToggleTailwind?: (enabled: boolean) => void;
   selectionRange?: readonly [number, number] | null;
+  onCaretChange?: (offset: number) => void;
   onForceScan?: () => void;
   isMaximized?: boolean;
   onToggleMaximize?: () => void;
@@ -57,6 +59,7 @@ export function Editor({
   useTailwind = false,
   onToggleTailwind,
   selectionRange,
+  onCaretChange,
   onForceScan,
   isMaximized = false,
   onToggleMaximize,
@@ -244,9 +247,14 @@ export function Editor({
                   }}
                   className="flex flex-col items-start gap-0.5 p-2"
                 >
-                  <span className="text-xs font-semibold text-[var(--color-text-primary)]">
-                    {tmpl.label}
-                  </span>
+                  <div className="flex w-full items-center justify-between">
+                    <span className="text-xs font-semibold text-[var(--color-text-primary)]">
+                      {tmpl.label}
+                    </span>
+                    <Badge variant="default" className="text-[8px] px-1 py-0 font-normal">
+                      Built-in
+                    </Badge>
+                  </div>
                   <span className="line-clamp-1 text-[11px] text-[var(--color-text-secondary)]">
                     {tmpl.description}
                   </span>
@@ -297,6 +305,7 @@ export function Editor({
             onChange={onHtmlChange}
             language="html"
             selectionRange={selectionRange}
+            onCaretChange={onCaretChange}
             onForceScan={onForceScan}
             indentWithTab={indentWithTab}
             ariaLabel="HTML code editor"

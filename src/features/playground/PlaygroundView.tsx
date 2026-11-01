@@ -10,23 +10,45 @@ import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useWorkbenchLayout } from "@/hooks/useWorkbenchLayout";
 import { usePlaygroundDocument } from "@/hooks/usePlaygroundDocument";
 import { useScanState } from "@/hooks/useScanState";
-import { parseHtmlToA11yTree, findA11yNodeById } from "@/lib/a11y-tree";
+import { useSelection } from "@/hooks/useSelection";
+import {
+  parseHtmlToA11yTree,
+  findA11yNodeAtOffset,
+  findA11yNodeById,
+} from "@/lib/a11y-tree";
 import { computeFocusOrder } from "@/lib/focus-order";
 import { runCustomRules } from "@/lib/custom-rules";
 import { mergeFindings } from "@/lib/merge-findings";
 import type { FocusOrderPosition } from "@/types/a11y";
 import { encodeSnippet } from "@/lib/snippet-share";
+import { AlertTriangle } from "lucide-react";
 import {
   setAttributeInSource,
   removeAttributeFromSource,
 } from "@/lib/mutate-html";
 import { applyAutoFixToHtml } from "@/lib/auto-fix";
 import { AnalysisTabs } from "./AnalysisTabs";
+import { useBaseline } from "@/hooks/useBaseline";
+import { normalizeFindings } from "@/lib/findings/normalize";
+import { toJson, toCsv, toMarkdown, downloadBlob } from "@/lib/report";
+import { loadManualTestResults } from "@/lib/manual-tests-storage";
+import { useToast } from "@accessly-ui/react";
+import { getChallengeById, type Challenge } from "@/data/challenges";
+import { useChallengeMode } from "@/hooks/useChallengeMode";
+import { ChallengeStrip } from "./ChallengeStrip";
 
 export function PlaygroundView() {
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab");
+  const challengeParam = searchParams.get("challenge");
   const isDesktop = useMediaQuery("(min-width: 1024px)");
+
+  // Challenge mode: resolve the active challenge from ?challenge=<id>
+  const activeChallenge = React.useMemo<Challenge | null>(
+    () => (challengeParam ? getChallengeById(challengeParam) ?? null : null),
+    [challengeParam]
+  );
+  const challengeMode = useChallengeMode(activeChallenge);
 
   const {
     outerPercent,
@@ -66,17 +88,25 @@ export function PlaygroundView() {
     setUseTailwind,
     handleSelectTemplate,
     handleStartFresh,
+    handleResetExample,
     isOverSizeLimit,
   } = usePlaygroundDocument(handleDocumentChange);
+
+  // Load challenge starter on first mount when ?challenge= is present
+  const loadedChallengeRef = React.useRef<string | null>(null);
+  React.useEffect(() => {
+    if (activeChallenge && loadedChallengeRef.current !== activeChallenge.id) {
+      loadedChallengeRef.current = activeChallenge.id;
+      setRawHtml(activeChallenge.startHtml);
+      setRawCss(activeChallenge.startCss ?? "");
+    }
+  }, [activeChallenge, setRawHtml, setRawCss]);
 
   // Active analysis tab (supports ?tab= in URL, e.g. ?tab=issues)
   const [analysisTab, setAnalysisTab] = React.useState<string>(
     tabParam || "tree"
   );
 
-  const [selectedNodeId, setSelectedNodeId] = React.useState<string | null>(
-    null
-  );
   const [focusPositions, setFocusPositions] = React.useState<
     readonly FocusOrderPosition[]
   >([]);
@@ -105,6 +135,26 @@ export function PlaygroundView() {
     return parseHtmlToA11yTree(debouncedHtml);
   }, [debouncedHtml, isOverSizeLimit, rawHtml]);
 
+  // Unified selection model (§C1)
+  const {
+    selectedId: activeNodeId,
+    select: handleSelect,
+    selectedNode,
+    selectionLost,
+  } = useSelection({ ast, onTabChange: setAnalysisTab });
+
+  // Sync cursor in CodeMirror with element selection (§C1)
+  const handleCaretChange = React.useCallback(
+    (offset: number) => {
+      if (!ast) return;
+      const node = findA11yNodeAtOffset(ast, offset);
+      if (node && node.id !== activeNodeId) {
+        handleSelect(node.id, "editor");
+      }
+    },
+    [ast, activeNodeId, handleSelect]
+  );
+
   // Derive computed focus sequence & findings
   const computedFocusOrder = React.useMemo(() => {
     if (!ast) return null;
@@ -114,31 +164,133 @@ export function PlaygroundView() {
   // Run custom playground rules host-side immediately
   const customFindings = React.useMemo(() => {
     if (!ast || isOverSizeLimit) return [];
-    return runCustomRules(ast, debouncedCss);
-  }, [ast, debouncedCss, isOverSizeLimit]);
+    return runCustomRules(ast, debouncedCss, debouncedHtml);
+  }, [ast, debouncedCss, debouncedHtml, isOverSizeLimit]);
 
   // Merge axe-core findings + custom findings
   const mergedViolations = React.useMemo(() => {
     return mergeFindings(customFindings, axeViolations);
   }, [customFindings, axeViolations]);
 
-  // Derive effective selected node ID
-  const activeNodeId = React.useMemo(() => {
-    if (!ast) return null;
-    if (selectedNodeId && findA11yNodeById(ast, selectedNodeId)) {
-      return selectedNodeId;
+  // Normalized findings for reports, comparison, and inspector
+  const normalizedFindings = React.useMemo(() => {
+    return normalizeFindings(customFindings, axeViolations, axeIncomplete);
+  }, [customFindings, axeViolations, axeIncomplete]);
+
+  // Collect all current violation rule IDs for challenge verification
+  const currentViolationRuleIds = React.useMemo(() => {
+    const ids = new Set<string>();
+    for (const v of mergedViolations) {
+      ids.add(v.id);
     }
-    return ast.children[0]?.id ?? ast.id;
-  }, [ast, selectedNodeId]);
+    for (const v of axeViolations) {
+      ids.add(v.id);
+    }
+    for (const f of normalizedFindings) {
+      ids.add(f.ruleId);
+    }
+    return Array.from(ids);
+  }, [mergedViolations, axeViolations, normalizedFindings]);
 
-  const selectedNode = React.useMemo(() => {
-    return findA11yNodeById(ast, activeNodeId ?? "");
-  }, [ast, activeNodeId]);
+  // Challenge: load solution into editor
+  const handleLoadSolution = React.useCallback(
+    (challenge: Challenge) => {
+      setRawHtml(challenge.solutionHtml);
+      setRawCss(challenge.solutionCss ?? "");
+    },
+    [setRawHtml, setRawCss]
+  );
 
-  const handleSimulateFocus = React.useCallback((id: string) => {
-    setSimulatedFocusId(id);
-    setSelectedNodeId(id);
-  }, []);
+  // Challenge: reset to starter code
+  const handleResetStarter = React.useCallback(
+    (challenge: Challenge) => {
+      setRawHtml(challenge.startHtml);
+      setRawCss(challenge.startCss ?? "");
+    },
+    [setRawHtml, setRawCss]
+  );
+
+  const toast = useToast();
+  const activeTemplateId = challengeParam || searchParams.get("pattern") || searchParams.get("s") || "default";
+
+  const handleBaselineCleared = React.useCallback(
+    (reason: string) => {
+      toast.push({
+        title: "Baseline cleared",
+        description: reason,
+        variant: "info",
+      });
+    },
+    [toast]
+  );
+
+  const {
+    baseline,
+    hasBaseline,
+    setBaseline,
+    clearBaseline,
+    comparison,
+  } = useBaseline(
+    activeTemplateId,
+    normalizedFindings,
+    rawHtml,
+    handleBaselineCleared
+  );
+
+  const handleExportJson = React.useCallback(() => {
+    const manualTests = loadManualTestResults(activeTemplateId);
+    const jsonString = toJson(normalizedFindings, comparison ?? undefined, undefined, manualTests);
+    downloadBlob(jsonString, `a11y-report-${Date.now()}.json`, "application/json");
+    toast.push({
+      title: "Report exported",
+      description: "Downloaded JSON report.",
+      variant: "success",
+    });
+  }, [normalizedFindings, comparison, activeTemplateId, toast]);
+
+  const handleExportCsv = React.useCallback(() => {
+    const manualTests = loadManualTestResults(activeTemplateId);
+    const csvString = toCsv(normalizedFindings, comparison ?? undefined, manualTests);
+    downloadBlob(csvString, `a11y-report-${Date.now()}.csv`, "text/csv;charset=utf-8");
+    toast.push({
+      title: "Report exported",
+      description: "Downloaded CSV spreadsheet.",
+      variant: "success",
+    });
+  }, [normalizedFindings, comparison, activeTemplateId, toast]);
+
+  const handleExportMarkdown = React.useCallback(() => {
+    const manualTests = loadManualTestResults(activeTemplateId);
+    const mdString = toMarkdown(normalizedFindings, comparison ?? undefined, undefined, manualTests);
+    downloadBlob(mdString, `a11y-report-${Date.now()}.md`, "text/markdown;charset=utf-8");
+    toast.push({
+      title: "Report exported",
+      description: "Downloaded Markdown report.",
+      variant: "success",
+    });
+  }, [normalizedFindings, comparison, activeTemplateId, toast]);
+
+  const handleCopyReport = React.useCallback(() => {
+    const manualTests = loadManualTestResults(activeTemplateId);
+    const mdString = toMarkdown(normalizedFindings, comparison ?? undefined, undefined, manualTests);
+    if (navigator?.clipboard) {
+      navigator.clipboard.writeText(mdString).then(() => {
+        toast.push({
+          title: "Report copied",
+          description: "Markdown report copied to clipboard.",
+          variant: "success",
+        });
+      });
+    }
+  }, [normalizedFindings, comparison, activeTemplateId, toast]);
+
+  const handleSimulateFocus = React.useCallback(
+    (id: string) => {
+      setSimulatedFocusId(id);
+      handleSelect(id, "focus");
+    },
+    [handleSelect]
+  );
 
   // F6 / Shift+F6 keyboard cycling between panes and Esc to exit maximize (§2.5)
   React.useEffect(() => {
@@ -200,6 +352,7 @@ export function PlaygroundView() {
         useTailwind={useTailwind}
         onToggleTailwind={setUseTailwind}
         selectionRange={selectedNode?.sourceRange ?? null}
+        onCaretChange={handleCaretChange}
         onForceScan={triggerScan}
         isMaximized={maximizedPane === "editor"}
         onToggleMaximize={() => toggleMaximize("editor")}
@@ -219,7 +372,7 @@ export function PlaygroundView() {
         useTailwind={useTailwind}
         selectedNodeId={activeNodeId}
         scanId={scanId}
-        onSelectNodeId={(id) => setSelectedNodeId(id)}
+        onSelectNodeId={(id) => handleSelect(id, "preview")}
         onScanResults={handleScanResults}
         onScanError={handleScanError}
         parseError={parseError}
@@ -239,6 +392,17 @@ export function PlaygroundView() {
       aria-label="Analysis"
       className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xs"
     >
+      {selectionLost && (
+        <div
+          role="status"
+          className="flex items-center gap-1.5 border-b border-[var(--color-warning-border)] bg-[var(--color-warning-subtle)] px-3 py-1.5 text-xs text-[var(--color-warning-text)]"
+        >
+          <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+          <span>
+            Selection lost — previously selected element was removed. Fell back to first element.
+          </span>
+        </div>
+      )}
       <AnalysisTabs
         analysisTab={analysisTab}
         onTabChange={setAnalysisTab}
@@ -247,7 +411,7 @@ export function PlaygroundView() {
         ast={ast}
         selectedNode={selectedNode}
         activeNodeId={activeNodeId}
-        onSelectNode={(id) => setSelectedNodeId(id)}
+        onSelectNode={(id) => handleSelect(id, "tree")}
         onUpdateAttribute={(attr, value) => {
           if (!selectedNode) return;
           setRawHtml((html) =>
@@ -274,9 +438,24 @@ export function PlaygroundView() {
           setRawHtml((html) => applyAutoFixToHtml(html, finding, node));
         }}
         isOverSizeLimit={isOverSizeLimit}
+        baseline={baseline}
+        comparison={comparison}
+        rawHtml={rawHtml}
+        onSetBaseline={setBaseline}
+        onClearBaseline={clearBaseline}
+        templateOrSnippetId={activeTemplateId}
       />
     </section>
   );
+
+  const challengeStripElement = activeChallenge ? (
+    <ChallengeStrip
+      challengeMode={challengeMode}
+      currentViolationRuleIds={currentViolationRuleIds}
+      onLoadSolution={handleLoadSolution}
+      onResetStarter={handleResetStarter}
+    />
+  ) : null;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -284,46 +463,61 @@ export function PlaygroundView() {
       <WorkbenchToolbar
         onForceScan={triggerScan}
         isScanning={isScanning}
-        onStartFresh={handleStartFresh}
+        onStartFresh={() => {
+          clearBaseline("Started fresh with default template");
+          handleStartFresh();
+        }}
+        onResetExample={handleResetExample}
+        onSetBaseline={setBaseline}
+        hasBaseline={hasBaseline}
+        onExportJson={handleExportJson}
+        onExportCsv={handleExportCsv}
+        onExportMarkdown={handleExportMarkdown}
+        onCopyReport={handleCopyReport}
       />
 
       {/* Main Workspace Body */}
       {isDesktop ? (
-        maximizedPane === "editor" ? (
-          <div className="min-h-0 flex-1 p-2">{editorPane}</div>
-        ) : maximizedPane === "preview" ? (
-          <div className="min-h-0 flex-1 p-2">{previewPane}</div>
-        ) : maximizedPane === "analysis" ? (
-          <div className="min-h-0 flex-1 p-2">{analysisPane}</div>
-        ) : (
-          <SplitPane
-            direction={direction}
-            size={outerPercent}
-            onSizeChange={setOuterPercent}
-            min={25}
-            max={75}
-            primaryId="pane-left"
-            primaryLabel="Editor and Preview"
-            secondaryLabel="Analysis"
-            className="min-h-0 flex-1"
-            primary={
+        <div className="flex min-h-0 flex-1">
+          <div className="flex min-h-0 flex-1 flex-col">
+            {maximizedPane === "editor" ? (
+              <div className="min-h-0 flex-1 p-2">{editorPane}</div>
+            ) : maximizedPane === "preview" ? (
+              <div className="min-h-0 flex-1 p-2">{previewPane}</div>
+            ) : maximizedPane === "analysis" ? (
+              <div className="min-h-0 flex-1 p-2">{analysisPane}</div>
+            ) : (
               <SplitPane
-                direction="column"
-                size={innerPercent}
-                onSizeChange={setInnerPercent}
+                direction={direction}
+                size={outerPercent}
+                onSizeChange={setOuterPercent}
                 min={25}
-                max={80}
-                primaryId="pane-editor"
-                primaryLabel="Code editor"
-                secondaryLabel="Live preview"
-                className="h-full"
-                primary={editorPane}
-                secondary={previewPane}
+                max={75}
+                primaryId="pane-left"
+                primaryLabel="Editor and Preview"
+                secondaryLabel="Analysis"
+                className="min-h-0 flex-1"
+                primary={
+                  <SplitPane
+                    direction="column"
+                    size={innerPercent}
+                    onSizeChange={setInnerPercent}
+                    min={25}
+                    max={80}
+                    primaryId="pane-editor"
+                    primaryLabel="Code editor"
+                    secondaryLabel="Live preview"
+                    className="h-full"
+                    primary={editorPane}
+                    secondary={previewPane}
+                  />
+                }
+                secondary={analysisPane}
               />
-            }
-            secondary={analysisPane}
-          />
-        )
+            )}
+          </div>
+          {challengeStripElement}
+        </div>
       ) : (
         /* Mobile: one pane at a time with segmented control (SC 1.4.10 Reflow) */
         <div className="flex min-h-0 flex-1 flex-col">

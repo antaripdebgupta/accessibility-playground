@@ -5,9 +5,11 @@ import { NATURAL_FORM_CONTROLS } from "./helpers";
 export const inputNoLabelRule: Rule = {
   id: "input-no-label",
   impact: "critical",
+  confidence: "high",
   wcag: ["1.3.1", "3.3.2", "4.1.2"],
   help: "Form control has no accessible name",
-  checkNode(node) {
+  equivalentAxeIds: ["label"],
+  checkNode(node, ctx) {
     const tag = node.tagName.toLowerCase();
     const attrs = node.attributes || {};
     if (
@@ -28,10 +30,12 @@ export const inputNoLabelRule: Rule = {
             wcag: ["1.3.1", "3.3.2", "4.1.2"],
             fix: 'Add an associated <label for="..."> or an aria-label/aria-labelledby attribute.',
             node,
+            html: ctx?.html,
           }),
         ];
       }
     }
+
     return [];
   },
 };

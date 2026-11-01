@@ -292,6 +292,15 @@ input:focus-visible {
   tabindex="0"
 >
   <p>Project details and configuration options are displayed here.</p>
+</section>
+<section
+  role="tabpanel"
+  id="panel-2"
+  aria-labelledby="tab-2"
+  tabindex="0"
+  hidden
+>
+  <p>Recent project activity and audit log entries.</p>
 </section>`,
   },
   {
@@ -482,6 +491,19 @@ input:focus-visible {
     <h3 class="text-sm font-semibold text-slate-900">Personal Information</h3>
     <p class="mt-1 text-xs text-slate-600 leading-relaxed">
       Manage your public display name, email preferences, and profile avatar.
+    </p>
+  </section>
+  <section
+    role="tabpanel"
+    id="panel-security"
+    aria-labelledby="tab-security"
+    tabindex="0"
+    class="mt-3 p-3 bg-white rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600"
+    hidden
+  >
+    <h3 class="text-sm font-semibold text-slate-900">Security Settings</h3>
+    <p class="mt-1 text-xs text-slate-600 leading-relaxed">
+      Two-factor authentication and session management.
     </p>
   </section>
 </div>`,

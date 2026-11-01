@@ -59,12 +59,22 @@ const IframeFocusOrderMessageSchema = z.object({
   elements: z.array(FocusOrderPositionSchema),
 });
 
+export const IframeRuntimeErrorMessageSchema = z.object({
+  type: z.literal("runtime-error"),
+  message: z.string(),
+  source: z.string().optional(),
+  lineno: z.number().optional(),
+  colno: z.number().optional(),
+  timestamp: z.string(),
+});
+
 const IframeMessageSchema = z.discriminatedUnion("type", [
   IframeReadyMessageSchema,
   IframeElementClickedMessageSchema,
   IframeScanResultsMessageSchema,
   IframeScanErrorMessageSchema,
   IframeFocusOrderMessageSchema,
+  IframeRuntimeErrorMessageSchema,
 ]);
 
 export type IframeMessage = z.infer<typeof IframeMessageSchema>;
