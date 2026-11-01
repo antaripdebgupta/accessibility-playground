@@ -139,7 +139,7 @@ h1 { font-size: 1.5rem; margin: 16px 0 8px; }`,
         "Provides aria-label='Close dialog' on the interactive button and hides the decorative SVG paths with aria-hidden='true'.",
     },
     commonMistakes: [
-      "Leaving aria-label empty (aria-label=\"\") which removes any text fallback",
+      'Leaving aria-label empty (aria-label="") which removes any text fallback',
       "Using generic names like 'Click here', 'More', or 'Edit' when multiple exist on the page",
       "Relying on title attributes, which do not work on touch devices and are inconsistently announced",
     ],
@@ -197,9 +197,9 @@ h1 { font-size: 1.5rem; margin: 16px 0 8px; }`,
         "Uses a native <button> with valid boolean aria-expanded and connects to the controlled content via aria-controls.",
     },
     commonMistakes: [
-      "Writing role=\"button\" on a <div> without implementing Enter and Space keyboard event listeners",
-      "Supplying invalid attribute values (e.g. aria-expanded=\"yes\" instead of \"true\"/\"false\")",
-      "Using aria-hidden=\"true\" on elements that contain focusable child controls",
+      'Writing role="button" on a <div> without implementing Enter and Space keyboard event listeners',
+      'Supplying invalid attribute values (e.g. aria-expanded="yes" instead of "true"/"false")',
+      'Using aria-hidden="true" on elements that contain focusable child controls',
     ],
     browserBehaviour:
       "ARIA roles override the element's default role in the accessibility tree, but browsers do not synthesize keyboard handling or focusability.",
@@ -220,7 +220,11 @@ h1 { font-size: 1.5rem; margin: 16px 0 8px; }`,
         source: "MDN",
       },
     ],
-    relatedRuleIds: ["invalid-aria", "aria-broken-reference", "aria-hidden-focusable"],
+    relatedRuleIds: [
+      "invalid-aria",
+      "aria-broken-reference",
+      "aria-hidden-focusable",
+    ],
   },
   {
     slug: "keyboard",
@@ -252,7 +256,7 @@ h1 { font-size: 1.5rem; margin: 16px 0 8px; }`,
         "Uses native <button> which is natively focusable with Tab, responds to Enter and Space, and styles focus-visible.",
     },
     commonMistakes: [
-      "Using positive tabindex values (tabindex=\"1\", tabindex=\"2\") which break the natural document reading order",
+      'Using positive tabindex values (tabindex="1", tabindex="2") which break the natural document reading order',
       "Keyboard traps in modal dialogs where focus cannot escape back to the trigger button",
       "Listening only to mouseup/mousedown rather than click and keydown handlers",
     ],
@@ -474,7 +478,7 @@ input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }`,
     plainExplanation:
       "When a screen reader reaches an image without alt text, it reads the raw filename (like 'IMG_98234_final.jpg'). Describing the image allows blind users to experience the content just as sighted readers do.",
     technicalExplanation:
-      "Every <img> requires an alt attribute. Informative images must describe the content and purpose. Decorative images must use alt=\"\" or role=\"presentation\" to be skipped by the accessibility tree.",
+      'Every <img> requires an alt attribute. Informative images must describe the content and purpose. Decorative images must use alt="" or role="presentation" to be skipped by the accessibility tree.',
     whyItMatters:
       "Alternative text is essential for screen reader users and users with poor network connections where images fail to download.",
     wcagCriteria: ["1.1.1"],
@@ -499,7 +503,7 @@ input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }`,
       "Stuffing alt text with search engine keywords instead of describing visual content",
     ],
     browserBehaviour:
-      "When alt is omitted, browsers fall back to file names or image heuristics. When alt=\"\" is present, the image is treated as decorative and excluded from the accessibility tree.",
+      'When alt is omitted, browsers fall back to file names or image heuristics. When alt="" is present, the image is treated as decorative and excluded from the accessibility tree.',
     manualTest: [
       "Inspect the Accessibility Tree in DevTools: ensure decorative images do not appear.",
       "Check that informative images convey the essential takeaway in their announced name.",
@@ -642,7 +646,7 @@ th { background: #f9fafb; font-weight: 600; }`,
         "Utilizes native <dialog> with showModal(), establishing natural focus containment, backdrop, and Escape handling.",
     },
     commonMistakes: [
-      "Forgetting to set aria-modal=\"true\" on custom role=\"dialog\" containers",
+      'Forgetting to set aria-modal="true" on custom role="dialog" containers',
       "Lacking an accessible label (via aria-labelledby or aria-label)",
       "Failing to restore focus to the opening trigger button upon closing",
     ],
@@ -791,7 +795,7 @@ function saveChanges() {
     },
     commonMistakes: [
       "Injecting a new container with aria-live at the exact same moment as the message text",
-      "Overusing aria-live=\"assertive\", which interrupts the user mid-sentence",
+      'Overusing aria-live="assertive", which interrupts the user mid-sentence',
       "Placing constantly fluctuating counters into live regions, causing endless speech spam",
     ],
     browserBehaviour:
@@ -905,7 +909,7 @@ function saveChanges() {
     commonMistakes: [
       "Using `overflow: hidden` on text containers which truncates enlarged text",
       "Setting fixed pixel heights on elements containing text",
-      "Disabling pinch-to-zoom using `<meta name=\"viewport\" content=\"user-scalable=no\">`",
+      'Disabling pinch-to-zoom using `<meta name="viewport" content="user-scalable=no">`',
     ],
     browserBehaviour:
       "Zooming in browsers multiplies CSS pixel values by the zoom factor. At 400% zoom on a 1280px display, the effective CSS viewport width becomes 320px.",

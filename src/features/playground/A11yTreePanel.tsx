@@ -3,7 +3,10 @@
 import * as React from "react";
 import type { A11yNode, Finding } from "@/types/a11y";
 import { Badge } from "@/components/ui/Badge";
-import { InspectorSelectedHeader, InspectorEmptyState } from "./InspectorSelectedHeader";
+import {
+  InspectorSelectedHeader,
+  InspectorEmptyState,
+} from "./InspectorSelectedHeader";
 import {
   ChevronRight,
   AlertCircle,
@@ -172,7 +175,9 @@ export function A11yTreePanel({
 
   // Related issues for currently selected node
   const nodeFindings = selectedNode
-    ? findings.filter((f) => f.nodes.some((n) => n.targetId === selectedNode.id))
+    ? findings.filter((f) =>
+        f.nodes.some((n) => n.targetId === selectedNode.id)
+      )
     : [];
 
   const ariaAttributes = selectedNode
@@ -186,15 +191,22 @@ export function A11yTreePanel({
 
       {/* Visible disclaimer notice (§C2) */}
       <div className="flex items-start gap-1.5 border-b border-[var(--color-border)] bg-[var(--color-surface-sunken)]/60 px-4 py-2 text-[11px] text-[var(--color-text-secondary)]">
-        <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--color-focus-ring)]" aria-hidden="true" />
+        <Info
+          className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--color-focus-ring)]"
+          aria-hidden="true"
+        />
         <p>
-          This is the playground&apos;s interpretation of the DOM, not the browser&apos;s real accessibility tree.
+          This is the playground&apos;s interpretation of the DOM, not the
+          browser&apos;s real accessibility tree.
         </p>
       </div>
 
       {/* Selected Node Details Card (§C2) */}
       {selectedNode && (
-        <section aria-label="Selected node details" className="flex flex-col gap-2.5 border-b border-[var(--color-border)] bg-[var(--color-surface-raised)]/30 p-4 text-xs">
+        <section
+          aria-label="Selected node details"
+          className="flex flex-col gap-2.5 border-b border-[var(--color-border)] bg-[var(--color-surface-raised)]/30 p-4 text-xs"
+        >
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <div>
               <span className="text-[11px] font-semibold text-[var(--color-text-secondary)] uppercase">
@@ -203,7 +215,8 @@ export function A11yTreePanel({
               <p className="mt-0.5 font-mono text-[var(--color-text-primary)]">
                 {selectedNode.role}{" "}
                 <span className="text-[11px] font-normal text-[var(--color-text-secondary)]">
-                  (implicit: {selectedNode.implicitRole}, explicit: {selectedNode.explicitRole || "none"})
+                  (implicit: {selectedNode.implicitRole}, explicit:{" "}
+                  {selectedNode.explicitRole || "none"})
                 </span>
               </p>
             </div>
@@ -220,7 +233,9 @@ export function A11yTreePanel({
                     </span>
                   </span>
                 ) : (
-                  <span className="italic text-[var(--color-text-secondary)]">None</span>
+                  <span className="text-[var(--color-text-secondary)] italic">
+                    None
+                  </span>
                 )}
               </p>
             </div>
@@ -249,7 +264,10 @@ export function A11yTreePanel({
           {selectedNode.ariaAttributes["aria-hidden"] === "true" && (
             <div className="flex items-center gap-1.5 rounded bg-[var(--color-warning-subtle)] px-2 py-1 text-[11px] text-[var(--color-warning-text)]">
               <EyeOff className="h-3.5 w-3.5" aria-hidden="true" />
-              <span>Hidden from assistive technology tree (aria-hidden=&quot;true&quot;)</span>
+              <span>
+                Hidden from assistive technology tree
+                (aria-hidden=&quot;true&quot;)
+              </span>
             </div>
           )}
 
@@ -353,12 +371,18 @@ export function A11yTreePanel({
                         variant="warning"
                         className="px-1.5 py-0 text-[10px]"
                       >
-                        <AlertCircle className="h-2.5 w-2.5" aria-hidden="true" />
+                        <AlertCircle
+                          className="h-2.5 w-2.5"
+                          aria-hidden="true"
+                        />
                         no name
                       </Badge>
                     )}
                     {isHidden && (
-                      <span className="rounded bg-[var(--color-surface-sunken)] px-1 font-mono text-[10px] text-[var(--color-text-secondary)]" title="aria-hidden='true'">
+                      <span
+                        className="rounded bg-[var(--color-surface-sunken)] px-1 font-mono text-[10px] text-[var(--color-text-secondary)]"
+                        title="aria-hidden='true'"
+                      >
                         hidden
                       </span>
                     )}

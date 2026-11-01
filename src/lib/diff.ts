@@ -14,16 +14,17 @@ export interface DiffLine {
  * Computes line-by-line differences between baseline and current text.
  * Uses a classic Longest Common Subsequence (LCS) dynamic programming algorithm.
  */
-export function computeLineDiff(baselineText: string, currentText: string): readonly DiffLine[] {
+export function computeLineDiff(
+  baselineText: string,
+  currentText: string
+): readonly DiffLine[] {
   if (baselineText === currentText) {
-    return baselineText
-      .split("\n")
-      .map((text, idx) => ({
-        type: "unchanged" as const,
-        text,
-        oldLineNumber: idx + 1,
-        newLineNumber: idx + 1,
-      }));
+    return baselineText.split("\n").map((text, idx) => ({
+      type: "unchanged" as const,
+      text,
+      oldLineNumber: idx + 1,
+      newLineNumber: idx + 1,
+    }));
   }
 
   const oldLines = baselineText.split("\n");
@@ -82,7 +83,10 @@ export function computeLineDiff(baselineText: string, currentText: string): read
       });
       i--;
       j--;
-    } else if (j > 0 && (i === 0 || (dp[i]?.[j - 1] ?? 0) >= (dp[i - 1]?.[j] ?? 0))) {
+    } else if (
+      j > 0 &&
+      (i === 0 || (dp[i]?.[j - 1] ?? 0) >= (dp[i - 1]?.[j] ?? 0))
+    ) {
       result.push({
         type: "added",
         text: newLines[j - 1] ?? "",

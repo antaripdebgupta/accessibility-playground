@@ -123,9 +123,7 @@ describe("Snippet export/import", () => {
   it("imports valid snippet file", () => {
     const payload = JSON.stringify({
       version: 1,
-      snippets: [
-        { name: "Imported", html: "<div>Hello</div>", css: ".x {}" },
-      ],
+      snippets: [{ name: "Imported", html: "<div>Hello</div>", css: ".x {}" }],
     });
     const result = importSnippets(payload);
 

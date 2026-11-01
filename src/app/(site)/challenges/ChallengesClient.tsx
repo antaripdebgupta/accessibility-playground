@@ -3,7 +3,10 @@
 import React from "react";
 import Link from "next/link";
 import { CHALLENGES, type Challenge } from "@/data/challenges";
-import { loadAllChallengeProgress, type ChallengeProgress } from "@/lib/challenge-progress";
+import {
+  loadAllChallengeProgress,
+  type ChallengeProgress,
+} from "@/lib/challenge-progress";
 import {
   Trophy,
   ChevronRight,
@@ -27,7 +30,7 @@ const CHALLENGE_ICONS: Record<string, React.ElementType> = {
   "color-contrast": Palette,
   "modal-dialog": AppWindow,
   "tabs-keyboard": Keyboard,
-  "accordion": ChevronsDownUp,
+  accordion: ChevronsDownUp,
   "live-status": Radio,
   "skip-link": SkipForward,
 };
@@ -42,15 +45,15 @@ const DIFFICULTY_STYLES: Record<
 };
 
 export function ChallengesClient() {
-  const [progressMap] = React.useState<Map<string, ChallengeProgress>>(
-    () => {
-      if (typeof window === "undefined") return new Map();
-      const ids = CHALLENGES.map((c) => c.id);
-      return loadAllChallengeProgress(ids);
-    }
-  );
+  const [progressMap] = React.useState<Map<string, ChallengeProgress>>(() => {
+    if (typeof window === "undefined") return new Map();
+    const ids = CHALLENGES.map((c) => c.id);
+    return loadAllChallengeProgress(ids);
+  });
 
-  const completedCount = Array.from(progressMap.values()).filter((p) => p.completed).length;
+  const completedCount = Array.from(progressMap.values()).filter(
+    (p) => p.completed
+  ).length;
 
   return (
     <div className="challenges-page">
@@ -60,7 +63,8 @@ export function ChallengesClient() {
           <h1>Accessibility Challenges</h1>
           <p>
             Fix real-world accessibility issues in interactive code exercises.
-            Each challenge starts with broken HTML — your job is to make it accessible.
+            Each challenge starts with broken HTML — your job is to make it
+            accessible.
           </p>
           {completedCount > 0 && (
             <div className="challenges-progress-summary" role="status">
@@ -73,71 +77,84 @@ export function ChallengesClient() {
         </section>
 
         {/* Difficulty sections */}
-        {(["beginner", "intermediate", "advanced"] as const).map((difficulty) => {
-          const group = CHALLENGES.filter((c) => c.difficulty === difficulty);
-          if (group.length === 0) return null;
-          return (
-            <section key={difficulty} className="challenges-section" aria-label={`${difficulty} challenges`}>
-              <h2 className="challenges-section-title">
-                <span
-                  className="difficulty-badge"
-                  style={{
-                    color: DIFFICULTY_STYLES[difficulty].color,
-                    background: DIFFICULTY_STYLES[difficulty].bg,
-                    borderColor: DIFFICULTY_STYLES[difficulty].border,
-                  }}
-                >
-                  {difficulty}
-                </span>
-              </h2>
-              <ul className="challenges-grid">
-                {group.map((challenge) => {
-                  const progress = progressMap.get(challenge.id);
-                  const Icon = CHALLENGE_ICONS[challenge.id] ?? MousePointer2;
-                  return (
-                    <li key={challenge.id}>
-                      <Link
-                        href={`/playground?challenge=${challenge.id}`}
-                        className="challenge-card"
-                        aria-label={`${challenge.title}${progress?.completed ? " (completed)" : ""}`}
-                      >
-                        <div className="challenge-card-icon">
-                          <Icon className="h-5 w-5" aria-hidden="true" />
-                        </div>
-                        <div className="challenge-card-content">
-                          <div className="challenge-card-header">
-                            <h3 className="challenge-card-title">{challenge.title}</h3>
-                            {progress?.completed && (
-                              <Trophy
-                                className="h-4 w-4"
-                                style={{ color: "#065f46", flexShrink: 0 }}
-                                aria-hidden="true"
-                              />
-                            )}
+        {(["beginner", "intermediate", "advanced"] as const).map(
+          (difficulty) => {
+            const group = CHALLENGES.filter((c) => c.difficulty === difficulty);
+            if (group.length === 0) return null;
+            return (
+              <section
+                key={difficulty}
+                className="challenges-section"
+                aria-label={`${difficulty} challenges`}
+              >
+                <h2 className="challenges-section-title">
+                  <span
+                    className="difficulty-badge"
+                    style={{
+                      color: DIFFICULTY_STYLES[difficulty].color,
+                      background: DIFFICULTY_STYLES[difficulty].bg,
+                      borderColor: DIFFICULTY_STYLES[difficulty].border,
+                    }}
+                  >
+                    {difficulty}
+                  </span>
+                </h2>
+                <ul className="challenges-grid">
+                  {group.map((challenge) => {
+                    const progress = progressMap.get(challenge.id);
+                    const Icon = CHALLENGE_ICONS[challenge.id] ?? MousePointer2;
+                    return (
+                      <li key={challenge.id}>
+                        <Link
+                          href={`/playground?challenge=${challenge.id}`}
+                          className="challenge-card"
+                          aria-label={`${challenge.title}${progress?.completed ? " (completed)" : ""}`}
+                        >
+                          <div className="challenge-card-icon">
+                            <Icon className="h-5 w-5" aria-hidden="true" />
                           </div>
-                          <p className="challenge-card-summary">{challenge.summary}</p>
-                          <div className="challenge-card-meta">
-                            <span>{challenge.objectives.length} objectives</span>
-                            <span>·</span>
-                            <span>{challenge.hints.length} hints</span>
+                          <div className="challenge-card-content">
+                            <div className="challenge-card-header">
+                              <h3 className="challenge-card-title">
+                                {challenge.title}
+                              </h3>
+                              {progress?.completed && (
+                                <Trophy
+                                  className="h-4 w-4"
+                                  style={{ color: "#065f46", flexShrink: 0 }}
+                                  aria-hidden="true"
+                                />
+                              )}
+                            </div>
+                            <p className="challenge-card-summary">
+                              {challenge.summary}
+                            </p>
+                            <div className="challenge-card-meta">
+                              <span>
+                                {challenge.objectives.length} objectives
+                              </span>
+                              <span>·</span>
+                              <span>{challenge.hints.length} hints</span>
+                            </div>
                           </div>
-                        </div>
-                        <ChevronRight
-                          className="challenge-card-arrow h-4 w-4"
-                          aria-hidden="true"
-                        />
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </section>
-          );
-        })}
+                          <ChevronRight
+                            className="challenge-card-arrow h-4 w-4"
+                            aria-hidden="true"
+                          />
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            );
+          }
+        )}
 
         {/* Footer note */}
         <p className="challenges-footer-note">
-          Progress is stored locally in your browser. No accounts or server storage.
+          Progress is stored locally in your browser. No accounts or server
+          storage.
         </p>
       </div>
 

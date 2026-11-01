@@ -137,7 +137,9 @@ h3 {
   font-size: 0.8125rem;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.12s, border-color 0.12s;
+  transition:
+    background 0.12s,
+    border-color 0.12s;
 }
 .challenge-strip-btn:hover {
   border-color: var(--color-border-strong);

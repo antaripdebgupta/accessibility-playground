@@ -220,12 +220,7 @@ const ROLE_ALLOWED_ARIA: Record<string, string[]> = {
     "aria-orientation",
     "aria-activedescendant",
   ],
-  option: [
-    "aria-selected",
-    "aria-checked",
-    "aria-posinset",
-    "aria-setsize",
-  ],
+  option: ["aria-selected", "aria-checked", "aria-posinset", "aria-setsize"],
   menu: ["aria-orientation", "aria-activedescendant"],
   menubar: ["aria-orientation", "aria-activedescendant"],
   menuitem: ["aria-expanded", "aria-haspopup"],
@@ -398,7 +393,6 @@ export function validateAriaAttribute(
     explanation: `${attr}='${value}' is valid and supported on role='${role}'.`,
   };
 }
-
 
 export const ROLES: readonly { name: string; description: string }[] = [
   {

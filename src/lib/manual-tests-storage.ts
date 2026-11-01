@@ -34,7 +34,9 @@ export const ManualTestStoragePayloadSchema = z.object({
   records: z.record(z.string(), ManualTestRecordSchema),
 });
 
-export type ManualTestStoragePayload = z.infer<typeof ManualTestStoragePayloadSchema>;
+export type ManualTestStoragePayload = z.infer<
+  typeof ManualTestStoragePayloadSchema
+>;
 
 export function getManualTestStorageKey(id: string): string {
   return `${STORAGE_PREFIX}${id}`;
@@ -45,7 +47,9 @@ export function loadManualTestResults(
 ): Record<string, ManualTestRecord> {
   if (typeof window === "undefined") return {};
   try {
-    const raw = window.localStorage.getItem(getManualTestStorageKey(templateOrSnippetId));
+    const raw = window.localStorage.getItem(
+      getManualTestStorageKey(templateOrSnippetId)
+    );
     if (!raw) return {};
     const parsed = JSON.parse(raw);
     const validated = ManualTestStoragePayloadSchema.safeParse(parsed);
@@ -66,7 +70,8 @@ export function saveManualTestResult(
   if (!validation.success) {
     return {
       success: false,
-      error: validation.error.issues[0]?.message ?? "Invalid manual test record",
+      error:
+        validation.error.issues[0]?.message ?? "Invalid manual test record",
     };
   }
 
@@ -90,7 +95,10 @@ export function saveManualTestResult(
   } catch (err) {
     return {
       success: false,
-      error: err instanceof Error ? err.message : "Failed to save manual test result",
+      error:
+        err instanceof Error
+          ? err.message
+          : "Failed to save manual test result",
     };
   }
 }
@@ -98,7 +106,9 @@ export function saveManualTestResult(
 export function clearManualTestResults(templateOrSnippetId: string): void {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.removeItem(getManualTestStorageKey(templateOrSnippetId));
+    window.localStorage.removeItem(
+      getManualTestStorageKey(templateOrSnippetId)
+    );
   } catch {
     // Ignore
   }

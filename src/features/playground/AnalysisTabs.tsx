@@ -140,8 +140,8 @@ export const AnalysisTabs = React.memo(function AnalysisTabs({
                   {mergedViolations.length > 0 && axeIncomplete.length > 0
                     ? `${mergedViolations.length} · ${axeIncomplete.length}`
                     : mergedViolations.length > 0
-                    ? `${mergedViolations.length}`
-                    : `${axeIncomplete.length} to review`}
+                      ? `${mergedViolations.length}`
+                      : `${axeIncomplete.length} to review`}
                 </Badge>
               ) : undefined
             }
@@ -151,14 +151,22 @@ export const AnalysisTabs = React.memo(function AnalysisTabs({
           <TabsTrigger
             value="compare"
             badge={
-              comparison && (comparison.resolved.length > 0 || comparison.introduced.length > 0) ? (
+              comparison &&
+              (comparison.resolved.length > 0 ||
+                comparison.introduced.length > 0) ? (
                 <Badge
-                  variant={comparison.introduced.length > 0 ? "warning" : "default"}
+                  variant={
+                    comparison.introduced.length > 0 ? "warning" : "default"
+                  }
                   className="ml-1 px-1 py-0 text-[10px]"
                 >
-                  {comparison.resolved.length > 0 && `-${comparison.resolved.length}`}
-                  {comparison.resolved.length > 0 && comparison.introduced.length > 0 && " "}
-                  {comparison.introduced.length > 0 && `+${comparison.introduced.length}`}
+                  {comparison.resolved.length > 0 &&
+                    `-${comparison.resolved.length}`}
+                  {comparison.resolved.length > 0 &&
+                    comparison.introduced.length > 0 &&
+                    " "}
+                  {comparison.introduced.length > 0 &&
+                    `+${comparison.introduced.length}`}
                 </Badge>
               ) : undefined
             }

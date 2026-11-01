@@ -7,8 +7,14 @@ describe("Starter Templates Audit (W8 False Positives Resolution)", () => {
   it("verifies all starter templates parse cleanly", () => {
     for (const template of STARTER_TEMPLATES) {
       const result = parseHtmlToA11yTree(template.html);
-      expect(result.error, `Template ${template.id} should not produce parse error`).toBeNull();
-      expect(result.ast, `Template ${template.id} should produce an AST`).not.toBeNull();
+      expect(
+        result.error,
+        `Template ${template.id} should not produce parse error`
+      ).toBeNull();
+      expect(
+        result.ast,
+        `Template ${template.id} should produce an AST`
+      ).not.toBeNull();
     }
   });
 
@@ -34,7 +40,11 @@ describe("Starter Templates Audit (W8 False Positives Resolution)", () => {
       expect(template, `Template ${id} must exist`).toBeDefined();
 
       const parseResult = parseHtmlToA11yTree(template!.html);
-      const findings = runCustomRules(parseResult.ast, template!.css || "", template!.html);
+      const findings = runCustomRules(
+        parseResult.ast,
+        template!.css || "",
+        template!.html
+      );
 
       expect(
         findings.map((f) => ({ id: f.id, help: f.help })),
@@ -51,12 +61,18 @@ describe("Starter Templates Audit (W8 False Positives Resolution)", () => {
       "outline-removed": "outline-removed",
     };
 
-    for (const [templateId, expectedRuleId] of Object.entries(teachingIntentExpected)) {
+    for (const [templateId, expectedRuleId] of Object.entries(
+      teachingIntentExpected
+    )) {
       const template = STARTER_TEMPLATES.find((t) => t.id === templateId);
       expect(template, `Template ${templateId} must exist`).toBeDefined();
 
       const parseResult = parseHtmlToA11yTree(template!.html);
-      const findings = runCustomRules(parseResult.ast, template!.css || "", template!.html);
+      const findings = runCustomRules(
+        parseResult.ast,
+        template!.css || "",
+        template!.html
+      );
 
       const hasExpected = findings.some((f) => f.id === expectedRuleId);
       expect(
@@ -65,5 +81,4 @@ describe("Starter Templates Audit (W8 False Positives Resolution)", () => {
       ).toBe(true);
     }
   });
-
 });

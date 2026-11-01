@@ -1,5 +1,8 @@
 import type { AxeFinding } from "@/types/a11y";
-import { isEquivalentRule as isRuleEquivalent, normalizeHtmlSnippet } from "./findings/normalize";
+import {
+  isEquivalentRule as isRuleEquivalent,
+  normalizeHtmlSnippet,
+} from "./findings/normalize";
 
 /**
  * Mapping between axe-core rule IDs and playground custom-rule IDs

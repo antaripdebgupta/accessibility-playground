@@ -135,7 +135,10 @@ export function SnippetsMenu({
         <div className="flex items-center justify-between px-2 pt-2 pb-1 text-[11px] font-semibold text-[var(--color-text-secondary)]">
           <div className="flex items-center gap-1.5">
             <span>Saved Snippets</span>
-            <Badge variant="default" className="text-[9px] px-1 py-0 font-normal">
+            <Badge
+              variant="default"
+              className="px-1 py-0 text-[9px] font-normal"
+            >
               Yours
             </Badge>
           </div>
@@ -153,7 +156,7 @@ export function SnippetsMenu({
           snippets.map((snip) => (
             <div
               key={snip.id}
-              className="flex flex-col rounded border border-transparent hover:border-[var(--color-border)] hover:bg-[var(--color-surface-sunken)] p-1.5 my-0.5"
+              className="my-0.5 flex flex-col rounded border border-transparent p-1.5 hover:border-[var(--color-border)] hover:bg-[var(--color-surface-sunken)]"
             >
               {editingSnippetId === snip.id ? (
                 <form
@@ -198,13 +201,13 @@ export function SnippetsMenu({
                         variant: "success",
                       });
                     }}
-                    className="flex flex-1 flex-col items-start p-1 cursor-pointer"
+                    className="flex flex-1 cursor-pointer flex-col items-start p-1"
                   >
                     <div className="flex items-center gap-1.5">
                       <span className="truncate text-xs font-semibold text-[var(--color-text-primary)]">
                         {snip.name}
                       </span>
-                      <Badge variant="default" className="text-[8px] px-1 py-0">
+                      <Badge variant="default" className="px-1 py-0 text-[8px]">
                         Yours
                       </Badge>
                     </div>
@@ -214,7 +217,7 @@ export function SnippetsMenu({
                   </DropdownMenuItem>
 
                   {/* Actions: Rename, Duplicate, Delete */}
-                  <div className="flex items-center gap-0.5 shrink-0 ml-1">
+                  <div className="ml-1 flex shrink-0 items-center gap-0.5">
                     <button
                       type="button"
                       onClick={(e) => handleStartRename(e, snip)}
@@ -235,7 +238,9 @@ export function SnippetsMenu({
                     </button>
                     <button
                       type="button"
-                      onClick={(e) => handleDeleteSnippet(e, snip.id, snip.name)}
+                      onClick={(e) =>
+                        handleDeleteSnippet(e, snip.id, snip.name)
+                      }
                       className="rounded p-1 text-[var(--color-text-secondary)] hover:bg-[var(--color-danger-subtle)] hover:text-[var(--color-danger-default)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
                       title={`Delete ${snip.name}`}
                       aria-label={`Delete ${snip.name}`}
@@ -272,7 +277,7 @@ export function SnippetsMenu({
             type="button"
             disabled={snippets.length === 0}
             onClick={handleExportAll}
-            className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
+            className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)] disabled:opacity-40"
           >
             <Download className="h-3 w-3" aria-hidden="true" />
             <span>Export All</span>

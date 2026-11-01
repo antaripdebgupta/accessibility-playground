@@ -5,7 +5,8 @@
 
 export type ManualTestCategory = "keyboard" | "screen-reader" | "visual";
 
-export type ManualTestStatus = "not-tested" | "passed" | "failed" | "not-applicable";
+export type ManualTestStatus =
+  "not-tested" | "passed" | "failed" | "not-applicable";
 
 export interface ManualTestItem {
   readonly id: string;

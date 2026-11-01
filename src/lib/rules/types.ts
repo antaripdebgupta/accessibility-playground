@@ -23,4 +23,3 @@ export interface Rule {
   checkNode?(node: A11yNode, ctx: RuleContext): AxeFinding[];
   checkEnd?(ctx: RuleContext): AxeFinding[];
 }
-

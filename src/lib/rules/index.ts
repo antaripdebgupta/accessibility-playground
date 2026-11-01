@@ -38,4 +38,3 @@ export const RULES: readonly Rule[] = [
   invalidAriaRule,
   outlineRemovedRule,
 ];
-

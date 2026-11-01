@@ -143,12 +143,17 @@ export function AriaExplorerPanel({
         {/* Related Name Info (§C2) */}
         <div className="flex flex-col gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-3 text-xs">
           <div className="flex items-center gap-1.5 font-semibold text-[var(--color-text-primary)]">
-            <Tag className="h-3.5 w-3.5 text-[var(--color-focus-ring)]" aria-hidden="true" />
+            <Tag
+              className="h-3.5 w-3.5 text-[var(--color-focus-ring)]"
+              aria-hidden="true"
+            />
             <span>Related Name Information</span>
           </div>
           <div className="flex flex-col gap-1 text-[var(--color-text-secondary)]">
             <p>
-              <strong className="text-[var(--color-text-primary)]">Accessible Name:</strong>{" "}
+              <strong className="text-[var(--color-text-primary)]">
+                Accessible Name:
+              </strong>{" "}
               {selectedNode.accessibleName ? (
                 <span>&quot;{selectedNode.accessibleName}&quot;</span>
               ) : (
@@ -156,12 +161,16 @@ export function AriaExplorerPanel({
               )}
             </p>
             <p>
-              <strong className="text-[var(--color-text-primary)]">Source:</strong>{" "}
+              <strong className="text-[var(--color-text-primary)]">
+                Source:
+              </strong>{" "}
               {selectedNode.accessibleNameSource || "None"}
             </p>
             {selectedNode.ariaAttributes["aria-labelledby"] && (
               <p>
-                <strong className="text-[var(--color-text-primary)]">aria-labelledby targets:</strong>{" "}
+                <strong className="text-[var(--color-text-primary)]">
+                  aria-labelledby targets:
+                </strong>{" "}
                 <code className="font-mono text-[var(--color-focus-ring)]">
                   {selectedNode.ariaAttributes["aria-labelledby"]}
                 </code>
@@ -169,7 +178,9 @@ export function AriaExplorerPanel({
             )}
             {selectedNode.ariaAttributes["aria-describedby"] && (
               <p>
-                <strong className="text-[var(--color-text-primary)]">aria-describedby targets:</strong>{" "}
+                <strong className="text-[var(--color-text-primary)]">
+                  aria-describedby targets:
+                </strong>{" "}
                 <code className="font-mono text-[var(--color-focus-ring)]">
                   {selectedNode.ariaAttributes["aria-describedby"]}
                 </code>
@@ -194,205 +205,205 @@ export function AriaExplorerPanel({
         )}
 
         {/* ARIA Attributes Table */}
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <h4 className="text-md font-semibold text-[var(--color-text-primary)]">
-            Applied ARIA Attributes ({ariaAttrEntries.length})
-          </h4>
-          <span className="text-[11px] text-[var(--color-text-secondary)]">
-            WAI-ARIA 1.2 Validity · Click value to edit
-          </span>
-        </div>
-
-        {ariaAttrEntries.length === 0 ? (
-          <div className="text-md rounded-lg border border-dashed border-[var(--color-border)] bg-[var(--color-surface-sunken)]/20 p-5 text-center text-[var(--color-text-secondary)]">
-            <p className="mb-0.5 font-medium text-[var(--color-text-primary)]">
-              No ARIA attributes applied to this node.
-            </p>
-            <p>
-              It relies entirely on native HTML semantics (implicit role:{" "}
-              <span className="font-mono font-semibold text-[var(--color-text-primary)]">
-                {selectedNode.implicitRole}
-              </span>
-              ).
-            </p>
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <h4 className="text-md font-semibold text-[var(--color-text-primary)]">
+              Applied ARIA Attributes ({ariaAttrEntries.length})
+            </h4>
+            <span className="text-[11px] text-[var(--color-text-secondary)]">
+              WAI-ARIA 1.2 Validity · Click value to edit
+            </span>
           </div>
-        ) : (
-          <div className="overflow-x-auto rounded-lg border border-[var(--color-border)]">
-            <table className="text-md w-full text-left">
-              <thead className="border-b border-[var(--color-border)] bg-[var(--color-surface-raised)] font-mono text-[11px] text-[var(--color-text-secondary)]">
-                <tr>
-                  <th scope="col" className="p-2.5">
-                    Attribute
-                  </th>
-                  <th scope="col" className="p-2.5">
-                    Value
-                  </th>
-                  <th scope="col" className="p-2.5">
-                    Status
-                  </th>
-                  <th scope="col" className="p-2.5">
-                    Explanation
-                  </th>
-                  {onRemoveAttribute && (
-                    <th scope="col" className="p-2.5 text-right">
-                      Actions
+
+          {ariaAttrEntries.length === 0 ? (
+            <div className="text-md rounded-lg border border-dashed border-[var(--color-border)] bg-[var(--color-surface-sunken)]/20 p-5 text-center text-[var(--color-text-secondary)]">
+              <p className="mb-0.5 font-medium text-[var(--color-text-primary)]">
+                No ARIA attributes applied to this node.
+              </p>
+              <p>
+                It relies entirely on native HTML semantics (implicit role:{" "}
+                <span className="font-mono font-semibold text-[var(--color-text-primary)]">
+                  {selectedNode.implicitRole}
+                </span>
+                ).
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto rounded-lg border border-[var(--color-border)]">
+              <table className="text-md w-full text-left">
+                <thead className="border-b border-[var(--color-border)] bg-[var(--color-surface-raised)] font-mono text-[11px] text-[var(--color-text-secondary)]">
+                  <tr>
+                    <th scope="col" className="p-2.5">
+                      Attribute
                     </th>
-                  )}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--color-border)] bg-[var(--color-surface)]">
-                {ariaAttrEntries.map(([attr, val]) => {
-                  const validation = validateAriaAttribute(
-                    attr,
-                    val,
-                    selectedNode.role
-                  );
-                  const isEditing = editingAttr === attr;
+                    <th scope="col" className="p-2.5">
+                      Value
+                    </th>
+                    <th scope="col" className="p-2.5">
+                      Status
+                    </th>
+                    <th scope="col" className="p-2.5">
+                      Explanation
+                    </th>
+                    {onRemoveAttribute && (
+                      <th scope="col" className="p-2.5 text-right">
+                        Actions
+                      </th>
+                    )}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--color-border)] bg-[var(--color-surface)]">
+                  {ariaAttrEntries.map(([attr, val]) => {
+                    const validation = validateAriaAttribute(
+                      attr,
+                      val,
+                      selectedNode.role
+                    );
+                    const isEditing = editingAttr === attr;
 
-                  return (
-                    <tr
-                      key={attr}
-                      className="transition-colors hover:bg-[var(--color-surface-raised)]/50"
-                    >
-                      <td className="p-2.5 font-mono font-medium text-[var(--color-text-primary)]">
-                        {attr}
-                      </td>
-                      <td className="p-2.5 font-mono text-[var(--color-text-secondary)]">
-                        {isEditing ? (
-                          <input
-                            ref={(el) => el?.focus()}
-                            type="text"
-                            value={editingValue}
-                            onChange={(e) => setEditingValue(e.target.value)}
-                            onBlur={() => handleCommitEdit(attr)}
-                            onKeyDown={(e) => handleKeyDownEdit(e, attr)}
-                            className="rounded border border-[var(--color-focus-ring)] bg-[var(--color-surface)] px-1.5 py-0.5 font-mono text-xs text-[var(--color-text-primary)] ring-1 ring-[var(--color-focus-ring)] outline-none"
-                            aria-label={`Edit value for ${attr}`}
-                          />
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => handleStartEdit(attr, val)}
-                            title="Click to edit value"
-                            className="rounded px-1.5 py-0.5 text-left transition-colors hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
-                          >
-                            &quot;{val}&quot;
-                          </button>
-                        )}
-                      </td>
-                      <td className="p-2.5">
-                        {validation.status === "valid" ? (
-                          <Badge variant="success">
-                            <CheckCircle2
-                              className="h-3 w-3"
-                              aria-hidden="true"
-                            />
-                            Valid
-                          </Badge>
-                        ) : validation.status === "not-allowed" ? (
-                          <Badge variant="warning">
-                            <AlertTriangle
-                              className="h-3 w-3"
-                              aria-hidden="true"
-                            />
-                            Not Allowed
-                          </Badge>
-                        ) : validation.status === "invalid-value" ? (
-                          <Badge variant="danger">
-                            <XCircle className="h-3 w-3" aria-hidden="true" />
-                            Invalid Value
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline">Unknown</Badge>
-                        )}
-                      </td>
-                      <td className="text-md p-2.5 leading-relaxed text-[var(--color-text-secondary)]">
-                        {validation.explanation}
-                      </td>
-                      {onRemoveAttribute && (
-                        <td className="p-2.5 text-right">
-                          <button
-                            type="button"
-                            onClick={() => onRemoveAttribute(attr)}
-                            title={`Remove ${attr}`}
-                            className="rounded p-1 text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-danger-subtle)] hover:text-[var(--color-danger-default)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
-                            aria-label={`Remove attribute ${attr}`}
-                          >
-                            <Trash2
-                              className="h-3.5 w-3.5"
-                              aria-hidden="true"
-                            />
-                          </button>
+                    return (
+                      <tr
+                        key={attr}
+                        className="transition-colors hover:bg-[var(--color-surface-raised)]/50"
+                      >
+                        <td className="p-2.5 font-mono font-medium text-[var(--color-text-primary)]">
+                          {attr}
                         </td>
-                      )}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* Add Attribute Row */}
-        {onUpdateAttribute && (
-          <form
-            onSubmit={handleAddAttribute}
-            className="flex flex-wrap items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-raised)]/60 p-2.5"
-          >
-            <div className="flex min-w-[160px] flex-1 items-center gap-1.5">
-              <label
-                htmlFor="new-aria-attr-select"
-                className="text-xs font-medium text-[var(--color-text-secondary)]"
-              >
-                Add:
-              </label>
-              <select
-                id="new-aria-attr-select"
-                value={newAttr}
-                onChange={(e) => setNewAttr(e.target.value)}
-                className="h-7 w-full rounded border border-[var(--color-border)] bg-[var(--color-surface)] px-2 font-mono text-xs text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
-              >
-                <option value="">Select ARIA attribute...</option>
-                {availableAttrs.map((attr) => (
-                  <option key={attr} value={attr}>
-                    {attr}
-                  </option>
-                ))}
-              </select>
+                        <td className="p-2.5 font-mono text-[var(--color-text-secondary)]">
+                          {isEditing ? (
+                            <input
+                              ref={(el) => el?.focus()}
+                              type="text"
+                              value={editingValue}
+                              onChange={(e) => setEditingValue(e.target.value)}
+                              onBlur={() => handleCommitEdit(attr)}
+                              onKeyDown={(e) => handleKeyDownEdit(e, attr)}
+                              className="rounded border border-[var(--color-focus-ring)] bg-[var(--color-surface)] px-1.5 py-0.5 font-mono text-xs text-[var(--color-text-primary)] ring-1 ring-[var(--color-focus-ring)] outline-none"
+                              aria-label={`Edit value for ${attr}`}
+                            />
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => handleStartEdit(attr, val)}
+                              title="Click to edit value"
+                              className="rounded px-1.5 py-0.5 text-left transition-colors hover:bg-[var(--color-surface-raised)] hover:text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
+                            >
+                              &quot;{val}&quot;
+                            </button>
+                          )}
+                        </td>
+                        <td className="p-2.5">
+                          {validation.status === "valid" ? (
+                            <Badge variant="success">
+                              <CheckCircle2
+                                className="h-3 w-3"
+                                aria-hidden="true"
+                              />
+                              Valid
+                            </Badge>
+                          ) : validation.status === "not-allowed" ? (
+                            <Badge variant="warning">
+                              <AlertTriangle
+                                className="h-3 w-3"
+                                aria-hidden="true"
+                              />
+                              Not Allowed
+                            </Badge>
+                          ) : validation.status === "invalid-value" ? (
+                            <Badge variant="danger">
+                              <XCircle className="h-3 w-3" aria-hidden="true" />
+                              Invalid Value
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline">Unknown</Badge>
+                          )}
+                        </td>
+                        <td className="text-md p-2.5 leading-relaxed text-[var(--color-text-secondary)]">
+                          {validation.explanation}
+                        </td>
+                        {onRemoveAttribute && (
+                          <td className="p-2.5 text-right">
+                            <button
+                              type="button"
+                              onClick={() => onRemoveAttribute(attr)}
+                              title={`Remove ${attr}`}
+                              className="rounded p-1 text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-danger-subtle)] hover:text-[var(--color-danger-default)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
+                              aria-label={`Remove attribute ${attr}`}
+                            >
+                              <Trash2
+                                className="h-3.5 w-3.5"
+                                aria-hidden="true"
+                              />
+                            </button>
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
+          )}
 
-            <div className="flex min-w-[140px] flex-1 items-center gap-1.5">
-              <label
-                htmlFor="new-aria-attr-value"
-                className="text-xs font-medium text-[var(--color-text-secondary)]"
-              >
-                Value:
-              </label>
-              <input
-                id="new-aria-attr-value"
-                type="text"
-                placeholder="e.g. true"
-                value={newValue}
-                onChange={(e) => setNewValue(e.target.value)}
-                className="h-7 w-full rounded border border-[var(--color-border)] bg-[var(--color-surface)] px-2 font-mono text-xs text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
-              />
-            </div>
-
-            <Button
-              type="submit"
-              variant="secondary"
-              size="sm"
-              disabled={!newAttr}
-              className="h-7 gap-1 px-2.5 text-xs font-medium"
+          {/* Add Attribute Row */}
+          {onUpdateAttribute && (
+            <form
+              onSubmit={handleAddAttribute}
+              className="flex flex-wrap items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-raised)]/60 p-2.5"
             >
-              <Plus className="h-3 w-3" aria-hidden="true" />
-              <span>Add</span>
-            </Button>
-          </form>
-        )}
+              <div className="flex min-w-[160px] flex-1 items-center gap-1.5">
+                <label
+                  htmlFor="new-aria-attr-select"
+                  className="text-xs font-medium text-[var(--color-text-secondary)]"
+                >
+                  Add:
+                </label>
+                <select
+                  id="new-aria-attr-select"
+                  value={newAttr}
+                  onChange={(e) => setNewAttr(e.target.value)}
+                  className="h-7 w-full rounded border border-[var(--color-border)] bg-[var(--color-surface)] px-2 font-mono text-xs text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
+                >
+                  <option value="">Select ARIA attribute...</option>
+                  {availableAttrs.map((attr) => (
+                    <option key={attr} value={attr}>
+                      {attr}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex min-w-[140px] flex-1 items-center gap-1.5">
+                <label
+                  htmlFor="new-aria-attr-value"
+                  className="text-xs font-medium text-[var(--color-text-secondary)]"
+                >
+                  Value:
+                </label>
+                <input
+                  id="new-aria-attr-value"
+                  type="text"
+                  placeholder="e.g. true"
+                  value={newValue}
+                  onChange={(e) => setNewValue(e.target.value)}
+                  className="h-7 w-full rounded border border-[var(--color-border)] bg-[var(--color-surface)] px-2 font-mono text-xs text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
+                />
+              </div>
+
+              <Button
+                type="submit"
+                variant="secondary"
+                size="sm"
+                disabled={!newAttr}
+                className="h-7 gap-1 px-2.5 text-xs font-medium"
+              >
+                <Plus className="h-3 w-3" aria-hidden="true" />
+                <span>Add</span>
+              </Button>
+            </form>
+          )}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
 }

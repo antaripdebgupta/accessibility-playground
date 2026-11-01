@@ -113,4 +113,3 @@ describe("Contrast Calculation (WCAG 2.2)", () => {
     }
   });
 });
-

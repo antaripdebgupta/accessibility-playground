@@ -14,10 +14,14 @@ import {
 
 export function useManualTests(templateOrSnippetId: string) {
   const [prevId, setPrevId] = React.useState(templateOrSnippetId);
-  const [records, setRecords] = React.useState<Record<string, ManualTestRecord>>(() => {
+  const [records, setRecords] = React.useState<
+    Record<string, ManualTestRecord>
+  >(() => {
     return loadManualTestResults(templateOrSnippetId);
   });
-  const [validationErrors, setValidationErrors] = React.useState<Record<string, string>>({});
+  const [validationErrors, setValidationErrors] = React.useState<
+    Record<string, string>
+  >({});
 
   // When template or snippet ID changes, sync records during render
   if (prevId !== templateOrSnippetId) {

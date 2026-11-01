@@ -48,10 +48,7 @@ export function saveChallengeProgress(
 ): void {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem(
-      storageKey(challengeId),
-      JSON.stringify(progress)
-    );
+    localStorage.setItem(storageKey(challengeId), JSON.stringify(progress));
   } catch {
     // Storage full — silently ignore
   }

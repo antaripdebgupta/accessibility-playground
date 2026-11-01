@@ -5,7 +5,13 @@ import type { Finding, FindingStatus, AxeImpactLevel } from "@/types/a11y";
 import { FindingStatusBadge } from "./FindingStatusBadge";
 import { Badge } from "@/components/ui/Badge";
 import { getImpactMeta } from "@/lib/impact";
-import { AlertOctagon, AlertTriangle, HelpCircle, ChevronRight, Filter } from "lucide-react";
+import {
+  AlertOctagon,
+  AlertTriangle,
+  HelpCircle,
+  ChevronRight,
+  Filter,
+} from "lucide-react";
 
 export interface IssuesListProps {
   findings: readonly Finding[];
@@ -25,9 +31,15 @@ export function IssuesList({
   selectedFingerprint,
   onSelectFinding,
 }: IssuesListProps) {
-  const [statusFilter, setStatusFilter] = React.useState<"all" | FindingStatus>("all");
-  const [severityFilter, setSeverityFilter] = React.useState<"all" | AxeImpactLevel>("all");
-  const [engineFilter, setEngineFilter] = React.useState<"all" | "axe-core" | "playground">("all");
+  const [statusFilter, setStatusFilter] = React.useState<"all" | FindingStatus>(
+    "all"
+  );
+  const [severityFilter, setSeverityFilter] = React.useState<
+    "all" | AxeImpactLevel
+  >("all");
+  const [engineFilter, setEngineFilter] = React.useState<
+    "all" | "axe-core" | "playground"
+  >("all");
 
   const filteredFindings = React.useMemo(() => {
     return findings.filter((f) => {
@@ -42,26 +54,37 @@ export function IssuesList({
   const violations = React.useMemo(() => {
     return filteredFindings
       .filter((f) => f.status === "violation")
-      .sort((a, b) => (SEVERITY_ORDER[a.impact] ?? 99) - (SEVERITY_ORDER[b.impact] ?? 99));
+      .sort(
+        (a, b) =>
+          (SEVERITY_ORDER[a.impact] ?? 99) - (SEVERITY_ORDER[b.impact] ?? 99)
+      );
   }, [filteredFindings]);
 
   const needsReview = React.useMemo(() => {
     return filteredFindings
       .filter((f) => f.status === "needs-review")
-      .sort((a, b) => (SEVERITY_ORDER[a.impact] ?? 99) - (SEVERITY_ORDER[b.impact] ?? 99));
+      .sort(
+        (a, b) =>
+          (SEVERITY_ORDER[a.impact] ?? 99) - (SEVERITY_ORDER[b.impact] ?? 99)
+      );
   }, [filteredFindings]);
 
   const manualCheck = React.useMemo(() => {
     return filteredFindings
       .filter((f) => f.status === "manual-required")
-      .sort((a, b) => (SEVERITY_ORDER[a.impact] ?? 99) - (SEVERITY_ORDER[b.impact] ?? 99));
+      .sort(
+        (a, b) =>
+          (SEVERITY_ORDER[a.impact] ?? 99) - (SEVERITY_ORDER[b.impact] ?? 99)
+      );
   }, [filteredFindings]);
 
   const renderFindingRow = (f: Finding) => {
     const isSelected = selectedFingerprint === f.fingerprint;
     const impactMeta = getImpactMeta(f.impact);
     const primaryNode = f.nodes[0];
-    const targetTag = primaryNode?.html ? primaryNode.html.match(/<([a-z0-9-]+)/i)?.[1] || "element" : "element";
+    const targetTag = primaryNode?.html
+      ? primaryNode.html.match(/<([a-z0-9-]+)/i)?.[1] || "element"
+      : "element";
 
     return (
       <button
@@ -78,9 +101,7 @@ export function IssuesList({
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <div className="flex flex-wrap items-center gap-1.5">
             <FindingStatusBadge status={f.status} />
-            <Badge variant={impactMeta.variant}>
-              {impactMeta.label}
-            </Badge>
+            <Badge variant={impactMeta.variant}>{impactMeta.label}</Badge>
             <span className="rounded bg-[var(--color-surface-sunken)] px-1 font-mono text-[10px] text-[var(--color-text-secondary)]">
               {f.engine}
             </span>
@@ -94,7 +115,9 @@ export function IssuesList({
         </div>
         <ChevronRight
           className={`h-4 w-4 shrink-0 transition-transform ${
-            isSelected ? "translate-x-0.5 text-[var(--color-focus-ring)]" : "text-[var(--color-text-secondary)]"
+            isSelected
+              ? "translate-x-0.5 text-[var(--color-focus-ring)]"
+              : "text-[var(--color-text-secondary)]"
           }`}
           aria-hidden="true"
         />
@@ -118,7 +141,11 @@ export function IssuesList({
 
         <div className="flex flex-wrap gap-2 pt-1">
           {/* Status filter toggle */}
-          <div className="flex items-center gap-1" role="group" aria-label="Filter by status">
+          <div
+            className="flex items-center gap-1"
+            role="group"
+            aria-label="Filter by status"
+          >
             <button
               type="button"
               aria-pressed={statusFilter === "all"}
@@ -158,7 +185,11 @@ export function IssuesList({
           </div>
 
           {/* Severity filter */}
-          <div className="flex items-center gap-1" role="group" aria-label="Filter by severity">
+          <div
+            className="flex items-center gap-1"
+            role="group"
+            aria-label="Filter by severity"
+          >
             <button
               type="button"
               aria-pressed={severityFilter === "all"}
@@ -213,7 +244,7 @@ export function IssuesList({
               onClick={() => setSeverityFilter("minor")}
               className={`rounded px-2 py-0.5 text-[11px] font-medium transition-colors ${
                 severityFilter === "minor"
-                  ? "bg-[var(--color-surface-raised)] text-[var(--color-text-primary)] border border-[var(--color-border)]"
+                  ? "border border-[var(--color-border)] bg-[var(--color-surface-raised)] text-[var(--color-text-primary)]"
                   : "bg-[var(--color-surface)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
               }`}
             >
@@ -222,7 +253,11 @@ export function IssuesList({
           </div>
 
           {/* Engine filter */}
-          <div className="flex items-center gap-1" role="group" aria-label="Filter by engine">
+          <div
+            className="flex items-center gap-1"
+            role="group"
+            aria-label="Filter by engine"
+          >
             <button
               type="button"
               aria-pressed={engineFilter === "all"}
@@ -265,17 +300,28 @@ export function IssuesList({
 
       {/* Legend */}
       <div className="flex flex-wrap items-center gap-3 border-b border-[var(--color-border)] pb-2 text-[11px] text-[var(--color-text-secondary)]">
-        <span className="font-semibold text-[var(--color-text-primary)]">Legend:</span>
+        <span className="font-semibold text-[var(--color-text-primary)]">
+          Legend:
+        </span>
         <span className="inline-flex items-center gap-1">
-          <AlertOctagon className="h-3 w-3 text-[var(--color-danger-default)]" aria-hidden="true" />
+          <AlertOctagon
+            className="h-3 w-3 text-[var(--color-danger-default)]"
+            aria-hidden="true"
+          />
           <span>Violation (verified)</span>
         </span>
         <span className="inline-flex items-center gap-1">
-          <AlertTriangle className="h-3 w-3 text-[var(--color-warning-default)]" aria-hidden="true" />
+          <AlertTriangle
+            className="h-3 w-3 text-[var(--color-warning-default)]"
+            aria-hidden="true"
+          />
           <span>Needs review (heuristic)</span>
         </span>
         <span className="inline-flex items-center gap-1">
-          <HelpCircle className="h-3 w-3 text-[var(--color-info-default)]" aria-hidden="true" />
+          <HelpCircle
+            className="h-3 w-3 text-[var(--color-info-default)]"
+            aria-hidden="true"
+          />
           <span>Manual check</span>
         </span>
       </div>

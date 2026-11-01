@@ -57,7 +57,10 @@ export default async function TopicDetailPage({ params }: TopicPageProps) {
   const goodPlaygroundUrl = getPlaygroundUrlForExample(topic.goodExample);
 
   return (
-    <main id="main-content" className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
+    <main
+      id="main-content"
+      className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12"
+    >
       {/* Navigation Breadcrumb */}
       <nav aria-label="Breadcrumb" className="mb-6">
         <Link
@@ -90,7 +93,10 @@ export default async function TopicDetailPage({ params }: TopicPageProps) {
 
         {topic.challengeId && (
           <div className="mt-4 flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-3 text-xs">
-            <Trophy className="h-4 w-4 text-[var(--amber)] flex-shrink-0" aria-hidden="true" />
+            <Trophy
+              className="h-4 w-4 flex-shrink-0 text-[var(--amber)]"
+              aria-hidden="true"
+            />
             <span className="text-[var(--color-text-secondary)]">
               Want to practice this topic interactively?
             </span>
@@ -107,7 +113,10 @@ export default async function TopicDetailPage({ params }: TopicPageProps) {
 
       <div className="flex flex-col gap-10">
         {/* 1. Explanations */}
-        <section aria-labelledby="section-explanations" className="flex flex-col gap-4">
+        <section
+          aria-labelledby="section-explanations"
+          className="flex flex-col gap-4"
+        >
           <h2
             id="section-explanations"
             className="text-xl font-bold text-[var(--color-text-primary)]"
@@ -135,14 +144,17 @@ export default async function TopicDetailPage({ params }: TopicPageProps) {
         </section>
 
         {/* 2. Why it matters */}
-        <section aria-labelledby="section-why-it-matters" className="flex flex-col gap-3">
+        <section
+          aria-labelledby="section-why-it-matters"
+          className="flex flex-col gap-3"
+        >
           <h2
             id="section-why-it-matters"
             className="text-xl font-bold text-[var(--color-text-primary)]"
           >
             Why it matters
           </h2>
-          <div className="rounded-lg border-l-4 border-l-[var(--color-accent)] bg-[var(--color-surface)] p-5 border border-[var(--color-border)]">
+          <div className="rounded-lg border border-l-4 border-[var(--color-border)] border-l-[var(--color-accent)] bg-[var(--color-surface)] p-5">
             <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
               {topic.whyItMatters}
             </p>
@@ -150,7 +162,10 @@ export default async function TopicDetailPage({ params }: TopicPageProps) {
         </section>
 
         {/* 3. Bad vs Good Example */}
-        <section aria-labelledby="section-examples" className="flex flex-col gap-4">
+        <section
+          aria-labelledby="section-examples"
+          className="flex flex-col gap-4"
+        >
           <h2
             id="section-examples"
             className="text-xl font-bold text-[var(--color-text-primary)]"
@@ -163,7 +178,7 @@ export default async function TopicDetailPage({ params }: TopicPageProps) {
             <div className="flex flex-col justify-between rounded-xl border border-[var(--color-danger-border)] bg-[var(--color-danger-bg)]/30 p-5">
               <div>
                 <div className="mb-2 flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 font-semibold text-xs text-[var(--color-danger-default)]">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-danger-default)]">
                     <XCircle className="h-4 w-4" aria-hidden="true" />
                     <span>Inaccessible (Avoid)</span>
                   </div>
@@ -171,13 +186,13 @@ export default async function TopicDetailPage({ params }: TopicPageProps) {
                 <p className="mb-3 text-xs text-[var(--color-text-secondary)]">
                   {topic.badExample.description}
                 </p>
-                <div className="overflow-x-auto rounded-md bg-[#1e1e1e] p-3 text-xs text-white font-mono">
+                <div className="overflow-x-auto rounded-md bg-[#1e1e1e] p-3 font-mono text-xs text-white">
                   <pre>
                     <code>{topic.badExample.html}</code>
                   </pre>
                 </div>
                 {topic.badExample.css && (
-                  <div className="mt-2 overflow-x-auto rounded-md bg-[#1e1e1e] p-3 text-xs text-zinc-300 font-mono">
+                  <div className="mt-2 overflow-x-auto rounded-md bg-[#1e1e1e] p-3 font-mono text-xs text-zinc-300">
                     <pre>
                       <code>{topic.badExample.css}</code>
                     </pre>
@@ -185,12 +200,15 @@ export default async function TopicDetailPage({ params }: TopicPageProps) {
                 )}
               </div>
 
-              <div className="mt-4 pt-3 border-t border-[var(--color-border)]">
+              <div className="mt-4 border-t border-[var(--color-border)] pt-3">
                 <Link
                   href={badPlaygroundUrl}
                   className="inline-flex w-full items-center justify-center gap-1.5 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-xs font-semibold text-[var(--color-text-primary)] hover:bg-[var(--color-surface-hover)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
                 >
-                  <Play className="h-3 w-3 text-[var(--color-accent)]" aria-hidden="true" />
+                  <Play
+                    className="h-3 w-3 text-[var(--color-accent)]"
+                    aria-hidden="true"
+                  />
                   <span>Open bad example in playground</span>
                 </Link>
               </div>
@@ -200,7 +218,7 @@ export default async function TopicDetailPage({ params }: TopicPageProps) {
             <div className="flex flex-col justify-between rounded-xl border border-[var(--color-success-border)] bg-[var(--color-success-bg)]/30 p-5">
               <div>
                 <div className="mb-2 flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 font-semibold text-xs text-[var(--color-success-default)]">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-success-default)]">
                     <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
                     <span>Accessible (Recommended)</span>
                   </div>
@@ -208,13 +226,13 @@ export default async function TopicDetailPage({ params }: TopicPageProps) {
                 <p className="mb-3 text-xs text-[var(--color-text-secondary)]">
                   {topic.goodExample.description}
                 </p>
-                <div className="overflow-x-auto rounded-md bg-[#1e1e1e] p-3 text-xs text-white font-mono">
+                <div className="overflow-x-auto rounded-md bg-[#1e1e1e] p-3 font-mono text-xs text-white">
                   <pre>
                     <code>{topic.goodExample.html}</code>
                   </pre>
                 </div>
                 {topic.goodExample.css && (
-                  <div className="mt-2 overflow-x-auto rounded-md bg-[#1e1e1e] p-3 text-xs text-zinc-300 font-mono">
+                  <div className="mt-2 overflow-x-auto rounded-md bg-[#1e1e1e] p-3 font-mono text-xs text-zinc-300">
                     <pre>
                       <code>{topic.goodExample.css}</code>
                     </pre>
@@ -222,7 +240,7 @@ export default async function TopicDetailPage({ params }: TopicPageProps) {
                 )}
               </div>
 
-              <div className="mt-4 pt-3 border-t border-[var(--color-border)]">
+              <div className="mt-4 border-t border-[var(--color-border)] pt-3">
                 <Link
                   href={goodPlaygroundUrl}
                   className="inline-flex w-full items-center justify-center gap-1.5 rounded-md bg-[var(--color-accent)] px-3 py-2 text-xs font-semibold text-white shadow-xs hover:opacity-90 focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
@@ -236,9 +254,15 @@ export default async function TopicDetailPage({ params }: TopicPageProps) {
         </section>
 
         {/* 4. Common Mistakes */}
-        <section aria-labelledby="section-mistakes" className="flex flex-col gap-3">
+        <section
+          aria-labelledby="section-mistakes"
+          className="flex flex-col gap-3"
+        >
           <div className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-[var(--amber)]" aria-hidden="true" />
+            <AlertTriangle
+              className="h-5 w-5 text-[var(--amber)]"
+              aria-hidden="true"
+            />
             <h2
               id="section-mistakes"
               className="text-xl font-bold text-[var(--color-text-primary)]"
@@ -246,7 +270,7 @@ export default async function TopicDetailPage({ params }: TopicPageProps) {
               Common Mistakes
             </h2>
           </div>
-          <ul className="space-y-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-sm text-[var(--color-text-secondary)] list-disc pl-9">
+          <ul className="list-disc space-y-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-5 pl-9 text-sm text-[var(--color-text-secondary)]">
             {topic.commonMistakes.map((mistake, idx) => (
               <li key={idx} className="leading-relaxed">
                 {mistake}
@@ -256,9 +280,15 @@ export default async function TopicDetailPage({ params }: TopicPageProps) {
         </section>
 
         {/* 5. Browser Behaviour */}
-        <section aria-labelledby="section-browser" className="flex flex-col gap-3">
+        <section
+          aria-labelledby="section-browser"
+          className="flex flex-col gap-3"
+        >
           <div className="flex items-center gap-2">
-            <HelpCircle className="h-5 w-5 text-[var(--color-accent)]" aria-hidden="true" />
+            <HelpCircle
+              className="h-5 w-5 text-[var(--color-accent)]"
+              aria-hidden="true"
+            />
             <h2
               id="section-browser"
               className="text-xl font-bold text-[var(--color-text-primary)]"
@@ -272,14 +302,17 @@ export default async function TopicDetailPage({ params }: TopicPageProps) {
         </section>
 
         {/* 6. Manual Testing */}
-        <section aria-labelledby="section-testing" className="flex flex-col gap-3">
+        <section
+          aria-labelledby="section-testing"
+          className="flex flex-col gap-3"
+        >
           <h2
             id="section-testing"
             className="text-xl font-bold text-[var(--color-text-primary)]"
           >
             How to verify manually
           </h2>
-          <ol className="space-y-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-sm text-[var(--color-text-secondary)] list-decimal pl-9">
+          <ol className="list-decimal space-y-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-5 pl-9 text-sm text-[var(--color-text-secondary)]">
             {topic.manualTest.map((step, idx) => (
               <li key={idx} className="leading-relaxed">
                 {step}
@@ -289,9 +322,15 @@ export default async function TopicDetailPage({ params }: TopicPageProps) {
         </section>
 
         {/* 7. Official References */}
-        <section aria-labelledby="section-references" className="flex flex-col gap-3 border-t border-[var(--color-border)] pt-8">
+        <section
+          aria-labelledby="section-references"
+          className="flex flex-col gap-3 border-t border-[var(--color-border)] pt-8"
+        >
           <div className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5 text-[var(--color-accent)]" aria-hidden="true" />
+            <BookOpen
+              className="h-5 w-5 text-[var(--color-accent)]"
+              aria-hidden="true"
+            />
             <h2
               id="section-references"
               className="text-lg font-bold text-[var(--color-text-primary)]"
@@ -314,7 +353,10 @@ export default async function TopicDetailPage({ params }: TopicPageProps) {
                       {link.source}
                     </span>
                   </div>
-                  <ExternalLink className="h-3.5 w-3.5 text-[var(--color-text-secondary)]" aria-hidden="true" />
+                  <ExternalLink
+                    className="h-3.5 w-3.5 text-[var(--color-text-secondary)]"
+                    aria-hidden="true"
+                  />
                 </a>
               </li>
             ))}

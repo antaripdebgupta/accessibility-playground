@@ -1,11 +1,23 @@
 import { describe, it, expect } from "vitest";
-import { normalizeFindings, computeFindingFingerprint, isEquivalentRule } from "@/lib/findings/normalize";
+import {
+  normalizeFindings,
+  computeFindingFingerprint,
+  isEquivalentRule,
+} from "@/lib/findings/normalize";
 import type { AxeFinding } from "@/types/a11y";
 
 describe("Normalized Finding Model & Deduplication (P0-A)", () => {
   it("computes deterministic fingerprints", () => {
-    const fp1 = computeFindingFingerprint("image-alt", "a11y-1234", '<img src="cat.jpg">');
-    const fp2 = computeFindingFingerprint("image-alt", "a11y-1234", '<img  src="cat.jpg"  data-a11y-id="a11y-1234">');
+    const fp1 = computeFindingFingerprint(
+      "image-alt",
+      "a11y-1234",
+      '<img src="cat.jpg">'
+    );
+    const fp2 = computeFindingFingerprint(
+      "image-alt",
+      "a11y-1234",
+      '<img  src="cat.jpg"  data-a11y-id="a11y-1234">'
+    );
     expect(fp1).toBe(fp2);
     expect(fp1).toHaveLength(8);
   });
@@ -14,11 +26,17 @@ describe("Normalized Finding Model & Deduplication (P0-A)", () => {
     expect(isEquivalentRule("image-alt", "img-missing-alt")).toBe(true);
     expect(isEquivalentRule("tabindex", "positive-tabindex")).toBe(true);
     expect(isEquivalentRule("link-name", "empty-interactive-name")).toBe(true);
-    expect(isEquivalentRule("button-name", "empty-interactive-name")).toBe(true);
+    expect(isEquivalentRule("button-name", "empty-interactive-name")).toBe(
+      true
+    );
     expect(isEquivalentRule("label", "input-no-label")).toBe(true);
-    expect(isEquivalentRule("aria-hidden-focus", "aria-hidden-focusable")).toBe(true);
+    expect(isEquivalentRule("aria-hidden-focus", "aria-hidden-focusable")).toBe(
+      true
+    );
     expect(isEquivalentRule("duplicate-id", "duplicate-id")).toBe(true);
-    expect(isEquivalentRule("aria-valid-attr-value", "invalid-aria")).toBe(true);
+    expect(isEquivalentRule("aria-valid-attr-value", "invalid-aria")).toBe(
+      true
+    );
     // Unrelated rules are NOT equivalent
     expect(isEquivalentRule("tabindex", "empty-interactive-name")).toBe(false);
   });
@@ -72,7 +90,11 @@ describe("Normalized Finding Model & Deduplication (P0-A)", () => {
       ],
     };
 
-    const normalized = normalizeFindings([customFinding], [axeViolation], [axeIncomplete]);
+    const normalized = normalizeFindings(
+      [customFinding],
+      [axeViolation],
+      [axeIncomplete]
+    );
 
     expect(normalized).toHaveLength(3);
 
@@ -80,11 +102,11 @@ describe("Normalized Finding Model & Deduplication (P0-A)", () => {
     expect(normAxe.engine).toBe("axe-core");
     expect(normAxe.status).toBe("violation");
     expect(normAxe.confidence).toBe("high");
-    expect(normAxe.wcag).toEqual([
-      { id: "1.1.1", version: "2.0", level: "A" },
-    ]);
+    expect(normAxe.wcag).toEqual([{ id: "1.1.1", version: "2.0", level: "A" }]);
 
-    const normIncomplete = normalized.find((f) => f.ruleId === "color-contrast")!;
+    const normIncomplete = normalized.find(
+      (f) => f.ruleId === "color-contrast"
+    )!;
     expect(normIncomplete.engine).toBe("axe-core");
     expect(normIncomplete.status).toBe("needs-review");
     expect(normIncomplete.confidence).toBe("medium");
@@ -107,7 +129,9 @@ describe("Normalized Finding Model & Deduplication (P0-A)", () => {
       description: "Images must have alt text",
       help: "Image missing alt",
       helpUrl: "https://dequeuniversity.com/rules/axe/4.4/image-alt",
-      nodes: [{ html: '<img src="pic.jpg">', target: ["img"], targetId: "a11y-1" }],
+      nodes: [
+        { html: '<img src="pic.jpg">', target: ["img"], targetId: "a11y-1" },
+      ],
     };
 
     const customAlt: AxeFinding = {
@@ -117,7 +141,13 @@ describe("Normalized Finding Model & Deduplication (P0-A)", () => {
       help: "Image is missing alt attribute",
       helpUrl: "https://www.w3.org/WAI/WCAG22/quickref/#non-text-content",
       fix: 'Add alt="description"',
-      nodes: [{ html: '<img src="pic.jpg">', target: ['[data-a11y-id="a11y-1"]'], targetId: "a11y-1" }],
+      nodes: [
+        {
+          html: '<img src="pic.jpg">',
+          target: ['[data-a11y-id="a11y-1"]'],
+          targetId: "a11y-1",
+        },
+      ],
     };
 
     // Another failure on the same element a11y-1: positive tabindex
@@ -127,10 +157,19 @@ describe("Normalized Finding Model & Deduplication (P0-A)", () => {
       description: "Positive tabindex",
       help: "Positive tabindex attribute disrupts natural tab order",
       helpUrl: "https://www.w3.org/WAI/WCAG22/quickref/#focus-order",
-      nodes: [{ html: '<img src="pic.jpg" tabindex="1">', target: ['[data-a11y-id="a11y-1"]'], targetId: "a11y-1" }],
+      nodes: [
+        {
+          html: '<img src="pic.jpg" tabindex="1">',
+          target: ['[data-a11y-id="a11y-1"]'],
+          targetId: "a11y-1",
+        },
+      ],
     };
 
-    const findings = normalizeFindings([customAlt, customTabindex], [axeViolation]);
+    const findings = normalizeFindings(
+      [customAlt, customTabindex],
+      [axeViolation]
+    );
 
     // image-alt should be deduplicated (1 finding for image-alt inheriting fix),
     // while positive-tabindex stays distinct!
@@ -140,7 +179,9 @@ describe("Normalized Finding Model & Deduplication (P0-A)", () => {
     expect(imageFinding).toBeDefined();
     expect(imageFinding.fix).toBe('Add alt="description"');
 
-    const tabindexFinding = findings.find((f) => f.ruleId === "positive-tabindex")!;
+    const tabindexFinding = findings.find(
+      (f) => f.ruleId === "positive-tabindex"
+    )!;
     expect(tabindexFinding).toBeDefined();
   });
 });

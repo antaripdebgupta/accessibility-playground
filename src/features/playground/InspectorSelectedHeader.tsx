@@ -21,7 +21,10 @@ export function InspectorSelectedHeader({
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--color-border)] bg-[var(--color-surface-raised)]/60 px-4 py-2.5 text-xs">
       <div className="flex items-center gap-2">
-        <Tag className="h-3.5 w-3.5 text-[var(--color-focus-ring)]" aria-hidden="true" />
+        <Tag
+          className="h-3.5 w-3.5 text-[var(--color-focus-ring)]"
+          aria-hidden="true"
+        />
         <span className="font-semibold text-[var(--color-text-primary)]">
           Selected:
         </span>
@@ -37,7 +40,10 @@ export function InspectorSelectedHeader({
           role: {selectedNode.role}
         </Badge>
         {selectedNode.accessibleName && (
-          <span className="max-w-[200px] truncate text-[11px] text-[var(--color-text-secondary)]" title={selectedNode.accessibleName}>
+          <span
+            className="max-w-[200px] truncate text-[11px] text-[var(--color-text-secondary)]"
+            title={selectedNode.accessibleName}
+          >
             &quot;{selectedNode.accessibleName}&quot;
           </span>
         )}
@@ -58,9 +64,7 @@ export function InspectorEmptyState({
       <p className="mb-1 font-semibold text-[var(--color-text-primary)]">
         {title}
       </p>
-      <p className="max-w-xs leading-relaxed">
-        {description}
-      </p>
+      <p className="max-w-xs leading-relaxed">{description}</p>
     </div>
   );
 }

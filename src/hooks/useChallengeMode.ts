@@ -24,9 +24,7 @@ export interface ChallengeMode {
   readonly resetChallenge: () => void;
 }
 
-export function useChallengeMode(
-  challenge: Challenge | null
-): ChallengeMode {
+export function useChallengeMode(challenge: Challenge | null): ChallengeMode {
   const [progress, setProgress] = React.useState<ChallengeProgress>(() => {
     if (!challenge) return defaultProgress();
     return loadChallengeProgress(challenge.id) ?? defaultProgress();

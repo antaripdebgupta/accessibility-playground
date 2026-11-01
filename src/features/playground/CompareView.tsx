@@ -47,7 +47,8 @@ export function CompareView({
           No baseline set
         </h3>
         <p className="mt-1 max-w-sm text-xs text-[var(--color-text-secondary)]">
-          Snapshot your current findings as a baseline to track resolved, remaining, and introduced issues as you make fixes.
+          Snapshot your current findings as a baseline to track resolved,
+          remaining, and introduced issues as you make fixes.
         </p>
         <button
           type="button"
@@ -66,7 +67,7 @@ export function CompareView({
   const changedLines = lineDiff.filter((l) => l.type !== "unchanged");
 
   return (
-    <div className="flex h-full flex-col overflow-y-auto p-4 space-y-6">
+    <div className="flex h-full flex-col space-y-6 overflow-y-auto p-4">
       {/* Baseline status header */}
       <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-3">
         <div>
@@ -131,12 +132,16 @@ export function CompareView({
       {/* 1. Resolved issues */}
       <section className="space-y-2">
         <h4 className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-text-primary)]">
-          <CheckCircle2 className="h-4 w-4 text-[var(--color-success-default)]" aria-hidden="true" />
+          <CheckCircle2
+            className="h-4 w-4 text-[var(--color-success-default)]"
+            aria-hidden="true"
+          />
           <span>Resolved Issues ({resolved.length})</span>
         </h4>
         {resolved.length === 0 ? (
           <p className="text-xs text-[var(--color-text-secondary)] italic">
-            No issues resolved yet. Apply fixes in the code editor to resolve baseline findings.
+            No issues resolved yet. Apply fixes in the code editor to resolve
+            baseline findings.
           </p>
         ) : (
           <ul className="space-y-1.5">
@@ -154,7 +159,10 @@ export function CompareView({
       {/* 2. Remaining issues */}
       <section className="space-y-2">
         <h4 className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-text-primary)]">
-          <AlertTriangle className="h-4 w-4 text-[var(--color-warning-default)]" aria-hidden="true" />
+          <AlertTriangle
+            className="h-4 w-4 text-[var(--color-warning-default)]"
+            aria-hidden="true"
+          />
           <span>Remaining Baseline Issues ({remaining.length})</span>
         </h4>
         {remaining.length === 0 ? (
@@ -177,7 +185,10 @@ export function CompareView({
       {/* 3. Introduced issues */}
       <section className="space-y-2">
         <h4 className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-text-primary)]">
-          <PlusCircle className="h-4 w-4 text-[var(--color-danger-default)]" aria-hidden="true" />
+          <PlusCircle
+            className="h-4 w-4 text-[var(--color-danger-default)]"
+            aria-hidden="true"
+          />
           <span>Introduced Issues ({introduced.length})</span>
         </h4>
         {introduced.length === 0 ? (
@@ -205,15 +216,24 @@ export function CompareView({
           className="flex w-full items-center justify-between p-3 text-left focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
         >
           <div className="flex items-center gap-2">
-            <FileDiff className="h-4 w-4 text-[var(--color-accent)]" aria-hidden="true" />
+            <FileDiff
+              className="h-4 w-4 text-[var(--color-accent)]"
+              aria-hidden="true"
+            />
             <span className="text-xs font-semibold text-[var(--color-text-primary)]">
               Source Changes Diff ({changedLines.length} changed lines)
             </span>
           </div>
           {showDiff ? (
-            <ChevronDown className="h-4 w-4 text-[var(--color-text-secondary)]" aria-hidden="true" />
+            <ChevronDown
+              className="h-4 w-4 text-[var(--color-text-secondary)]"
+              aria-hidden="true"
+            />
           ) : (
-            <ChevronRight className="h-4 w-4 text-[var(--color-text-secondary)]" aria-hidden="true" />
+            <ChevronRight
+              className="h-4 w-4 text-[var(--color-text-secondary)]"
+              aria-hidden="true"
+            />
           )}
         </button>
 
@@ -230,7 +250,7 @@ export function CompareView({
                     return (
                       <div
                         key={idx}
-                        className="bg-[var(--color-success-subtle)] text-[var(--color-success-default)] px-1"
+                        className="bg-[var(--color-success-subtle)] px-1 text-[var(--color-success-default)]"
                       >
                         + {line.text}
                       </div>
@@ -240,15 +260,19 @@ export function CompareView({
                     return (
                       <div
                         key={idx}
-                        className="bg-[var(--color-danger-subtle)] text-[var(--color-danger-default)] px-1"
+                        className="bg-[var(--color-danger-subtle)] px-1 text-[var(--color-danger-default)]"
                       >
                         - {line.text}
                       </div>
                     );
                   }
                   return (
-                    <div key={idx} className="text-[var(--color-text-secondary)] opacity-50 px-1">
-                      {"  "}{line.text}
+                    <div
+                      key={idx}
+                      className="px-1 text-[var(--color-text-secondary)] opacity-50"
+                    >
+                      {"  "}
+                      {line.text}
                     </div>
                   );
                 })}
@@ -275,8 +299,8 @@ function ComparedItemRow({
   return (
     <li className="flex flex-col gap-1 rounded border border-[var(--color-border)] bg-[var(--color-surface)] p-2.5 text-xs">
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5 min-w-0">
-          <span className="font-semibold text-[var(--color-text-primary)] truncate">
+        <div className="flex min-w-0 items-center gap-1.5">
+          <span className="truncate font-semibold text-[var(--color-text-primary)]">
             {finding.help || finding.ruleId}
           </span>
           <span className="font-mono text-[10px] text-[var(--color-text-secondary)]">
@@ -285,7 +309,10 @@ function ComparedItemRow({
         </div>
 
         {disposition === "element-removed" ? (
-          <Badge variant="default" className="text-[9px] bg-[var(--color-surface-sunken)]">
+          <Badge
+            variant="default"
+            className="bg-[var(--color-surface-sunken)] text-[9px]"
+          >
             Element removed
           </Badge>
         ) : (
@@ -303,12 +330,12 @@ function ComparedItemRow({
       </div>
 
       <div className="flex items-center justify-between text-[11px] text-[var(--color-text-secondary)]">
-        <span className="font-mono truncate">{targetSelector}</span>
+        <span className="truncate font-mono">{targetSelector}</span>
         {targetId && onSelectNode && disposition !== "element-removed" && (
           <button
             type="button"
             onClick={() => onSelectNode(targetId)}
-            className="text-[10px] font-medium text-[var(--color-focus-ring)] hover:underline shrink-0 ml-2"
+            className="ml-2 shrink-0 text-[10px] font-medium text-[var(--color-focus-ring)] hover:underline"
           >
             Inspect
           </button>
@@ -318,7 +345,10 @@ function ComparedItemRow({
       {disposition === "element-removed" && (
         <div className="mt-1 flex items-center gap-1 text-[10px] text-[var(--color-text-secondary)] italic">
           <Trash2 className="h-3 w-3 shrink-0" aria-hidden="true" />
-          <span>The target element was removed from the markup — not verified as resolved.</span>
+          <span>
+            The target element was removed from the markup — not verified as
+            resolved.
+          </span>
         </div>
       )}
     </li>

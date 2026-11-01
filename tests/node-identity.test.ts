@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { parseHtmlToA11yTree, findA11yNodeById, rematchA11yNode } from "@/lib/a11y-tree";
+import {
+  parseHtmlToA11yTree,
+  findA11yNodeById,
+  rematchA11yNode,
+} from "@/lib/a11y-tree";
 import type { A11yNode } from "@/types/a11y";
 
 describe("Stable Node Identity & Re-matching (P0-A)", () => {
@@ -75,7 +79,9 @@ describe("Stable Node Identity & Re-matching (P0-A)", () => {
   <button type="button">Primary Action</button>
 </main>`;
     const initialTree = parseHtmlToA11yTree(initialHtml).ast!;
-    const initialButton = findA11yNodeById(initialTree, initialTree.children[0]!.id) || initialTree.children[0]!;
+    const initialButton =
+      findA11yNodeById(initialTree, initialTree.children[0]!.id) ||
+      initialTree.children[0]!;
 
     // Now insert a sibling before the button
     const modifiedHtml = `<main>

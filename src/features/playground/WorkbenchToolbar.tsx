@@ -253,13 +253,19 @@ export function WorkbenchToolbar({
           size="sm"
           onClick={onSetBaseline}
           className="h-7 gap-1.5 px-2.5 text-xs font-medium"
-          aria-label={hasBaseline ? "Update baseline snapshot" : "Snapshot current findings as baseline"}
+          aria-label={
+            hasBaseline
+              ? "Update baseline snapshot"
+              : "Snapshot current findings as baseline"
+          }
         >
           <BookmarkCheck
             className={`h-3.5 w-3.5 ${hasBaseline ? "text-[var(--color-accent)]" : "opacity-70"}`}
             aria-hidden="true"
           />
-          <span className="hidden sm:inline">{hasBaseline ? "Baseline Set" : "Set Baseline"}</span>
+          <span className="hidden sm:inline">
+            {hasBaseline ? "Baseline Set" : "Set Baseline"}
+          </span>
         </Button>
       )}
 
@@ -290,7 +296,10 @@ export function WorkbenchToolbar({
                 }}
                 className="text-xs"
               >
-                <FileCode className="mr-1.5 h-3.5 w-3.5 text-[var(--color-text-secondary)]" aria-hidden="true" />
+                <FileCode
+                  className="mr-1.5 h-3.5 w-3.5 text-[var(--color-text-secondary)]"
+                  aria-hidden="true"
+                />
                 JSON (.json)
               </DropdownMenuItem>
             )}
@@ -302,7 +311,10 @@ export function WorkbenchToolbar({
                 }}
                 className="text-xs"
               >
-                <Table className="mr-1.5 h-3.5 w-3.5 text-[var(--color-text-secondary)]" aria-hidden="true" />
+                <Table
+                  className="mr-1.5 h-3.5 w-3.5 text-[var(--color-text-secondary)]"
+                  aria-hidden="true"
+                />
                 Spreadsheet (.csv)
               </DropdownMenuItem>
             )}
@@ -314,7 +326,10 @@ export function WorkbenchToolbar({
                 }}
                 className="text-xs"
               >
-                <FileText className="mr-1.5 h-3.5 w-3.5 text-[var(--color-text-secondary)]" aria-hidden="true" />
+                <FileText
+                  className="mr-1.5 h-3.5 w-3.5 text-[var(--color-text-secondary)]"
+                  aria-hidden="true"
+                />
                 Markdown (.md)
               </DropdownMenuItem>
             )}
@@ -328,7 +343,10 @@ export function WorkbenchToolbar({
                   }}
                   className="text-xs"
                 >
-                  <Copy className="mr-1.5 h-3.5 w-3.5 text-[var(--color-text-secondary)]" aria-hidden="true" />
+                  <Copy
+                    className="mr-1.5 h-3.5 w-3.5 text-[var(--color-text-secondary)]"
+                    aria-hidden="true"
+                  />
                   Copy Markdown
                 </DropdownMenuItem>
               </>

@@ -55,7 +55,12 @@ function countByStatus(findings: readonly Finding[]): StatusCounts {
 }
 
 function countBySeverity(findings: readonly Finding[]): SeverityCounts {
-  const counts: SeverityCounts = { critical: 0, serious: 0, moderate: 0, minor: 0 };
+  const counts: SeverityCounts = {
+    critical: 0,
+    serious: 0,
+    moderate: 0,
+    minor: 0,
+  };
   for (const f of findings) {
     counts[f.impact]++;
   }
@@ -160,7 +165,9 @@ const CSV_HEADERS = [
 ] as const;
 
 function findingToCsvRow(f: Finding): string {
-  const wcag = f.wcag.map((w) => `${w.id} (${w.version}, ${w.level})`).join("; ");
+  const wcag = f.wcag
+    .map((w) => `${w.id} (${w.version}, ${w.level})`)
+    .join("; ");
   const selector = f.nodes[0]?.target.join(" > ") ?? "";
   const snippet = f.nodes[0]?.html ?? "";
   const fix = f.fix ?? "";
@@ -201,20 +208,30 @@ export function toCsv(
     rows.push("Disposition," + CSV_HEADERS.join(","));
 
     for (const cf of comparison.resolved) {
-      rows.push(`${escapeCsvCell(cf.disposition)},${findingToCsvRow(cf.finding)}`);
+      rows.push(
+        `${escapeCsvCell(cf.disposition)},${findingToCsvRow(cf.finding)}`
+      );
     }
     for (const cf of comparison.remaining) {
-      rows.push(`${escapeCsvCell(cf.disposition)},${findingToCsvRow(cf.finding)}`);
+      rows.push(
+        `${escapeCsvCell(cf.disposition)},${findingToCsvRow(cf.finding)}`
+      );
     }
     for (const cf of comparison.introduced) {
-      rows.push(`${escapeCsvCell(cf.disposition)},${findingToCsvRow(cf.finding)}`);
+      rows.push(
+        `${escapeCsvCell(cf.disposition)},${findingToCsvRow(cf.finding)}`
+      );
     }
   }
 
   if (manualTests && Object.keys(manualTests).length > 0) {
     rows.push("");
     rows.push("# Manual Test Checklist Results");
-    rows.push(["Test ID", "Category", "Title", "Status", "Note", "Updated At"].map(escapeCsvCell).join(","));
+    rows.push(
+      ["Test ID", "Category", "Title", "Status", "Note", "Updated At"]
+        .map(escapeCsvCell)
+        .join(",")
+    );
 
     for (const record of Object.values(manualTests)) {
       const item = MANUAL_TESTS.find((t) => t.id === record.testId);
@@ -283,7 +300,9 @@ export function toMarkdown(
   lines.push("# Accessibility Report");
   lines.push("");
   lines.push(`**Generated:** ${meta.generatedAt}`);
-  lines.push(`**Engines:** ${meta.engines.join(", ")}${meta.axeVersion ? ` (axe-core ${meta.axeVersion})` : ""}`);
+  lines.push(
+    `**Engines:** ${meta.engines.join(", ")}${meta.axeVersion ? ` (axe-core ${meta.axeVersion})` : ""}`
+  );
   lines.push("");
   lines.push(`> ⚠️ ${DISCLAIMER}`);
   lines.push("");
@@ -307,8 +326,12 @@ export function toMarkdown(
   if (findings.length > 0) {
     lines.push("## Findings");
     lines.push("");
-    lines.push("| # | Severity | Status | Rule | WCAG | Description | Selector |");
-    lines.push("|---|----------|--------|------|------|-------------|----------|");
+    lines.push(
+      "| # | Severity | Status | Rule | WCAG | Description | Selector |"
+    );
+    lines.push(
+      "|---|----------|--------|------|------|-------------|----------|"
+    );
 
     findings.forEach((f, i) => {
       const wcag = f.wcag.map((w) => `${w.id}`).join(", ");
@@ -334,8 +357,13 @@ export function toMarkdown(
       lines.push("### Resolved");
       lines.push("");
       for (const cf of comparison.resolved) {
-        const label = cf.disposition === "element-removed" ? "(element removed)" : "(fixed)";
-        lines.push(`- ~~\`${cf.finding.ruleId}\`~~ ${label}: ${escapeMarkdown(cf.finding.help)}`);
+        const label =
+          cf.disposition === "element-removed"
+            ? "(element removed)"
+            : "(fixed)";
+        lines.push(
+          `- ~~\`${cf.finding.ruleId}\`~~ ${label}: ${escapeMarkdown(cf.finding.help)}`
+        );
       }
       lines.push("");
     }
@@ -344,7 +372,9 @@ export function toMarkdown(
       lines.push("### Introduced");
       lines.push("");
       for (const cf of comparison.introduced) {
-        lines.push(`- \`${cf.finding.ruleId}\`: ${escapeMarkdown(cf.finding.help)}`);
+        lines.push(
+          `- \`${cf.finding.ruleId}\`: ${escapeMarkdown(cf.finding.help)}`
+        );
       }
       lines.push("");
     }
@@ -365,10 +395,10 @@ export function toMarkdown(
         record.status === "passed"
           ? "✅ Passed"
           : record.status === "failed"
-          ? "❌ Failed"
-          : record.status === "not-applicable"
-          ? "⚪ N/A"
-          : "⏳ Not Tested";
+            ? "❌ Failed"
+            : record.status === "not-applicable"
+              ? "⚪ N/A"
+              : "⏳ Not Tested";
       const note = escapeMarkdown(record.note ?? "—");
 
       lines.push(`| ${title} | ${cat} | ${status} | ${note} |`);
@@ -379,10 +409,18 @@ export function toMarkdown(
   // Testing limitations
   lines.push("## Testing Limitations");
   lines.push("");
-  lines.push("- Results are from automated checks only (axe-core and playground custom rules).");
-  lines.push("- Scans run in a sandboxed iframe; some checks may behave differently than in a real page.");
-  lines.push("- Inspector data (accessible name, ARIA) is simulated and may differ from real browser accessibility trees.");
-  lines.push("- Manual testing with assistive technologies (screen readers, keyboard, magnification) is required for full coverage.");
+  lines.push(
+    "- Results are from automated checks only (axe-core and playground custom rules)."
+  );
+  lines.push(
+    "- Scans run in a sandboxed iframe; some checks may behave differently than in a real page."
+  );
+  lines.push(
+    "- Inspector data (accessible name, ARIA) is simulated and may differ from real browser accessibility trees."
+  );
+  lines.push(
+    "- Manual testing with assistive technologies (screen readers, keyboard, magnification) is required for full coverage."
+  );
   lines.push("");
 
   return lines.join("\n");

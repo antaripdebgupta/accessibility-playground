@@ -12,7 +12,10 @@ export const metadata: Metadata = {
 
 export default function LearnIndexPage() {
   return (
-    <main id="main-content" className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
+    <main
+      id="main-content"
+      className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12"
+    >
       {/* Header */}
       <header className="mb-10 flex flex-col gap-3 border-b border-[var(--color-border)] pb-8">
         <div className="flex items-center gap-2 text-sm font-semibold text-[var(--color-accent)]">
@@ -23,9 +26,10 @@ export default function LearnIndexPage() {
           Core Accessibility Topics
         </h1>
         <p className="max-w-3xl text-base leading-relaxed text-[var(--color-text-secondary)]">
-          Short, actionable guides on modern web accessibility. Each topic covers plain and technical
-          explanations, why it matters, bad versus good code examples you can open live in the
-          playground, browser behaviors, and manual verification steps.
+          Short, actionable guides on modern web accessibility. Each topic
+          covers plain and technical explanations, why it matters, bad versus
+          good code examples you can open live in the playground, browser
+          behaviors, and manual verification steps.
         </p>
       </header>
 
@@ -37,7 +41,7 @@ export default function LearnIndexPage() {
             className="flex flex-col justify-between rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-xs transition-shadow hover:shadow-md"
           >
             <div>
-              <div className="mb-2 flex items-center justify-between text-xs font-mono text-[var(--color-text-secondary)]">
+              <div className="mb-2 flex items-center justify-between font-mono text-xs text-[var(--color-text-secondary)]">
                 <span>TOPIC {String(index + 1).padStart(2, "0")}</span>
                 {topic.challengeId && (
                   <span className="rounded bg-[var(--color-accent)]/10 px-1.5 py-0.5 text-[10px] font-semibold text-[var(--color-accent)]">
@@ -58,7 +62,7 @@ export default function LearnIndexPage() {
               </p>
             </div>
 
-            <div className="pt-2 border-t border-[var(--color-border)] flex flex-col gap-3">
+            <div className="flex flex-col gap-3 border-t border-[var(--color-border)] pt-2">
               <div className="flex flex-wrap gap-1">
                 {topic.wcagCriteria.map((sc) => (
                   <WcagBadge key={sc} criterionId={sc} asLink={false} />

@@ -128,12 +128,18 @@ export function FocusOrderPanel({
                     <div className="flex items-center gap-2">
                       {f.impact === "critical" ? (
                         <Badge variant="critical">
-                          <AlertOctagon className="h-3 w-3" aria-hidden="true" />
+                          <AlertOctagon
+                            className="h-3 w-3"
+                            aria-hidden="true"
+                          />
                           Critical
                         </Badge>
                       ) : (
                         <Badge variant="serious">
-                          <AlertTriangle className="h-3 w-3" aria-hidden="true" />
+                          <AlertTriangle
+                            className="h-3 w-3"
+                            aria-hidden="true"
+                          />
                           Serious
                         </Badge>
                       )}
@@ -190,8 +196,11 @@ export function FocusOrderPanel({
                 {sequence.map((el, idx) => {
                   const isSelected = selectedNodeId === el.id;
                   const isSimulated = activeStepIndex === idx;
-                  const domIndex = allFocusable.findIndex((f) => f.id === el.id) + 1;
-                  const hasMissingFocusStyle = missingFocusOutlineIds.has(el.id);
+                  const domIndex =
+                    allFocusable.findIndex((f) => f.id === el.id) + 1;
+                  const hasMissingFocusStyle = missingFocusOutlineIds.has(
+                    el.id
+                  );
 
                   const handleSelect = () => {
                     setActiveStepIndex(idx);
@@ -265,7 +274,10 @@ export function FocusOrderPanel({
                           )}
                           {hasMissingFocusStyle && (
                             <Badge variant="warning" className="text-[10px]">
-                              <EyeOff className="h-2.5 w-2.5" aria-hidden="true" />
+                              <EyeOff
+                                className="h-2.5 w-2.5"
+                                aria-hidden="true"
+                              />
                               Missing visible focus style
                             </Badge>
                           )}

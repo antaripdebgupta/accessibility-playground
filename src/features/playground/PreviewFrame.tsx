@@ -59,7 +59,9 @@ export function PreviewFrame({
   onToggleMaximize,
 }: PreviewFrameProps) {
   const [iframeKey, setIframeKey] = React.useState(0);
-  const [viewportWidth, setViewportWidth] = React.useState<"full" | "320" | "768" | "1280">("full");
+  const [viewportWidth, setViewportWidth] = React.useState<
+    "full" | "320" | "768" | "1280"
+  >("full");
   const [reducedMotion, setReducedMotion] = React.useState(false);
   const [forcedColors, setForcedColors] = React.useState(false);
   const [runtimeErrors, setRuntimeErrors] = React.useState<
@@ -174,17 +176,19 @@ export function PreviewFrame({
       } else if (parsed.type === "focus-order") {
         onFocusPositionsChange?.(parsed.elements);
       } else if (parsed.type === "runtime-error") {
-        setRuntimeErrors((prev) => [
-          {
-            id: `err-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-            message: parsed.message,
-            source: parsed.source,
-            lineno: parsed.lineno,
-            colno: parsed.colno,
-            timestamp: parsed.timestamp,
-          },
-          ...prev,
-        ].slice(0, 100));
+        setRuntimeErrors((prev) =>
+          [
+            {
+              id: `err-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+              message: parsed.message,
+              source: parsed.source,
+              lineno: parsed.lineno,
+              colno: parsed.colno,
+              timestamp: parsed.timestamp,
+            },
+            ...prev,
+          ].slice(0, 100)
+        );
         setIsConsoleOpen(true);
       }
     }
@@ -202,14 +206,18 @@ export function PreviewFrame({
       className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xs"
     >
       {/* Preview Header */}
-      <div className="flex flex-wrap items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface-raised)]/60 px-3 py-1.5 gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--color-border)] bg-[var(--color-surface-raised)]/60 px-3 py-1.5">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-mono font-semibold text-[var(--color-text-primary)]">
+          <span className="font-mono text-xs font-semibold text-[var(--color-text-primary)]">
             Live Preview
           </span>
 
           {/* Viewport Presets */}
-          <div className="flex items-center rounded border border-[var(--color-border)] bg-[var(--color-surface)] p-0.5" role="toolbar" aria-label="Viewport size presets">
+          <div
+            className="flex items-center rounded border border-[var(--color-border)] bg-[var(--color-surface)] p-0.5"
+            role="toolbar"
+            aria-label="Viewport size presets"
+          >
             <button
               type="button"
               onClick={() => setViewportWidth("full")}
@@ -257,7 +265,11 @@ export function PreviewFrame({
 
         <div className="flex items-center gap-1.5">
           {/* Simulations */}
-          <div className="flex items-center gap-1" role="toolbar" aria-label="Accessibility media simulations">
+          <div
+            className="flex items-center gap-1"
+            role="toolbar"
+            aria-label="Accessibility media simulations"
+          >
             <button
               type="button"
               onClick={() => setReducedMotion((v) => !v)}
@@ -289,7 +301,10 @@ export function PreviewFrame({
             </button>
           </div>
 
-          <div className="h-3.5 w-px bg-[var(--color-border)]" aria-hidden="true" />
+          <div
+            className="h-3.5 w-px bg-[var(--color-border)]"
+            aria-hidden="true"
+          />
 
           {onToggleMaximize && (
             <button
@@ -328,7 +343,10 @@ export function PreviewFrame({
           role="status"
           className="border-b border-[var(--color-accent-subtle)] bg-[var(--color-accent-subtle)]/30 px-3 py-1 font-mono text-[10px] text-[var(--color-accent)]"
         >
-          Simulated preview setting ({reducedMotion ? "reduced-motion" : ""}{reducedMotion && forcedColors ? ", " : ""}{forcedColors ? "forced-colors" : ""}) — does not replace testing in a real operating system environment.
+          Simulated preview setting ({reducedMotion ? "reduced-motion" : ""}
+          {reducedMotion && forcedColors ? ", " : ""}
+          {forcedColors ? "forced-colors" : ""}) — does not replace testing in a
+          real operating system environment.
         </div>
       )}
 
@@ -337,20 +355,23 @@ export function PreviewFrame({
           role="status"
           className="border-b border-[var(--color-border)] bg-[var(--color-surface-sunken)] px-3 py-1 text-[10px] text-[var(--color-text-secondary)]"
         >
-          320px viewport simulates 400% zoom on a standard 1280px display (WCAG 1.4.10 Reflow).
+          320px viewport simulates 400% zoom on a standard 1280px display (WCAG
+          1.4.10 Reflow).
         </div>
       )}
 
       {/* Frame Container */}
-      <div className={`relative min-h-0 w-full flex-1 bg-white ${
-        viewportWidth === "320"
-          ? "mx-auto max-w-[320px] shadow-lg border-x border-[var(--color-border)]"
-          : viewportWidth === "768"
-          ? "mx-auto max-w-[768px] shadow-lg border-x border-[var(--color-border)]"
-          : viewportWidth === "1280"
-          ? "mx-auto max-w-[1280px] shadow-lg border-x border-[var(--color-border)]"
-          : ""
-      }`}>
+      <div
+        className={`relative min-h-0 w-full flex-1 bg-white ${
+          viewportWidth === "320"
+            ? "mx-auto max-w-[320px] border-x border-[var(--color-border)] shadow-lg"
+            : viewportWidth === "768"
+              ? "mx-auto max-w-[768px] border-x border-[var(--color-border)] shadow-lg"
+              : viewportWidth === "1280"
+                ? "mx-auto max-w-[1280px] border-x border-[var(--color-border)] shadow-lg"
+                : ""
+        }`}
+      >
         {parseError ? (
           <div className="text-md flex h-full min-h-[220px] flex-col items-center justify-center p-6 text-center text-[var(--color-danger-default)]">
             <p className="font-semibold">{parseError}</p>
@@ -425,8 +446,12 @@ export function PreviewFrame({
             <Terminal className="h-3 w-3" aria-hidden="true" />
             <span>Console</span>
             {runtimeErrors.length > 0 && (
-              <Badge variant="danger" className="text-[9px] px-1 py-0 font-normal">
-                {runtimeErrors.length} {runtimeErrors.length === 1 ? "error" : "errors"}
+              <Badge
+                variant="danger"
+                className="px-1 py-0 text-[9px] font-normal"
+              >
+                {runtimeErrors.length}{" "}
+                {runtimeErrors.length === 1 ? "error" : "errors"}
               </Badge>
             )}
           </button>
@@ -447,10 +472,10 @@ export function PreviewFrame({
             id="preview-runtime-console"
             role="region"
             aria-label="Preview runtime errors"
-            className="max-h-36 overflow-y-auto border-t border-[var(--color-border)] p-2 font-mono text-[11px] space-y-1.5"
+            className="max-h-36 space-y-1.5 overflow-y-auto border-t border-[var(--color-border)] p-2 font-mono text-[11px]"
           >
             {runtimeErrors.length === 0 ? (
-              <div className="text-[var(--color-text-secondary)] opacity-60 italic text-[10px]">
+              <div className="text-[10px] text-[var(--color-text-secondary)] italic opacity-60">
                 No runtime exceptions detected.
               </div>
             ) : (
@@ -459,9 +484,12 @@ export function PreviewFrame({
                   key={err.id}
                   className="flex items-start gap-1.5 text-[var(--color-danger-default)]"
                 >
-                  <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" aria-hidden="true" />
+                  <AlertCircle
+                    className="mt-0.5 h-3.5 w-3.5 shrink-0"
+                    aria-hidden="true"
+                  />
                   <div className="min-w-0 flex-1">
-                    <p className="break-words font-semibold">{err.message}</p>
+                    <p className="font-semibold break-words">{err.message}</p>
                     <div className="flex items-center gap-2 text-[10px] text-[var(--color-text-secondary)]">
                       {err.lineno !== undefined && (
                         <span>
@@ -470,7 +498,9 @@ export function PreviewFrame({
                           {err.colno !== undefined ? `:${err.colno}` : ""}
                         </span>
                       )}
-                      <span>{new Date(err.timestamp).toLocaleTimeString()}</span>
+                      <span>
+                        {new Date(err.timestamp).toLocaleTimeString()}
+                      </span>
                     </div>
                   </div>
                 </div>

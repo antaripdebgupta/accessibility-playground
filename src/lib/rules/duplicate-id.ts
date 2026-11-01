@@ -8,7 +8,11 @@ export const duplicateIdRule: Rule = {
   confidence: "high",
   wcag: ["1.3.1", "4.1.2"],
   help: "Duplicate id attribute value",
-  equivalentAxeIds: ["duplicate-id", "duplicate-id-active", "duplicate-id-aria"],
+  equivalentAxeIds: [
+    "duplicate-id",
+    "duplicate-id-active",
+    "duplicate-id-aria",
+  ],
   checkEnd(ctx) {
     const findings: AxeFinding[] = [];
     for (const [idValue, idNodes] of ctx.idMap.entries()) {

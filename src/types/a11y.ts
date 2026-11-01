@@ -126,4 +126,3 @@ export interface AnalysisState {
   readonly scanError: string | null;
   readonly parseError: string | null;
 }
-

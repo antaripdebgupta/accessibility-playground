@@ -166,5 +166,4 @@ export function suggestPassingColor(
 
   const fallbackResult = searchDirection(!preferDarken);
   return fallbackResult;
-
 }

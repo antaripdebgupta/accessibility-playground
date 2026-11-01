@@ -24,7 +24,10 @@ import {
 export interface FindingDetailProps {
   finding: Finding;
   onSelectNode?: (id: string) => void;
-  onOpenInspector?: (inspector: "tree" | "aria" | "accname" | "focus" | "announce", nodeId?: string) => void;
+  onOpenInspector?: (
+    inspector: "tree" | "aria" | "accname" | "focus" | "announce",
+    nodeId?: string
+  ) => void;
   onApplyFix?: (finding: AxeFinding) => void;
 }
 
@@ -142,10 +145,8 @@ export function FindingDetail({
       <div className="flex flex-col gap-2 border-b border-[var(--color-border)] pb-4">
         <div className="flex flex-wrap items-center gap-2">
           <FindingStatusBadge status={finding.status} />
-          <Badge variant={impactMeta.variant}>
-            {impactMeta.label}
-          </Badge>
-          <span className="rounded bg-[var(--color-surface-sunken)] px-1.5 py-0.5 text-[10px] font-mono text-[var(--color-text-secondary)]">
+          <Badge variant={impactMeta.variant}>{impactMeta.label}</Badge>
+          <span className="rounded bg-[var(--color-surface-sunken)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--color-text-secondary)]">
             {finding.engine}
           </span>
           <span className="font-mono text-[11px] font-medium text-[var(--color-text-secondary)]">
@@ -160,16 +161,23 @@ export function FindingDetail({
       {/* Matching Knowledge Centre Topic */}
       {learnTopic && (
         <div className="flex items-center justify-between rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-2.5 text-xs">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <BookOpen className="h-3.5 w-3.5 flex-shrink-0 text-[var(--color-accent)]" aria-hidden="true" />
-            <span className="text-[var(--color-text-secondary)] flex-shrink-0">Guide:</span>
-            <span className="font-semibold text-[var(--color-text-primary)] truncate">{learnTopic.title}</span>
+          <div className="flex min-w-0 items-center gap-1.5">
+            <BookOpen
+              className="h-3.5 w-3.5 flex-shrink-0 text-[var(--color-accent)]"
+              aria-hidden="true"
+            />
+            <span className="flex-shrink-0 text-[var(--color-text-secondary)]">
+              Guide:
+            </span>
+            <span className="truncate font-semibold text-[var(--color-text-primary)]">
+              {learnTopic.title}
+            </span>
           </div>
           <Link
             href={`/learn/${learnTopic.slug}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="ml-2 inline-flex items-center gap-1 font-semibold text-[var(--color-accent)] hover:underline flex-shrink-0"
+            className="ml-2 inline-flex flex-shrink-0 items-center gap-1 font-semibold text-[var(--color-accent)] hover:underline"
           >
             <span>Read guide</span>
             <ExternalLink className="h-3 w-3" aria-hidden="true" />
@@ -215,14 +223,16 @@ export function FindingDetail({
             ))}
           </div>
           {knowledge.whoIsAffectedNote && (
-            <p className="text-[11px] italic text-[var(--color-text-secondary)]">
+            <p className="text-[11px] text-[var(--color-text-secondary)] italic">
               {knowledge.whoIsAffectedNote}
             </p>
           )}
         </section>
       ) : (
         <section className="flex flex-col gap-1 text-[var(--color-text-secondary)]">
-          <h4 className="font-semibold text-[var(--color-text-primary)]">Who is affected</h4>
+          <h4 className="font-semibold text-[var(--color-text-primary)]">
+            Who is affected
+          </h4>
           <p>No detailed lesson yet. See external documentation below.</p>
         </section>
       )}
@@ -300,7 +310,10 @@ export function FindingDetail({
         <section className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5 font-semibold text-[var(--color-text-primary)]">
-              <CheckCircle className="h-3.5 w-3.5 text-[var(--color-success-default)]" aria-hidden="true" />
+              <CheckCircle
+                className="h-3.5 w-3.5 text-[var(--color-success-default)]"
+                aria-hidden="true"
+              />
               <h4>How to verify</h4>
             </div>
             {onOpenInspector && (
@@ -309,7 +322,10 @@ export function FindingDetail({
                 onClick={() => onOpenInspector(knowledge.inspector, targetId)}
                 className="inline-flex items-center gap-1 rounded border border-[var(--color-border)] bg-[var(--color-surface-raised)] px-2 py-1 text-[11px] font-medium text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-focus-ring)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
               >
-                <span>Open in {INSPECTOR_LABELS[knowledge.inspector] || knowledge.inspector}</span>
+                <span>
+                  Open in{" "}
+                  {INSPECTOR_LABELS[knowledge.inspector] || knowledge.inspector}
+                </span>
                 <ArrowRight className="h-3 w-3" aria-hidden="true" />
               </button>
             )}
@@ -329,7 +345,10 @@ export function FindingDetail({
         <section className="flex flex-col gap-2 rounded-md border border-[var(--color-border)] bg-[var(--color-surface-sunken)]/60 p-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5 font-semibold text-[var(--color-text-primary)]">
-              <Wrench className="h-3.5 w-3.5 text-[var(--color-accent)]" aria-hidden="true" />
+              <Wrench
+                className="h-3.5 w-3.5 text-[var(--color-accent)]"
+                aria-hidden="true"
+              />
               <h4>Automated Fix Available</h4>
             </div>
             <button

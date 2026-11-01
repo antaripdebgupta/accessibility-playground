@@ -30,7 +30,9 @@ describe("Knowledge Centre (Phase P2)", () => {
 
     const actualSlugs = LEARN_TOPICS.map((t) => t.slug);
     for (const slug of requiredSlugs) {
-      expect(actualSlugs, `Missing required topic slug "${slug}"`).toContain(slug);
+      expect(actualSlugs, `Missing required topic slug "${slug}"`).toContain(
+        slug
+      );
     }
     expect(LEARN_TOPICS.length).toBe(15);
   });
@@ -45,8 +47,13 @@ describe("Knowledge Centre (Phase P2)", () => {
 
   it("every topic contains complete, non-empty content sections", () => {
     for (const topic of LEARN_TOPICS) {
-      expect(topic.title.trim().length, `${topic.slug} title`).toBeGreaterThan(0);
-      expect(topic.summary.trim().length, `${topic.slug} summary`).toBeGreaterThan(0);
+      expect(topic.title.trim().length, `${topic.slug} title`).toBeGreaterThan(
+        0
+      );
+      expect(
+        topic.summary.trim().length,
+        `${topic.slug} summary`
+      ).toBeGreaterThan(0);
       expect(
         topic.plainExplanation.trim().length,
         `${topic.slug} plainExplanation`
@@ -55,15 +62,19 @@ describe("Knowledge Centre (Phase P2)", () => {
         topic.technicalExplanation.trim().length,
         `${topic.slug} technicalExplanation`
       ).toBeGreaterThan(0);
-      expect(topic.whyItMatters.trim().length, `${topic.slug} whyItMatters`).toBeGreaterThan(
-        0
-      );
+      expect(
+        topic.whyItMatters.trim().length,
+        `${topic.slug} whyItMatters`
+      ).toBeGreaterThan(0);
       expect(
         topic.browserBehaviour.trim().length,
         `${topic.slug} browserBehaviour`
       ).toBeGreaterThan(0);
 
-      expect(topic.wcagCriteria.length, `${topic.slug} wcagCriteria`).toBeGreaterThan(0);
+      expect(
+        topic.wcagCriteria.length,
+        `${topic.slug} wcagCriteria`
+      ).toBeGreaterThan(0);
       for (const sc of topic.wcagCriteria) {
         expect(
           WCAG_CRITERIA_BY_ID.has(sc),
@@ -71,10 +82,14 @@ describe("Knowledge Centre (Phase P2)", () => {
         ).toBe(true);
       }
 
-      expect(topic.commonMistakes.length, `${topic.slug} commonMistakes`).toBeGreaterThan(
-        0
-      );
-      expect(topic.manualTest.length, `${topic.slug} manualTest`).toBeGreaterThan(0);
+      expect(
+        topic.commonMistakes.length,
+        `${topic.slug} commonMistakes`
+      ).toBeGreaterThan(0);
+      expect(
+        topic.manualTest.length,
+        `${topic.slug} manualTest`
+      ).toBeGreaterThan(0);
       expect(topic.links.length, `${topic.slug} links`).toBeGreaterThan(0);
       for (const link of topic.links) {
         expect(link.url.startsWith("http")).toBe(true);
@@ -92,7 +107,10 @@ describe("Knowledge Centre (Phase P2)", () => {
       expect(badUrl.startsWith("/playground?s=")).toBe(true);
       const badSnippetParam = badUrl.replace("/playground?s=", "");
       const decodedBad = decodeSnippet(badSnippetParam);
-      expect(decodedBad, `Failed to decode bad example for ${topic.slug}`).not.toBeNull();
+      expect(
+        decodedBad,
+        `Failed to decode bad example for ${topic.slug}`
+      ).not.toBeNull();
       expect(decodedBad?.html).toBe(topic.badExample.html);
 
       // Good example
@@ -102,7 +120,10 @@ describe("Knowledge Centre (Phase P2)", () => {
       expect(goodUrl.startsWith("/playground?s=")).toBe(true);
       const goodSnippetParam = goodUrl.replace("/playground?s=", "");
       const decodedGood = decodeSnippet(goodSnippetParam);
-      expect(decodedGood, `Failed to decode good example for ${topic.slug}`).not.toBeNull();
+      expect(
+        decodedGood,
+        `Failed to decode good example for ${topic.slug}`
+      ).not.toBeNull();
       expect(decodedGood?.html).toBe(topic.goodExample.html);
     }
   });
@@ -117,8 +138,12 @@ describe("Knowledge Centre (Phase P2)", () => {
 
   it("getLearnTopicForRuleId maps rule IDs to relevant topics", () => {
     expect(getLearnTopicForRuleId("img-missing-alt")?.slug).toBe("images");
-    expect(getLearnTopicForRuleId("empty-interactive-name")?.slug).toBe("accessible-names");
-    expect(getLearnTopicForRuleId("input-no-label")?.slug).toBe("accessible-names");
+    expect(getLearnTopicForRuleId("empty-interactive-name")?.slug).toBe(
+      "accessible-names"
+    );
+    expect(getLearnTopicForRuleId("input-no-label")?.slug).toBe(
+      "accessible-names"
+    );
     expect(getLearnTopicForRuleId("color-contrast")?.slug).toBe("contrast");
     expect(getLearnTopicForRuleId("dialog-no-name")?.slug).toBe("dialogs");
     expect(getLearnTopicForRuleId("outline-removed")?.slug).toBe("focus");

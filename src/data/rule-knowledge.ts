@@ -7,11 +7,7 @@ export type WhoIsAffected =
   | "low-vision-contrast";
 
 export type InspectorTarget =
-  | "tree"
-  | "aria"
-  | "accname"
-  | "focus"
-  | "announce";
+  "tree" | "aria" | "accname" | "focus" | "announce";
 
 export interface RuleResource {
   readonly title: string;
@@ -40,7 +36,12 @@ export const RULE_KNOWLEDGE: readonly RuleKnowledge[] = [
       "A non-interactive element has an onclick or keyboard click listener without interactive semantics or keyboard operability.",
     whyItMatters:
       "Keyboard and switch users cannot focus or trigger standard click handlers on static elements like div or span by default.",
-    whoIsAffected: ["keyboard", "screen-reader", "switch-device", "voice-control"],
+    whoIsAffected: [
+      "keyboard",
+      "screen-reader",
+      "switch-device",
+      "voice-control",
+    ],
     whoIsAffectedNote:
       "People navigating without a pointing device rely on elements participating in the tab sequence and responding to Enter/Space.",
     badExample: `<div onclick="submitForm()">Submit</div>`,
@@ -128,7 +129,12 @@ export const RULE_KNOWLEDGE: readonly RuleKnowledge[] = [
       "A form input relies solely on a placeholder attribute without an associated label element or accessible name.",
     whyItMatters:
       "Placeholders disappear when text is entered, frequently lack sufficient contrast, and are not reliably announced as labels by screen readers.",
-    whoIsAffected: ["screen-reader", "voice-control", "magnification", "low-vision-contrast"],
+    whoIsAffected: [
+      "screen-reader",
+      "voice-control",
+      "magnification",
+      "low-vision-contrast",
+    ],
     whoIsAffectedNote:
       "Users with memory impairments or low vision lose the prompt once text input starts.",
     badExample: `<input type="text" placeholder="First Name">`,
@@ -181,8 +187,7 @@ export const RULE_KNOWLEDGE: readonly RuleKnowledge[] = [
   },
   {
     ruleId: "img-missing-alt",
-    whatIsHappening:
-      "An img element is missing the alt attribute entirely.",
+    whatIsHappening: "An img element is missing the alt attribute entirely.",
     whyItMatters:
       "Screen readers may announce the raw file URL or ignore the image unpredictably, confusing users about the image content.",
     whoIsAffected: ["screen-reader", "low-vision-contrast"],
@@ -562,8 +567,7 @@ export const RULE_KNOWLEDGE: readonly RuleKnowledge[] = [
   },
   {
     ruleId: "label",
-    whatIsHappening:
-      "A form element is missing a programmatic label.",
+    whatIsHappening: "A form element is missing a programmatic label.",
     whyItMatters:
       "Users filling out forms will not hear the purpose of the input when navigating into the field.",
     whoIsAffected: ["screen-reader", "voice-control"],
@@ -686,7 +690,8 @@ export const RULE_KNOWLEDGE: readonly RuleKnowledge[] = [
     inspector: "aria",
     resources: [
       {
-        title: "Deque University: Elements must only use allowed ARIA attributes",
+        title:
+          "Deque University: Elements must only use allowed ARIA attributes",
         url: "https://dequeuniversity.com/rules/axe/4.4/aria-allowed-attr",
       },
       {
@@ -793,7 +798,8 @@ export const RULE_KNOWLEDGE: readonly RuleKnowledge[] = [
     inspector: "accname",
     resources: [
       {
-        title: "Deque University: All page content must be contained by landmarks",
+        title:
+          "Deque University: All page content must be contained by landmarks",
         url: "https://dequeuniversity.com/rules/axe/4.4/region",
       },
       {
@@ -860,8 +866,7 @@ export const RULE_KNOWLEDGE: readonly RuleKnowledge[] = [
   },
   {
     ruleId: "html-has-lang",
-    whatIsHappening:
-      "The root <html> element is missing the lang attribute.",
+    whatIsHappening: "The root <html> element is missing the lang attribute.",
     whyItMatters:
       "Screen readers use the document language attribute to select the correct speech synthesis voice and pronunciation dictionary.",
     whoIsAffected: ["screen-reader"],
@@ -930,7 +935,8 @@ export const RULE_KNOWLEDGE: readonly RuleKnowledge[] = [
     inspector: "tree",
     resources: [
       {
-        title: "Deque University: aria-hidden elements must not contain focusable elements",
+        title:
+          "Deque University: aria-hidden elements must not contain focusable elements",
         url: "https://dequeuniversity.com/rules/axe/4.4/aria-hidden-focus",
       },
       {
@@ -957,7 +963,8 @@ export const RULE_KNOWLEDGE: readonly RuleKnowledge[] = [
     inspector: "focus",
     resources: [
       {
-        title: "Deque University: Page must have means to bypass repeated blocks",
+        title:
+          "Deque University: Page must have means to bypass repeated blocks",
         url: "https://dequeuniversity.com/rules/axe/4.4/bypass",
       },
       {
@@ -984,7 +991,8 @@ export const RULE_KNOWLEDGE: readonly RuleKnowledge[] = [
     inspector: "tree",
     resources: [
       {
-        title: "Deque University: <ul> and <ol> must only directly contain <li> elements",
+        title:
+          "Deque University: <ul> and <ol> must only directly contain <li> elements",
         url: "https://dequeuniversity.com/rules/axe/4.4/list",
       },
       {
@@ -1011,7 +1019,8 @@ export const RULE_KNOWLEDGE: readonly RuleKnowledge[] = [
     inspector: "tree",
     resources: [
       {
-        title: "Deque University: <li> elements must be contained within a list",
+        title:
+          "Deque University: <li> elements must be contained within a list",
         url: "https://dequeuniversity.com/rules/axe/4.4/listitem",
       },
       {
@@ -1076,8 +1085,7 @@ export const RULE_KNOWLEDGE: readonly RuleKnowledge[] = [
   },
   {
     ruleId: "page-has-heading-one",
-    whatIsHappening:
-      "The page does not contain a level 1 heading (<h1>).",
+    whatIsHappening: "The page does not contain a level 1 heading (<h1>).",
     whyItMatters:
       "An <h1> identifies the primary subject of the page and serves as the main orientation anchor for assistive technology users.",
     whoIsAffected: ["screen-reader", "magnification"],
@@ -1119,7 +1127,8 @@ export const RULE_KNOWLEDGE: readonly RuleKnowledge[] = [
     inspector: "accname",
     resources: [
       {
-        title: "Deque University: ARIA input fields must have an accessible name",
+        title:
+          "Deque University: ARIA input fields must have an accessible name",
         url: "https://dequeuniversity.com/rules/axe/4.4/aria-input-field-name",
       },
       {
@@ -1146,7 +1155,8 @@ export const RULE_KNOWLEDGE: readonly RuleKnowledge[] = [
     inspector: "accname",
     resources: [
       {
-        title: "Deque University: ARIA toggle fields must have an accessible name",
+        title:
+          "Deque University: ARIA toggle fields must have an accessible name",
         url: "https://dequeuniversity.com/rules/axe/4.4/aria-toggle-field-name",
       },
       {

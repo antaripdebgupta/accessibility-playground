@@ -50,7 +50,8 @@ export function IssuesPanel({
   const findings: readonly Finding[] = React.useMemo(() => {
     if (propFindings) return propFindings;
 
-    const allViolationsAreNormalized = violations.length > 0 && violations.every(isNormalizedFinding);
+    const allViolationsAreNormalized =
+      violations.length > 0 && violations.every(isNormalizedFinding);
     if (allViolationsAreNormalized) {
       return violations as Finding[];
     }
@@ -69,7 +70,8 @@ export function IssuesPanel({
   if (!hasHtml) {
     return (
       <div className="flex h-48 items-center justify-center p-6 text-center text-xs text-[var(--color-text-secondary)]">
-        Write or paste HTML in the editor to run the automated accessibility audit.
+        Write or paste HTML in the editor to run the automated accessibility
+        audit.
       </div>
     );
   }
@@ -78,9 +80,10 @@ export function IssuesPanel({
     return (
       <div className="flex h-48 flex-col items-center justify-center p-6 text-center text-[var(--color-danger-default)]">
         <AlertOctagon className="mb-2 h-6 w-6" aria-hidden="true" />
-        <p className="font-semibold text-xs">Audit Scan Failed</p>
+        <p className="text-xs font-semibold">Audit Scan Failed</p>
         <p className="max-w-md text-[11px] text-[var(--color-text-secondary)]">
-          {scanError} Check that axe.min.js is accessible and iframe permissions are active.
+          {scanError} Check that axe.min.js is accessible and iframe permissions
+          are active.
         </p>
       </div>
     );
@@ -90,16 +93,22 @@ export function IssuesPanel({
     return (
       <div className="flex h-48 flex-col items-center justify-center p-6 text-center text-[var(--color-text-secondary)]">
         <div className="mb-3 h-6 w-6 animate-spin rounded-full border-2 border-[var(--color-focus-ring)] border-t-transparent" />
-        <p className="font-medium text-xs text-[var(--color-text-primary)]">
+        <p className="text-xs font-medium text-[var(--color-text-primary)]">
           Running automated accessibility scan…
         </p>
       </div>
     );
   }
 
-  const violationCount = findings.filter((f) => f.status === "violation").length;
-  const reviewCount = findings.filter((f) => f.status === "needs-review").length;
-  const manualCount = findings.filter((f) => f.status === "manual-required").length;
+  const violationCount = findings.filter(
+    (f) => f.status === "violation"
+  ).length;
+  const reviewCount = findings.filter(
+    (f) => f.status === "needs-review"
+  ).length;
+  const manualCount = findings.filter(
+    (f) => f.status === "manual-required"
+  ).length;
 
   if (findings.length === 0) {
     return (
@@ -109,20 +118,25 @@ export function IssuesPanel({
             className="mb-2 h-7 w-7 text-[var(--color-success-default)]"
             aria-hidden="true"
           />
-          <p className="font-semibold text-xs text-[var(--color-text-primary)]">
+          <p className="text-xs font-semibold text-[var(--color-text-primary)]">
             No automated issues detected
           </p>
           <p className="mt-1 max-w-sm text-[11px] text-[var(--color-text-secondary)]">
-            Automated checks passed. Always test manually with keyboard navigation, screen readers, and zoom.
+            Automated checks passed. Always test manually with keyboard
+            navigation, screen readers, and zoom.
           </p>
         </div>
 
         {/* Honest disclaimer */}
         <div className="rounded border border-[var(--color-border)] bg-[var(--color-surface-sunken)] p-3 text-center text-[11px] text-[var(--color-text-secondary)]">
-          <ShieldAlert className="mx-auto mb-1 h-4 w-4 text-[var(--color-text-secondary)]" aria-hidden="true" />
+          <ShieldAlert
+            className="mx-auto mb-1 h-4 w-4 text-[var(--color-text-secondary)]"
+            aria-hidden="true"
+          />
           <p className="font-medium">Testing Notice</p>
           <p className="mt-0.5">
-            Automated checks find only a subset of WCAG issues. Passing them does not mean the page is accessible.
+            Automated checks find only a subset of WCAG issues. Passing them
+            does not mean the page is accessible.
           </p>
         </div>
       </div>
@@ -168,7 +182,8 @@ export function IssuesPanel({
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className="text-sm font-bold text-[var(--color-text-primary)]">
-              {violationCount} {violationCount === 1 ? "violation" : "violations"}
+              {violationCount}{" "}
+              {violationCount === 1 ? "violation" : "violations"}
             </span>
             {reviewCount > 0 && (
               <span className="text-xs font-medium text-[var(--color-warning-default)]">
@@ -222,9 +237,13 @@ export function IssuesPanel({
 
         {/* Fixed honest disclaimer: no score, automated limits noted */}
         <div className="flex items-start gap-2 rounded border border-[var(--color-border)] bg-[var(--color-surface-sunken)]/80 p-2 text-[11px] text-[var(--color-text-secondary)]">
-          <ShieldAlert className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--color-warning-default)]" aria-hidden="true" />
+          <ShieldAlert
+            className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--color-warning-default)]"
+            aria-hidden="true"
+          />
           <p>
-            Automated checks find only a subset of WCAG issues. Passing them does not mean the page is accessible.
+            Automated checks find only a subset of WCAG issues. Passing them
+            does not mean the page is accessible.
           </p>
         </div>
       </header>

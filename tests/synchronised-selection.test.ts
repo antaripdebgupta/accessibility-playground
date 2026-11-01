@@ -45,7 +45,10 @@ describe("Synchronised Inspectors & Selection Model (P0-C)", () => {
     const currentScanId = "scan-v2";
     let appliedResults: string | null = null;
 
-    function handleScanResultsMessage(message: { scanId: string; violations: unknown[] }) {
+    function handleScanResultsMessage(message: {
+      scanId: string;
+      violations: unknown[];
+    }) {
       if (message.scanId !== currentScanId) {
         // Discard stale scan
         return;

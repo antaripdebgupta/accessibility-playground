@@ -23,7 +23,11 @@ function loadBaselineFromSession(id: string): BaselineData | null {
     const raw = window.sessionStorage.getItem(getStorageKey(id));
     if (!raw) return null;
     const parsed = JSON.parse(raw);
-    if (parsed && typeof parsed === "object" && Array.isArray(parsed.findings)) {
+    if (
+      parsed &&
+      typeof parsed === "object" &&
+      Array.isArray(parsed.findings)
+    ) {
       return parsed as BaselineData;
     }
   } catch {
@@ -56,9 +60,11 @@ export function useBaseline(
   currentHtml: string,
   onBaselineCleared?: (reason: string) => void
 ) {
-  const [baseline, setBaselineState] = React.useState<BaselineData | null>(() => {
-    return loadBaselineFromSession(activeId);
-  });
+  const [baseline, setBaselineState] = React.useState<BaselineData | null>(
+    () => {
+      return loadBaselineFromSession(activeId);
+    }
+  );
 
   const activeIdRef = React.useRef(activeId);
 

@@ -26,7 +26,10 @@ describe("Finding Detail & UI Logic (P0-B)", () => {
 
   describe("Contextual Fix Generator", () => {
     it("generates contextual fix for img-missing-alt by inserting alt attribute", () => {
-      const fix = generateContextualFix(mockBaseFinding, '<img src="test.png" alt="Test">');
+      const fix = generateContextualFix(
+        mockBaseFinding,
+        '<img src="test.png" alt="Test">'
+      );
       expect(fix).toContain('alt="Meaningful description of the image"');
       expect(fix).toContain('src="avatar.jpg"');
     });
@@ -42,7 +45,10 @@ describe("Finding Detail & UI Logic (P0-B)", () => {
           },
         ],
       };
-      const fix = generateContextualFix(buttonFinding, "<button>Action</button>");
+      const fix = generateContextualFix(
+        buttonFinding,
+        "<button>Action</button>"
+      );
       expect(fix).toContain('aria-label="Action description"');
       expect(fix).toContain('type="button"');
     });
@@ -58,7 +64,10 @@ describe("Finding Detail & UI Logic (P0-B)", () => {
           },
         ],
       };
-      const fix = generateContextualFix(linkFinding, '<a href="/dashboard">Dashboard</a>');
+      const fix = generateContextualFix(
+        linkFinding,
+        '<a href="/dashboard">Dashboard</a>'
+      );
       expect(fix).toContain('aria-label="Destination description"');
     });
 
@@ -73,7 +82,10 @@ describe("Finding Detail & UI Logic (P0-B)", () => {
           },
         ],
       };
-      const fix = generateContextualFix(inputFinding, "<label>Email</label><input>");
+      const fix = generateContextualFix(
+        inputFinding,
+        "<label>Email</label><input>"
+      );
       expect(fix).toContain('<label for="user-email">');
       expect(fix).toContain('id="user-email"');
     });
@@ -84,7 +96,10 @@ describe("Finding Detail & UI Logic (P0-B)", () => {
         ruleId: "duplicate-id",
         nodes: [{ html: '<div id="dup"></div>', target: ["div"] }],
       };
-      const fix = generateContextualFix(otherFinding, '<div id="unique-id"></div>');
+      const fix = generateContextualFix(
+        otherFinding,
+        '<div id="unique-id"></div>'
+      );
       expect(fix).toBe('<div id="unique-id"></div>');
     });
   });

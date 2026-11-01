@@ -9,10 +9,7 @@ import type { Finding } from "@/types/a11y";
  * - `introduced`:     New finding not present in the baseline.
  */
 export type CompareDisposition =
-  | "resolved"
-  | "element-removed"
-  | "remaining"
-  | "introduced";
+  "resolved" | "element-removed" | "remaining" | "introduced";
 
 export interface ComparedFinding {
   readonly finding: Finding;
@@ -81,9 +78,10 @@ export function compare(
       const isElementPresent =
         bfTargetId !== "" &&
         (currentElementIds.has(bfTargetId) ||
-          bf.nodes.some((n) =>
-            (n.targetId && currentElementIds.has(n.targetId)) ||
-            (n.target && currentElementIds.has(n.target.join(" > ")))
+          bf.nodes.some(
+            (n) =>
+              (n.targetId && currentElementIds.has(n.targetId)) ||
+              (n.target && currentElementIds.has(n.target.join(" > ")))
           ));
 
       if (isElementPresent) {

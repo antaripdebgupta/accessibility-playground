@@ -21,7 +21,9 @@ export function useSnippets(html: string, css: string) {
   );
   const [isNamingSnippet, setIsNamingSnippet] = React.useState(false);
   const [newSnippetName, setNewSnippetName] = React.useState("");
-  const [editingSnippetId, setEditingSnippetId] = React.useState<string | null>(null);
+  const [editingSnippetId, setEditingSnippetId] = React.useState<string | null>(
+    null
+  );
   const [editingSnippetName, setEditingSnippetName] = React.useState("");
   const toast = useToast();
 
@@ -81,10 +83,7 @@ export function useSnippets(html: string, css: string) {
     setEditingSnippetName("");
   };
 
-  const handleDuplicateSnippet = (
-    e: React.MouseEvent,
-    id: string
-  ) => {
+  const handleDuplicateSnippet = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
     const copy = duplicateSnippet(id);
     setSnippets(listSnippets());
@@ -100,7 +99,11 @@ export function useSnippets(html: string, css: string) {
   const handleExportAll = (e: React.MouseEvent) => {
     e.stopPropagation();
     const jsonString = exportSnippets();
-    downloadBlob(jsonString, `a11y-snippets-${Date.now()}.json`, "application/json");
+    downloadBlob(
+      jsonString,
+      `a11y-snippets-${Date.now()}.json`,
+      "application/json"
+    );
     toast.push({
       title: "Snippets exported",
       description: `Exported ${snippets.length} snippet(s) to JSON.`,
@@ -134,7 +137,10 @@ export function useSnippets(html: string, css: string) {
     } catch (err) {
       toast.push({
         title: "Import failed",
-        description: err instanceof Error ? err.message : "Malformed or invalid snippet file.",
+        description:
+          err instanceof Error
+            ? err.message
+            : "Malformed or invalid snippet file.",
         variant: "danger",
       });
     } finally {

@@ -19,7 +19,10 @@ import {
 import { computeFocusOrder } from "@/lib/focus-order";
 import { runCustomRules } from "@/lib/custom-rules";
 import { mergeFindings } from "@/lib/merge-findings";
-import type { FocusOrderPosition } from "@/types/a11y";
+import type { FocusOrderPosition, AxeFinding, Finding } from "@/types/a11y";
+import type { RevealRequest } from "./CodeEditor";
+import { buildDiagnostics } from "./editor/extensions/diagnostics";
+import type { SelectionSource } from "@/hooks/useSelection";
 import { encodeSnippet } from "@/lib/snippet-share";
 import { AlertTriangle } from "lucide-react";
 import {
@@ -45,7 +48,7 @@ export function PlaygroundView() {
 
   // Challenge mode: resolve the active challenge from ?challenge=<id>
   const activeChallenge = React.useMemo<Challenge | null>(
-    () => (challengeParam ? getChallengeById(challengeParam) ?? null : null),
+    () => (challengeParam ? (getChallengeById(challengeParam) ?? null) : null),
     [challengeParam]
   );
   const challengeMode = useChallengeMode(activeChallenge);
@@ -143,7 +146,37 @@ export function PlaygroundView() {
     selectionLost,
   } = useSelection({ ast, onTabChange: setAnalysisTab });
 
-  // Sync cursor in CodeMirror with element selection (§C1)
+  const [revealRequest, setRevealRequest] =
+    React.useState<RevealRequest | null>(null);
+  const revealSeqRef = React.useRef(0);
+
+  // One-shot reveal triggered only on user selection from tree/preview/issue/focus (Part A1)
+  const wrappedHandleSelect = React.useCallback(
+    (id: string | null, newSource: SelectionSource, focusEditor = false) => {
+      handleSelect(id, newSource);
+      if (
+        (newSource === "tree" ||
+          newSource === "preview" ||
+          newSource === "issue" ||
+          newSource === "focus") &&
+        id &&
+        ast
+      ) {
+        const node = findA11yNodeById(ast, id);
+        if (node?.sourceRange) {
+          revealSeqRef.current += 1;
+          setRevealRequest({
+            id: revealSeqRef.current,
+            range: node.sourceRange,
+            focus: focusEditor,
+          });
+        }
+      }
+    },
+    [handleSelect, ast]
+  );
+
+  // Sync cursor in CodeMirror with element selection (§C1) - no feedback loop (Part A1)
   const handleCaretChange = React.useCallback(
     (offset: number) => {
       if (!ast) return;
@@ -211,7 +244,11 @@ export function PlaygroundView() {
   );
 
   const toast = useToast();
-  const activeTemplateId = challengeParam || searchParams.get("pattern") || searchParams.get("s") || "default";
+  const activeTemplateId =
+    challengeParam ||
+    searchParams.get("pattern") ||
+    searchParams.get("s") ||
+    "default";
 
   const handleBaselineCleared = React.useCallback(
     (reason: string) => {
@@ -224,23 +261,27 @@ export function PlaygroundView() {
     [toast]
   );
 
-  const {
-    baseline,
-    hasBaseline,
-    setBaseline,
-    clearBaseline,
-    comparison,
-  } = useBaseline(
-    activeTemplateId,
-    normalizedFindings,
-    rawHtml,
-    handleBaselineCleared
-  );
+  const { baseline, hasBaseline, setBaseline, clearBaseline, comparison } =
+    useBaseline(
+      activeTemplateId,
+      normalizedFindings,
+      rawHtml,
+      handleBaselineCleared
+    );
 
   const handleExportJson = React.useCallback(() => {
     const manualTests = loadManualTestResults(activeTemplateId);
-    const jsonString = toJson(normalizedFindings, comparison ?? undefined, undefined, manualTests);
-    downloadBlob(jsonString, `a11y-report-${Date.now()}.json`, "application/json");
+    const jsonString = toJson(
+      normalizedFindings,
+      comparison ?? undefined,
+      undefined,
+      manualTests
+    );
+    downloadBlob(
+      jsonString,
+      `a11y-report-${Date.now()}.json`,
+      "application/json"
+    );
     toast.push({
       title: "Report exported",
       description: "Downloaded JSON report.",
@@ -250,8 +291,16 @@ export function PlaygroundView() {
 
   const handleExportCsv = React.useCallback(() => {
     const manualTests = loadManualTestResults(activeTemplateId);
-    const csvString = toCsv(normalizedFindings, comparison ?? undefined, manualTests);
-    downloadBlob(csvString, `a11y-report-${Date.now()}.csv`, "text/csv;charset=utf-8");
+    const csvString = toCsv(
+      normalizedFindings,
+      comparison ?? undefined,
+      manualTests
+    );
+    downloadBlob(
+      csvString,
+      `a11y-report-${Date.now()}.csv`,
+      "text/csv;charset=utf-8"
+    );
     toast.push({
       title: "Report exported",
       description: "Downloaded CSV spreadsheet.",
@@ -261,8 +310,17 @@ export function PlaygroundView() {
 
   const handleExportMarkdown = React.useCallback(() => {
     const manualTests = loadManualTestResults(activeTemplateId);
-    const mdString = toMarkdown(normalizedFindings, comparison ?? undefined, undefined, manualTests);
-    downloadBlob(mdString, `a11y-report-${Date.now()}.md`, "text/markdown;charset=utf-8");
+    const mdString = toMarkdown(
+      normalizedFindings,
+      comparison ?? undefined,
+      undefined,
+      manualTests
+    );
+    downloadBlob(
+      mdString,
+      `a11y-report-${Date.now()}.md`,
+      "text/markdown;charset=utf-8"
+    );
     toast.push({
       title: "Report exported",
       description: "Downloaded Markdown report.",
@@ -272,7 +330,12 @@ export function PlaygroundView() {
 
   const handleCopyReport = React.useCallback(() => {
     const manualTests = loadManualTestResults(activeTemplateId);
-    const mdString = toMarkdown(normalizedFindings, comparison ?? undefined, undefined, manualTests);
+    const mdString = toMarkdown(
+      normalizedFindings,
+      comparison ?? undefined,
+      undefined,
+      manualTests
+    );
     if (navigator?.clipboard) {
       navigator.clipboard.writeText(mdString).then(() => {
         toast.push({
@@ -287,10 +350,45 @@ export function PlaygroundView() {
   const handleSimulateFocus = React.useCallback(
     (id: string) => {
       setSimulatedFocusId(id);
-      handleSelect(id, "focus");
+      wrappedHandleSelect(id, "focus");
     },
-    [handleSelect]
+    [wrappedHandleSelect]
   );
+
+  const handleApplyFix = React.useCallback(
+    (finding: Finding | AxeFinding) => {
+      if (!ast) return;
+      const targetId = finding.nodes[0]?.targetId ?? "";
+      const node = findA11yNodeById(ast, targetId);
+      if (!node) return;
+      const axeFinding: AxeFinding =
+        "id" in finding
+          ? finding
+          : {
+              id: finding.ruleId,
+              impact: finding.impact,
+              description: finding.description,
+              help: finding.help,
+              helpUrl: finding.helpUrl,
+              fix: finding.fix,
+              nodes: finding.nodes,
+            };
+      setRawHtml((html) => applyAutoFixToHtml(html, axeFinding, node));
+    },
+    [ast, setRawHtml]
+  );
+
+  const editorDiagnostics = React.useMemo(() => {
+    return buildDiagnostics(rawHtml.length, {
+      ast,
+      findings: normalizedFindings,
+      parseError,
+      onApplyFix: handleApplyFix,
+      onSelectFinding: () => {
+        setAnalysisTab("issues");
+      },
+    });
+  }, [rawHtml.length, ast, normalizedFindings, parseError, handleApplyFix]);
 
   // F6 / Shift+F6 keyboard cycling between panes and Esc to exit maximize (§2.5)
   React.useEffect(() => {
@@ -351,9 +449,10 @@ export function PlaygroundView() {
         }}
         useTailwind={useTailwind}
         onToggleTailwind={setUseTailwind}
-        selectionRange={selectedNode?.sourceRange ?? null}
+        revealRequest={revealRequest}
         onCaretChange={handleCaretChange}
         onForceScan={triggerScan}
+        diagnostics={editorDiagnostics}
         isMaximized={maximizedPane === "editor"}
         onToggleMaximize={() => toggleMaximize("editor")}
       />
@@ -372,7 +471,7 @@ export function PlaygroundView() {
         useTailwind={useTailwind}
         selectedNodeId={activeNodeId}
         scanId={scanId}
-        onSelectNodeId={(id) => handleSelect(id, "preview")}
+        onSelectNodeId={(id) => wrappedHandleSelect(id, "preview")}
         onScanResults={handleScanResults}
         onScanError={handleScanError}
         parseError={parseError}
@@ -399,7 +498,8 @@ export function PlaygroundView() {
         >
           <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
           <span>
-            Selection lost — previously selected element was removed. Fell back to first element.
+            Selection lost — previously selected element was removed. Fell back
+            to first element.
           </span>
         </div>
       )}
@@ -411,7 +511,7 @@ export function PlaygroundView() {
         ast={ast}
         selectedNode={selectedNode}
         activeNodeId={activeNodeId}
-        onSelectNode={(id) => handleSelect(id, "tree")}
+        onSelectNode={(id) => wrappedHandleSelect(id, "tree")}
         onUpdateAttribute={(attr, value) => {
           if (!selectedNode) return;
           setRawHtml((html) =>
@@ -431,12 +531,7 @@ export function PlaygroundView() {
         isScanning={isScanning}
         scanError={scanError}
         hasHtml={rawHtml.trim().length > 0}
-        onApplyFix={(finding) => {
-          const targetId = finding.nodes[0]?.targetId ?? "";
-          const node = findA11yNodeById(ast, targetId);
-          if (!node) return;
-          setRawHtml((html) => applyAutoFixToHtml(html, finding, node));
-        }}
+        onApplyFix={handleApplyFix}
         isOverSizeLimit={isOverSizeLimit}
         baseline={baseline}
         comparison={comparison}

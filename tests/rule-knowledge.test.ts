@@ -51,7 +51,8 @@ describe("Rule Knowledge Registry (P0-B)", () => {
         expect(res.url.startsWith("https://")).toBe(true);
         const url = new URL(res.url);
         const isAllowed = ALLOWED_DOMAINS.some(
-          (domain) => url.hostname === domain || url.hostname.endsWith(`.${domain}`)
+          (domain) =>
+            url.hostname === domain || url.hostname.endsWith(`.${domain}`)
         );
         expect(
           isAllowed,

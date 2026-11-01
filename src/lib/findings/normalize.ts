@@ -9,10 +9,6 @@ import { RULES } from "@/lib/rules";
 import { WCAG_CRITERIA_BY_ID } from "@/data/wcag";
 import { fnv1a } from "@/lib/hash";
 
-/**
- * Normalizes HTML snippet for stable fingerprinting by stripping data-a11y-id
- * and collapsing whitespace.
- */
 export function normalizeHtmlSnippet(html: string): string {
   return html
     .replace(/\s*data-a11y-id="[^"]*"/g, "")
@@ -20,10 +16,6 @@ export function normalizeHtmlSnippet(html: string): string {
     .trim();
 }
 
-/**
- * Stable finding fingerprint:
- * hash(ruleId + ":" + targetNodeStructuralId + ":" + normalizedHtml)
- */
 export function computeFindingFingerprint(
   ruleId: string,
   targetId: string | undefined,
@@ -33,9 +25,6 @@ export function computeFindingFingerprint(
   return fnv1a(`${ruleId}:${targetId || ""}:${normalized}`);
 }
 
-/**
- * Checks whether an axe-core rule and a custom playground rule represent the same issue.
- */
 export function isEquivalentRule(
   axeRuleId: string,
   customRuleId: string
@@ -47,15 +36,15 @@ export function isEquivalentRule(
   }
   // Check reverse if customRuleId is tested as axe ID
   const reverseRule = RULES.find((r) => r.id === axeRuleId);
-  if (reverseRule?.equivalentAxeIds && reverseRule.equivalentAxeIds.includes(customRuleId)) {
+  if (
+    reverseRule?.equivalentAxeIds &&
+    reverseRule.equivalentAxeIds.includes(customRuleId)
+  ) {
     return true;
   }
   return false;
 }
 
-/**
- * Maps raw WCAG string references to structured WcagRef objects.
- */
 export function parseWcagRefs(wcag?: readonly string[]): readonly WcagRef[] {
   if (!wcag || wcag.length === 0) return [];
 
@@ -88,10 +77,7 @@ export function parseWcagRefs(wcag?: readonly string[]): readonly WcagRef[] {
   return refs;
 }
 
-/**
- * Normalizes custom playground findings, axe violations, and axe incomplete checks
- * into the rich Finding model with stable fingerprints and node-level deduplication.
- */
+
 export function normalizeFindings(
   customFindings: readonly AxeFinding[] = [],
   axeViolations: readonly AxeFinding[] = [],
@@ -113,12 +99,12 @@ export function normalizeFindings(
         for (const cfNode of cf.nodes) {
           const idMatch = Boolean(
             afNode.targetId &&
-              cfNode.targetId &&
-              afNode.targetId === cfNode.targetId
+            cfNode.targetId &&
+            afNode.targetId === cfNode.targetId
           );
           const htmlMatch = Boolean(
             normalizeHtmlSnippet(afNode.html) ===
-              normalizeHtmlSnippet(cfNode.html)
+            normalizeHtmlSnippet(cfNode.html)
           );
 
           if (idMatch || htmlMatch) {
@@ -133,11 +119,13 @@ export function normalizeFindings(
     }
 
     const primaryNode = af.nodes[0];
-    const fingerprint = af.fingerprint || computeFindingFingerprint(
-      af.id,
-      primaryNode?.targetId,
-      primaryNode?.html || ""
-    );
+    const fingerprint =
+      af.fingerprint ||
+      computeFindingFingerprint(
+        af.id,
+        primaryNode?.targetId,
+        primaryNode?.html || ""
+      );
 
     result.push({
       fingerprint,
@@ -158,11 +146,13 @@ export function normalizeFindings(
   // Process axe incomplete checks (status: "needs-review")
   for (const af of axeIncomplete) {
     const primaryNode = af.nodes[0];
-    const fingerprint = af.fingerprint || computeFindingFingerprint(
-      af.id,
-      primaryNode?.targetId,
-      primaryNode?.html || ""
-    );
+    const fingerprint =
+      af.fingerprint ||
+      computeFindingFingerprint(
+        af.id,
+        primaryNode?.targetId,
+        primaryNode?.html || ""
+      );
 
     result.push({
       fingerprint,
@@ -192,15 +182,14 @@ export function normalizeFindings(
     }
 
     const primaryNode = remainingNodes[0]!;
-    const fingerprint = cf.fingerprint || computeFindingFingerprint(
-      cf.id,
-      primaryNode.targetId,
-      primaryNode.html
-    );
+    const fingerprint =
+      cf.fingerprint ||
+      computeFindingFingerprint(cf.id, primaryNode.targetId, primaryNode.html);
 
     const ruleDef = RULES.find((r) => r.id === cf.id);
     const confidence: FindingConfidence = ruleDef?.confidence || "high";
-    const status: FindingStatus = confidence === "low" ? "needs-review" : "violation";
+    const status: FindingStatus =
+      confidence === "low" ? "needs-review" : "violation";
 
     result.push({
       fingerprint,

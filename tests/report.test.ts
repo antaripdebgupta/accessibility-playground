@@ -3,7 +3,9 @@ import { toJson, toCsv, toMarkdown, escapeCsvCell } from "@/lib/report";
 import { compare } from "@/lib/compare";
 import type { Finding } from "@/types/a11y";
 
-function makeFinding(overrides: Partial<Finding> & Pick<Finding, "fingerprint" | "ruleId">): Finding {
+function makeFinding(
+  overrides: Partial<Finding> & Pick<Finding, "fingerprint" | "ruleId">
+): Finding {
   return {
     engine: "playground",
     status: "violation",
@@ -25,14 +27,20 @@ function makeFinding(overrides: Partial<Finding> & Pick<Finding, "fingerprint" |
 }
 
 const sampleFindings: Finding[] = [
-  makeFinding({ fingerprint: "fp-1", ruleId: "img-missing-alt", impact: "critical" }),
+  makeFinding({
+    fingerprint: "fp-1",
+    ruleId: "img-missing-alt",
+    impact: "critical",
+  }),
   makeFinding({
     fingerprint: "fp-2",
     ruleId: "button-name",
     impact: "serious",
     status: "needs-review",
     help: "Buttons must have discernible text",
-    nodes: [{ html: "<button></button>", target: ["button"], targetId: "el-2" }],
+    nodes: [
+      { html: "<button></button>", target: ["button"], targetId: "el-2" },
+    ],
   }),
 ];
 
@@ -44,7 +52,9 @@ describe("toJson()", () => {
     expect(parsed.meta).toBeDefined();
     expect(parsed.meta.engines).toContain("axe-core");
     expect(parsed.meta.engines).toContain("playground");
-    expect(parsed.meta.disclaimer).toContain("does not mean the page is accessible");
+    expect(parsed.meta.disclaimer).toContain(
+      "does not mean the page is accessible"
+    );
     expect(parsed.meta.generatedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
 
     expect(parsed.summary.total).toBe(2);
@@ -198,7 +208,9 @@ describe("Golden-file report exports", () => {
     status: "violation",
     impact: "critical",
     help: "Images must have alt",
-    nodes: [{ html: '<img src="cat.jpg">', target: ["img#cat"], targetId: "cat" }],
+    nodes: [
+      { html: '<img src="cat.jpg">', target: ["img#cat"], targetId: "cat" },
+    ],
   });
 
   it("JSON export matches exact schema and contains all required sections", () => {
@@ -264,7 +276,9 @@ describe("Golden-file report exports", () => {
     const parsed = JSON.parse(json);
     expect(parsed.manualTests).toBeDefined();
     expect(parsed.manualTests).toHaveLength(2);
-    expect(parsed.manualTests[1].note).toBe("Focus ring missing on custom submit button");
+    expect(parsed.manualTests[1].note).toBe(
+      "Focus ring missing on custom submit button"
+    );
 
     // CSV
     const csv = toCsv([fixedFinding], undefined, manualRecords);

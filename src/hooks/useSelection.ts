@@ -5,12 +5,7 @@ import type { A11yNode } from "@/types/a11y";
 import { findA11yNodeById, rematchA11yNode } from "@/lib/a11y-tree";
 
 export type SelectionSource =
-  | "preview"
-  | "tree"
-  | "issue"
-  | "focus"
-  | "editor"
-  | "initial";
+  "preview" | "tree" | "issue" | "focus" | "editor" | "initial";
 
 export interface SelectedNodeMeta {
   readonly id: string;

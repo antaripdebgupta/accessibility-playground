@@ -174,7 +174,11 @@ describe("Challenge progress storage", () => {
   it("saveChallengeProgress round-trips correctly", async () => {
     const { saveChallengeProgress, loadChallengeProgress, defaultProgress } =
       await import("@/lib/challenge-progress");
-    const progress = { ...defaultProgress(), hintsRevealed: 2, completed: true };
+    const progress = {
+      ...defaultProgress(),
+      hintsRevealed: 2,
+      completed: true,
+    };
     saveChallengeProgress("test-challenge", progress);
     const loaded = loadChallengeProgress("test-challenge");
     expect(loaded).toEqual(progress);
@@ -182,7 +186,10 @@ describe("Challenge progress storage", () => {
 
   it("loadChallengeProgress rejects malformed data", async () => {
     const { loadChallengeProgress } = await import("@/lib/challenge-progress");
-    localStorage.setItem("ap_challenge_v1_bad", JSON.stringify({ garbage: true }));
+    localStorage.setItem(
+      "ap_challenge_v1_bad",
+      JSON.stringify({ garbage: true })
+    );
     expect(loadChallengeProgress("bad")).toBeNull();
   });
 

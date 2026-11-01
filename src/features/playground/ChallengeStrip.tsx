@@ -31,8 +31,14 @@ export function ChallengeStrip({
   onLoadSolution,
   onResetStarter,
 }: ChallengeStripProps) {
-  const { challenge, progress, revealNextHint, recordCheckResult, viewSolution, resetChallenge } =
-    challengeMode;
+  const {
+    challenge,
+    progress,
+    revealNextHint,
+    recordCheckResult,
+    viewSolution,
+    resetChallenge,
+  } = challengeMode;
 
   const [showSolutionConfirm, setShowSolutionConfirm] = React.useState(false);
   const [checkResult, setCheckResult] = React.useState<{
@@ -106,7 +112,14 @@ export function ChallengeStrip({
           background: "var(--color-surface-raised, var(--color-surface))",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            marginBottom: "6px",
+          }}
+        >
           <span
             style={{
               display: "inline-flex",
@@ -162,7 +175,12 @@ export function ChallengeStrip({
       </div>
 
       {/* Objectives */}
-      <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--color-border)" }}>
+      <div
+        style={{
+          padding: "12px 16px",
+          borderBottom: "1px solid var(--color-border)",
+        }}
+      >
         <h3
           style={{
             fontSize: "0.75rem",
@@ -196,7 +214,10 @@ export function ChallengeStrip({
             >
               <CircleDot
                 className="h-3.5 w-3.5 shrink-0"
-                style={{ marginTop: "2px", color: "var(--color-accent, var(--focus))" }}
+                style={{
+                  marginTop: "2px",
+                  color: "var(--color-accent, var(--focus))",
+                }}
                 aria-hidden="true"
               />
               <span>{obj}</span>
@@ -206,7 +227,12 @@ export function ChallengeStrip({
       </div>
 
       {/* Hints (progressive disclosure) */}
-      <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--color-border)" }}>
+      <div
+        style={{
+          padding: "12px 16px",
+          borderBottom: "1px solid var(--color-border)",
+        }}
+      >
         <h3
           style={{
             fontSize: "0.75rem",
@@ -265,7 +291,12 @@ export function ChallengeStrip({
       </div>
 
       {/* Check my fix */}
-      <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--color-border)" }}>
+      <div
+        style={{
+          padding: "12px 16px",
+          borderBottom: "1px solid var(--color-border)",
+        }}
+      >
         <button
           type="button"
           onClick={handleCheckFix}
@@ -283,11 +314,7 @@ export function ChallengeStrip({
         </button>
 
         {checkResult && (
-          <div
-            role="status"
-            aria-live="polite"
-            style={{ marginTop: "10px" }}
-          >
+          <div role="status" aria-live="polite" style={{ marginTop: "10px" }}>
             {checkResult.remaining.length === 0 ? (
               <div
                 style={{
@@ -322,7 +349,10 @@ export function ChallengeStrip({
                     marginBottom: "6px",
                   }}
                 >
-                  <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  <AlertCircle
+                    className="h-4 w-4 shrink-0"
+                    aria-hidden="true"
+                  />
                   {checkResult.remaining.length} issue
                   {checkResult.remaining.length === 1 ? "" : "s"} still present
                 </div>
@@ -361,7 +391,12 @@ export function ChallengeStrip({
       </div>
 
       {/* Show solution */}
-      <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--color-border)" }}>
+      <div
+        style={{
+          padding: "12px 16px",
+          borderBottom: "1px solid var(--color-border)",
+        }}
+      >
         {progress.solutionViewed ? (
           <p
             style={{
@@ -428,7 +463,12 @@ export function ChallengeStrip({
 
       {/* Manual verification steps */}
       {challenge.manualSteps.length > 0 && (
-        <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--color-border)" }}>
+        <div
+          style={{
+            padding: "12px 16px",
+            borderBottom: "1px solid var(--color-border)",
+          }}
+        >
           <h3
             style={{
               fontSize: "0.75rem",

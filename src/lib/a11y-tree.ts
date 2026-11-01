@@ -78,16 +78,6 @@ function extractTagRanges(html: string): {
   };
 }
 
-/**
- * Calculates a deterministic structural path for an element within doc.body.
- * Format: tag[index]>tag[index] from the root down to the element,
- * where index is the 0-based index of the element among siblings of the same tag.
- *
- * Limitation note:
- * Node IDs are stable across edits in other parts of the document.
- * However, inserting a sibling before an element of the same tag shifts that tag's index.
- * Selection drift is mitigated via rematchA11yNode.
- */
 export function getElementStructuralPath(element: Element): string {
   const segments: string[] = [];
   let current: Element | null = element;
@@ -268,14 +258,6 @@ export interface RematchCriteria {
   readonly sourceRange?: readonly [number, number];
 }
 
-/**
- * Best-effort node re-matching across document mutations.
- * When a previously selected node ID disappears (e.g. after editing sibling markup),
- * this function tries matching candidates by:
- * 1. Matching tagName
- * 2. Matching accessible name (highest priority)
- * 3. Proximity of source range start offset
- */
 export function rematchA11yNode(
   previous: RematchCriteria | null | undefined,
   root: A11yNode | null
@@ -376,5 +358,3 @@ export function findA11yNodeAtOffset(
 
   return candidate;
 }
-
-

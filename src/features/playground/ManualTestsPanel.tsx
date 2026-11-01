@@ -26,8 +26,12 @@ interface ManualTestsPanelProps {
   templateOrSnippetId: string;
 }
 
-export function ManualTestsPanel({ templateOrSnippetId }: ManualTestsPanelProps) {
-  const [selectedCategory, setSelectedCategory] = React.useState<"all" | ManualTestCategory>("all");
+export function ManualTestsPanel({
+  templateOrSnippetId,
+}: ManualTestsPanelProps) {
+  const [selectedCategory, setSelectedCategory] = React.useState<
+    "all" | ManualTestCategory
+  >("all");
   const { records, validationErrors, updateTestStatus, clearAll, stats } =
     useManualTests(templateOrSnippetId);
 
@@ -37,7 +41,7 @@ export function ManualTestsPanel({ templateOrSnippetId }: ManualTestsPanelProps)
   }, [selectedCategory]);
 
   return (
-    <div className="flex h-full flex-col overflow-y-auto p-4 space-y-4">
+    <div className="flex h-full flex-col space-y-4 overflow-y-auto p-4">
       {/* Overview and Stats */}
       <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -46,14 +50,15 @@ export function ManualTestsPanel({ templateOrSnippetId }: ManualTestsPanelProps)
               Manual Testing Checklists
             </h3>
             <p className="text-xs text-[var(--color-text-secondary)]">
-              Automated scans miss ~60% of WCAG criteria. Verify essential human interactions below.
+              Automated scans miss ~60% of WCAG criteria. Verify essential human
+              interactions below.
             </p>
           </div>
 
           <button
             type="button"
             onClick={clearAll}
-            className="inline-flex items-center gap-1 rounded border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1 text-xs font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-sunken)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
+            className="inline-flex items-center gap-1 rounded border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1 text-xs font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
           >
             <RotateCcw className="h-3 w-3" aria-hidden="true" />
             <span>Reset checklists</span>
@@ -66,25 +71,33 @@ export function ManualTestsPanel({ templateOrSnippetId }: ManualTestsPanelProps)
             <span className="block text-base font-bold text-[var(--color-success-default)]">
               {stats.passed}
             </span>
-            <span className="text-[10px] text-[var(--color-text-secondary)]">Passed</span>
+            <span className="text-[10px] text-[var(--color-text-secondary)]">
+              Passed
+            </span>
           </div>
           <div className="rounded border border-[var(--color-border)] bg-[var(--color-surface)] p-2 text-center">
             <span className="block text-base font-bold text-[var(--color-danger-default)]">
               {stats.failed}
             </span>
-            <span className="text-[10px] text-[var(--color-text-secondary)]">Failed</span>
+            <span className="text-[10px] text-[var(--color-text-secondary)]">
+              Failed
+            </span>
           </div>
           <div className="rounded border border-[var(--color-border)] bg-[var(--color-surface)] p-2 text-center">
             <span className="block text-base font-bold text-[var(--color-text-secondary)]">
               {stats.notApplicable}
             </span>
-            <span className="text-[10px] text-[var(--color-text-secondary)]">N/A</span>
+            <span className="text-[10px] text-[var(--color-text-secondary)]">
+              N/A
+            </span>
           </div>
           <div className="rounded border border-[var(--color-border)] bg-[var(--color-surface)] p-2 text-center">
             <span className="block text-base font-bold text-[var(--color-text-primary)]">
               {stats.notTested}
             </span>
-            <span className="text-[10px] text-[var(--color-text-secondary)]">To test</span>
+            <span className="text-[10px] text-[var(--color-text-secondary)]">
+              To test
+            </span>
           </div>
         </div>
       </div>
@@ -107,7 +120,7 @@ export function ManualTestsPanel({ templateOrSnippetId }: ManualTestsPanelProps)
           }`}
         >
           <span>All Tests</span>
-          <Badge variant="default" className="text-[9px] px-1 py-0">
+          <Badge variant="default" className="px-1 py-0 text-[9px]">
             {MANUAL_TESTS.length}
           </Badge>
         </button>
@@ -166,7 +179,9 @@ export function ManualTestsPanel({ templateOrSnippetId }: ManualTestsPanelProps)
             test={test}
             record={records[test.id]}
             validationError={validationErrors[test.id]}
-            onStatusChange={(status, note) => updateTestStatus(test.id, status, note)}
+            onStatusChange={(status, note) =>
+              updateTestStatus(test.id, status, note)
+            }
           />
         ))}
       </div>
@@ -187,7 +202,9 @@ function ManualTestCard({
 }) {
   const currentStatus = record?.status ?? "not-tested";
   const [note, setNote] = React.useState(record?.note ?? "");
-  const [isFailedSelected, setIsFailedSelected] = React.useState(currentStatus === "failed");
+  const [isFailedSelected, setIsFailedSelected] = React.useState(
+    currentStatus === "failed"
+  );
 
   const handleRadioChange = (newStatus: ManualTestStatus) => {
     if (newStatus === "failed") {
@@ -209,12 +226,12 @@ function ManualTestCard({
 
   return (
     <article
-      className={`rounded-lg border p-3.5 space-y-3 transition-colors ${
+      className={`space-y-3 rounded-lg border p-3.5 transition-colors ${
         currentStatus === "passed"
           ? "border-[var(--color-success-border,var(--color-border))] bg-[var(--color-surface)]"
           : currentStatus === "failed"
-          ? "border-[var(--color-danger-border,var(--color-border))] bg-[var(--color-danger-subtle)]/20"
-          : "border-[var(--color-border)] bg-[var(--color-surface)]"
+            ? "border-[var(--color-danger-border,var(--color-border))] bg-[var(--color-danger-subtle)]/20"
+            : "border-[var(--color-border)] bg-[var(--color-surface)]"
       }`}
     >
       {/* Title & WCAG Header */}
@@ -242,12 +259,12 @@ function ManualTestCard({
       </div>
 
       {/* Steps and expected result */}
-      <div className="rounded bg-[var(--color-surface-sunken)] p-2.5 text-xs space-y-2">
+      <div className="space-y-2 rounded bg-[var(--color-surface-sunken)] p-2.5 text-xs">
         <div>
           <span className="text-[10px] font-semibold text-[var(--color-text-secondary)] uppercase">
             Testing Steps:
           </span>
-          <ol className="mt-1 list-decimal list-inside space-y-0.5 text-[11px] text-[var(--color-text-primary)]">
+          <ol className="mt-1 list-inside list-decimal space-y-0.5 text-[11px] text-[var(--color-text-primary)]">
             {test.steps.map((step, idx) => (
               <li key={idx}>{step}</li>
             ))}
@@ -266,9 +283,14 @@ function ManualTestCard({
 
       {/* Why automation can't tell you */}
       <div className="flex items-start gap-1.5 rounded border border-[var(--color-border)] bg-[var(--color-surface-raised)]/50 p-2 text-[11px] text-[var(--color-text-secondary)]">
-        <HelpCircle className="h-3.5 w-3.5 shrink-0 text-[var(--color-accent)] mt-0.5" aria-hidden="true" />
+        <HelpCircle
+          className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--color-accent)]"
+          aria-hidden="true"
+        />
         <span>
-          <strong className="text-[var(--color-text-primary)]">Why manual:</strong>{" "}
+          <strong className="text-[var(--color-text-primary)]">
+            Why manual:
+          </strong>{" "}
           {test.whatAutomationCantTellYou}
         </span>
       </div>
@@ -284,7 +306,7 @@ function ManualTestCard({
         </legend>
 
         <div className="flex flex-wrap items-center gap-2">
-          <label className="flex items-center gap-1.5 text-xs text-[var(--color-text-secondary)] cursor-pointer">
+          <label className="flex cursor-pointer items-center gap-1.5 text-xs text-[var(--color-text-secondary)]">
             <input
               type="radio"
               name={`status-${test.id}`}
@@ -296,7 +318,7 @@ function ManualTestCard({
             <span>Not tested</span>
           </label>
 
-          <label className="flex items-center gap-1.5 text-xs text-[var(--color-success-default)] cursor-pointer">
+          <label className="flex cursor-pointer items-center gap-1.5 text-xs text-[var(--color-success-default)]">
             <input
               type="radio"
               name={`status-${test.id}`}
@@ -311,7 +333,7 @@ function ManualTestCard({
             </span>
           </label>
 
-          <label className="flex items-center gap-1.5 text-xs text-[var(--color-danger-default)] cursor-pointer">
+          <label className="flex cursor-pointer items-center gap-1.5 text-xs text-[var(--color-danger-default)]">
             <input
               type="radio"
               name={`status-${test.id}`}
@@ -326,7 +348,7 @@ function ManualTestCard({
             </span>
           </label>
 
-          <label className="flex items-center gap-1.5 text-xs text-[var(--color-text-secondary)] cursor-pointer">
+          <label className="flex cursor-pointer items-center gap-1.5 text-xs text-[var(--color-text-secondary)]">
             <input
               type="radio"
               name={`status-${test.id}`}
@@ -360,7 +382,7 @@ function ManualTestCard({
               placeholder="Describe why this test failed (e.g. Escape does not close the dialog)..."
               aria-required="true"
               aria-invalid={validationError !== undefined}
-              className={`w-full rounded border p-2 text-xs text-[var(--color-text-primary)] bg-[var(--color-surface)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)] ${
+              className={`w-full rounded border bg-[var(--color-surface)] p-2 text-xs text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)] ${
                 validationError
                   ? "border-[var(--color-danger-default)] ring-1 ring-[var(--color-danger-default)]"
                   : "border-[var(--color-border)]"

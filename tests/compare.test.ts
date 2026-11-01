@@ -3,7 +3,9 @@ import { compare } from "@/lib/compare";
 import type { Finding } from "@/types/a11y";
 
 /** Helper to build a minimal Finding with overrides */
-function makeFinding(overrides: Partial<Finding> & Pick<Finding, "fingerprint" | "ruleId">): Finding {
+function makeFinding(
+  overrides: Partial<Finding> & Pick<Finding, "fingerprint" | "ruleId">
+): Finding {
   return {
     engine: "playground",
     status: "violation",
@@ -29,7 +31,9 @@ describe("compare()", () => {
     expect(result.remaining).toHaveLength(2);
     expect(result.resolved).toHaveLength(0);
     expect(result.introduced).toHaveLength(0);
-    expect(result.remaining.every((r) => r.disposition === "remaining")).toBe(true);
+    expect(result.remaining.every((r) => r.disposition === "remaining")).toBe(
+      true
+    );
   });
 
   it("classifies removed fingerprint with same element key as resolved", () => {
@@ -37,7 +41,7 @@ describe("compare()", () => {
       makeFinding({
         fingerprint: "aaa",
         ruleId: "img-missing-alt",
-        nodes: [{ html: '<img>', target: ["img"], targetId: "el-1" }],
+        nodes: [{ html: "<img>", target: ["img"], targetId: "el-1" }],
       }),
     ];
     // Same element key (ruleId + targetId) but different fingerprint (HTML changed)
@@ -45,7 +49,9 @@ describe("compare()", () => {
       makeFinding({
         fingerprint: "bbb",
         ruleId: "link-name",
-        nodes: [{ html: '<img alt="desc">', target: ["img"], targetId: "el-1" }],
+        nodes: [
+          { html: '<img alt="desc">', target: ["img"], targetId: "el-1" },
+        ],
       }),
     ];
     const result = compare(baseline, current);
@@ -63,7 +69,7 @@ describe("compare()", () => {
       makeFinding({
         fingerprint: "aaa",
         ruleId: "img-missing-alt",
-        nodes: [{ html: '<img>', target: ["img"], targetId: "el-removed" }],
+        nodes: [{ html: "<img>", target: ["img"], targetId: "el-removed" }],
       }),
     ];
     // Element is completely gone from current
@@ -99,7 +105,7 @@ describe("compare()", () => {
       makeFinding({
         fingerprint: "will-resolve",
         ruleId: "img-missing-alt",
-        nodes: [{ html: '<img>', target: ["img"], targetId: "el-1" }],
+        nodes: [{ html: "<img>", target: ["img"], targetId: "el-1" }],
       }),
       shared,
     ];
@@ -129,12 +135,24 @@ describe("compare()", () => {
       makeFinding({
         fingerprint: "f1",
         ruleId: "button-name",
-        nodes: [{ html: "<button></button>", target: ["button:nth-of-type(1)"], targetId: "btn-1" }],
+        nodes: [
+          {
+            html: "<button></button>",
+            target: ["button:nth-of-type(1)"],
+            targetId: "btn-1",
+          },
+        ],
       }),
       makeFinding({
         fingerprint: "f2",
         ruleId: "button-name",
-        nodes: [{ html: "<button></button>", target: ["button:nth-of-type(2)"], targetId: "btn-2" }],
+        nodes: [
+          {
+            html: "<button></button>",
+            target: ["button:nth-of-type(2)"],
+            targetId: "btn-2",
+          },
+        ],
       }),
     ];
     // Only btn-1 fixed (fingerprint gone, element still present with other rule)
@@ -142,7 +160,13 @@ describe("compare()", () => {
       makeFinding({
         fingerprint: "f2",
         ruleId: "button-name",
-        nodes: [{ html: "<button></button>", target: ["button:nth-of-type(2)"], targetId: "btn-2" }],
+        nodes: [
+          {
+            html: "<button></button>",
+            target: ["button:nth-of-type(2)"],
+            targetId: "btn-2",
+          },
+        ],
       }),
     ];
     const result = compare(baseline, current);
@@ -160,7 +184,13 @@ describe("compare()", () => {
       makeFinding({
         fingerprint: "fp-old-id",
         ruleId: "img-missing-alt",
-        nodes: [{ html: '<img id="pic-old">', target: ["#pic-old"], targetId: "pic-old" }],
+        nodes: [
+          {
+            html: '<img id="pic-old">',
+            target: ["#pic-old"],
+            targetId: "pic-old",
+          },
+        ],
       }),
     ];
     // Renamed to pic-new and fixed the alt tag (no img-missing-alt finding)
@@ -177,7 +207,13 @@ describe("compare()", () => {
       makeFinding({
         fingerprint: "fp-header-btn",
         ruleId: "button-name",
-        nodes: [{ html: "<button></button>", target: ["header > button"], targetId: "btn-submit" }],
+        nodes: [
+          {
+            html: "<button></button>",
+            target: ["header > button"],
+            targetId: "btn-submit",
+          },
+        ],
       }),
     ];
     // Moved from header to main, still unfixed (same fingerprint or same targetId)
@@ -185,7 +221,13 @@ describe("compare()", () => {
       makeFinding({
         fingerprint: "fp-header-btn",
         ruleId: "button-name",
-        nodes: [{ html: "<button></button>", target: ["main > button"], targetId: "btn-submit" }],
+        nodes: [
+          {
+            html: "<button></button>",
+            target: ["main > button"],
+            targetId: "btn-submit",
+          },
+        ],
       }),
     ];
     const result = compare(baseline, current);
@@ -200,7 +242,9 @@ describe("compare()", () => {
       makeFinding({
         fingerprint: "fp-del",
         ruleId: "link-name",
-        nodes: [{ html: "<a></a>", target: ["a#del-link"], targetId: "del-link" }],
+        nodes: [
+          { html: "<a></a>", target: ["a#del-link"], targetId: "del-link" },
+        ],
       }),
     ];
     const current: Finding[] = [];

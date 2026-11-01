@@ -91,9 +91,7 @@ export type SnippetExportPayload = z.infer<typeof SnippetExportSchema>;
 /**
  * Export selected snippets (or all) as a JSON string.
  */
-export function exportSnippets(
-  snippetIds?: readonly string[]
-): string {
+export function exportSnippets(snippetIds?: readonly string[]): string {
   let snippets = listSnippets();
   if (snippetIds) {
     const idSet = new Set(snippetIds);

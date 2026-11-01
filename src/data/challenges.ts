@@ -59,13 +59,11 @@ button {
   cursor: pointer; font-size: 0.875rem;
 }
 button:hover { background: #1e40af; }`,
-  expected: [
-    { ruleId: "img-missing-alt", wcag: ["1.1.1"] },
-  ],
+  expected: [{ ruleId: "img-missing-alt", wcag: ["1.1.1"] }],
   hints: [
-    "Every <img> needs an alt attribute. Describe what the image shows, or use alt=\"\" for decoration.",
+    'Every <img> needs an alt attribute. Describe what the image shows, or use alt="" for decoration.',
     'For the product image, describe what the user would see: alt="Blue running shoes on white background".',
-    "The divider is decorative — use alt=\"\" and optionally role=\"presentation\".",
+    'The divider is decorative — use alt="" and optionally role="presentation".',
   ],
   solutionHtml: `<section class="product-card">
   <img src="https://picsum.photos/seed/shoes/400/300" class="product-img" alt="Blue running shoes on a white background">
@@ -106,7 +104,7 @@ const emptyButton: Challenge = {
   title: "Buttons Without Labels",
   difficulty: "beginner",
   summary:
-    "A toolbar uses icon-only buttons with no accessible name. Screen readers announce \"button\" with no context.",
+    'A toolbar uses icon-only buttons with no accessible name. Screen readers announce "button" with no context.',
   objectives: [
     "Give every icon button an accessible name using aria-label or visually hidden text",
     "Keep the visual appearance icon-only",
@@ -134,13 +132,11 @@ const emptyButton: Challenge = {
   color: #14161b; cursor: pointer;
 }
 .icon-btn:hover { background: #eef3fd; color: #1d4ed8; }`,
-  expected: [
-    { ruleId: "empty-interactive-name", wcag: ["4.1.2"] },
-  ],
+  expected: [{ ruleId: "empty-interactive-name", wcag: ["4.1.2"] }],
   hints: [
     "An icon alone does not give a button a name. Add aria-label to each button.",
     'Example: <button aria-label="Bold"> — screen readers will announce "Bold, button".',
-    "Make sure the SVG has aria-hidden=\"true\" so its paths aren't read out.",
+    'Make sure the SVG has aria-hidden="true" so its paths aren\'t read out.',
   ],
   solutionHtml: `<div class="toolbar" role="toolbar" aria-label="Text formatting">
   <button type="button" class="icon-btn" aria-label="Bold">
@@ -215,7 +211,7 @@ button[type="submit"] {
   hints: [
     "Placeholder text disappears when the user starts typing. It cannot replace a label.",
     "Add a <label> element before each input. Use the for attribute matching the input's id.",
-    "Example: <label for=\"name\">Full name</label><input id=\"name\" type=\"text\">",
+    'Example: <label for="name">Full name</label><input id="name" type="text">',
   ],
   solutionHtml: `<form class="contact-form">
   <h2>Contact Us</h2>
@@ -291,9 +287,7 @@ h2 { font-size: 1.375rem; margin-top: 1.5rem; }
 h4 { font-size: 1.125rem; margin-top: 1.25rem; color: #4b5563; }
 h6 { font-size: 0.9375rem; margin-top: 1rem; color: #4b5563; }
 p { color: #4b5563; }`,
-  expected: [
-    { ruleId: "heading-order", wcag: ["1.3.1"] },
-  ],
+  expected: [{ ruleId: "heading-order", wcag: ["1.3.1"] }],
   hints: [
     "Heading levels should descend by one: h1 → h2 → h3. Never skip from h1 to h4.",
     "If you want a smaller visual size, use CSS — don't choose a heading level for its default appearance.",
@@ -382,9 +376,7 @@ const colorContrast: Challenge = {
 .status-ok { background: #f0fdf4; }
 .status-warn { background: #fefce8; }
 .status-err { background: #fef2f2; }`,
-  expected: [
-    { ruleId: "color-contrast", wcag: ["1.4.3"] },
-  ],
+  expected: [{ ruleId: "color-contrast", wcag: ["1.4.3"] }],
   hints: [
     "Light green text (#bbf7d0) on a light green background (#f0fdf4) has very low contrast.",
     "Use a contrast checker — aim for at least 4.5:1 for normal-sized text.",
@@ -492,11 +484,9 @@ document.getElementById('open-dialog').addEventListener('click', function() {
   padding: 8px 16px; border: none; border-radius: 6px;
   background: #dc2626; color: #fff; cursor: pointer;
 }`,
-  expected: [
-    { ruleId: "dialog-no-name", wcag: ["4.1.2"] },
-  ],
+  expected: [{ ruleId: "dialog-no-name", wcag: ["4.1.2"] }],
   hints: [
-    "The <div> acting as a dialog has no role or accessible name. Use <dialog> or role=\"dialog\".",
+    'The <div> acting as a dialog has no role or accessible name. Use <dialog> or role="dialog".',
     "Add aria-labelledby pointing to the dialog heading, or aria-label.",
     "Native <dialog> with showModal() provides built-in focus trapping and Escape handling.",
   ],
@@ -593,13 +583,11 @@ function switchTab(index) {
 .panel h3 { font-size: 1rem; margin: 0 0 0.25rem; }
 .panel p { color: #4b5563; }
 .hidden { display: none; }`,
-  expected: [
-    { ruleId: "click-on-non-interactive", wcag: ["4.1.2"] },
-  ],
+  expected: [{ ruleId: "click-on-non-interactive", wcag: ["4.1.2"] }],
   hints: [
     "The tab bar uses <div> elements with onclick. These are not keyboard-focusable or announced correctly.",
-    "Add role=\"tablist\" on the container, role=\"tab\" on each tab, and role=\"tabpanel\" on each panel.",
-    "Use <button> elements (or tabindex) for tabs. The active tab gets aria-selected=\"true\"; others get aria-selected=\"false\" and tabindex=\"-1\".",
+    'Add role="tablist" on the container, role="tab" on each tab, and role="tabpanel" on each panel.',
+    'Use <button> elements (or tabindex) for tabs. The active tab gets aria-selected="true"; others get aria-selected="false" and tabindex="-1".',
   ],
   solutionHtml: `<div class="tabs-container">
   <div class="tab-buttons" role="tablist" aria-label="Product information">
@@ -715,13 +703,11 @@ function toggleAccordion(header) {
 .acc-panel { padding: 14px 18px; }
 .acc-panel p { margin: 0; color: #4b5563; font-size: 0.9375rem; line-height: 1.6; }
 .hidden { display: none; }`,
-  expected: [
-    { ruleId: "click-on-non-interactive", wcag: ["4.1.2"] },
-  ],
+  expected: [{ ruleId: "click-on-non-interactive", wcag: ["4.1.2"] }],
   hints: [
     "The <div> headers have onclick but are not focusable or announced as interactive controls.",
-    "Replace each <div class=\"acc-header\"> with a <button> (or at minimum <h3><button>).",
-    "Add aria-expanded=\"true|false\" to each button to communicate the panel's open/closed state.",
+    'Replace each <div class="acc-header"> with a <button> (or at minimum <h3><button>).',
+    'Add aria-expanded="true|false" to each button to communicate the panel\'s open/closed state.',
   ],
   solutionHtml: `<div class="accordion">
   <h3>
@@ -832,12 +818,10 @@ function handleSubmit(e) {
   display: none; padding: 10px 14px; border-radius: 6px;
   background: #ecfdf5; color: #065f46; font-size: 0.875rem;
 }`,
-  expected: [
-    { ruleId: "status-messages", wcag: ["4.1.3"] },
-  ],
+  expected: [{ ruleId: "status-messages", wcag: ["4.1.3"] }],
   hints: [
     "The status message appears visually but screen readers don't know about it. They need an ARIA live region.",
-    "Add role=\"status\" (implicit aria-live=\"polite\") to the status message container.",
+    'Add role="status" (implicit aria-live="polite") to the status message container.',
     "The live region container must be in the DOM at page load — only the text content should change dynamically.",
   ],
   solutionHtml: `<form class="subscribe-form" onsubmit="handleSubmit(event)">
@@ -937,13 +921,11 @@ const skipLink: Challenge = {
 }
 .content h1 { font-size: 1.5rem; margin: 0 0 0.75rem; }
 .content p { color: #4b5563; }`,
-  expected: [
-    { ruleId: "bypass-blocks", wcag: ["2.4.1"] },
-  ],
+  expected: [{ ruleId: "bypass-blocks", wcag: ["2.4.1"] }],
   hints: [
     "Keyboard users must tab through all 8 navigation links to reach the content. A skip link lets them bypass the navigation.",
-    "Add an <a href=\"#main-content\"> as the very first element inside <body>. Use CSS to hide it until focused.",
-    "Change the content <div> to <main id=\"main-content\"> so the skip link has a target and screen readers recognise the landmark.",
+    'Add an <a href="#main-content"> as the very first element inside <body>. Use CSS to hide it until focused.',
+    'Change the content <div> to <main id="main-content"> so the skip link has a target and screen readers recognise the landmark.',
   ],
   solutionHtml: `<a href="#main-content" class="skip-link">Skip to main content</a>
 
