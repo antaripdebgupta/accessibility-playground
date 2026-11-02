@@ -184,13 +184,7 @@ export function useWorkbenchLayout() {
   }, []);
 
   const resetLayout = React.useCallback(() => {
-    if (typeof window !== "undefined") {
-      try {
-        localStorage.removeItem(STORAGE_KEY);
-      } catch {
-        // ignore
-      }
-    }
+    storage.remove(STORAGE_KEY);
     updateLayout(() => ({ ...DEFAULT_LAYOUT }));
   }, []);
 

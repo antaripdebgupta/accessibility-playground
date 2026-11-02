@@ -1,9 +1,10 @@
 import { z } from "zod";
 import type { ManualTestRecord } from "@/data/manual-tests";
+import { storage } from "./storage";
 
 const STORAGE_PREFIX = "ap_manual_tests_v1_";
 
-export const ManualTestStatusSchema = z.enum([
+const ManualTestStatusSchema = z.enum([
   "not-tested",
   "passed",
   "failed",
@@ -29,37 +30,25 @@ export const ManualTestRecordSchema = z
     }
   });
 
-export const ManualTestStoragePayloadSchema = z.object({
+const ManualTestStoragePayloadSchema = z.object({
   version: z.literal(1),
   records: z.record(z.string(), ManualTestRecordSchema),
 });
 
-export type ManualTestStoragePayload = z.infer<
-  typeof ManualTestStoragePayloadSchema
->;
+type ManualTestStoragePayload = z.infer<typeof ManualTestStoragePayloadSchema>;
 
-export function getManualTestStorageKey(id: string): string {
+function getManualTestStorageKey(id: string): string {
   return `${STORAGE_PREFIX}${id}`;
 }
 
 export function loadManualTestResults(
   templateOrSnippetId: string
 ): Record<string, ManualTestRecord> {
-  if (typeof window === "undefined") return {};
-  try {
-    const raw = window.localStorage.getItem(
-      getManualTestStorageKey(templateOrSnippetId)
-    );
-    if (!raw) return {};
-    const parsed = JSON.parse(raw);
-    const validated = ManualTestStoragePayloadSchema.safeParse(parsed);
-    if (validated.success) {
-      return validated.data.records;
-    }
-  } catch {
-    // Ignore storage parse errors
-  }
-  return {};
+  const payload = storage.getJSON(
+    getManualTestStorageKey(templateOrSnippetId),
+    ManualTestStoragePayloadSchema
+  );
+  return payload ? payload.records : {};
 }
 
 export function saveManualTestResult(
@@ -75,41 +64,26 @@ export function saveManualTestResult(
     };
   }
 
-  if (typeof window === "undefined") {
-    return { success: true };
-  }
+  const current = loadManualTestResults(templateOrSnippetId);
+  current[record.testId] = validation.data;
 
-  try {
-    const current = loadManualTestResults(templateOrSnippetId);
-    current[record.testId] = validation.data;
-
-    const payload: ManualTestStoragePayload = {
-      version: 1,
-      records: current,
-    };
-    window.localStorage.setItem(
-      getManualTestStorageKey(templateOrSnippetId),
-      JSON.stringify(payload)
-    );
-    return { success: true };
-  } catch (err) {
+  const payload: ManualTestStoragePayload = {
+    version: 1,
+    records: current,
+  };
+  const saved = storage.setJSON(
+    getManualTestStorageKey(templateOrSnippetId),
+    payload
+  );
+  if (!saved) {
     return {
       success: false,
-      error:
-        err instanceof Error
-          ? err.message
-          : "Failed to save manual test result",
+      error: "Failed to save manual test result",
     };
   }
+  return { success: true };
 }
 
 export function clearManualTestResults(templateOrSnippetId: string): void {
-  if (typeof window === "undefined") return;
-  try {
-    window.localStorage.removeItem(
-      getManualTestStorageKey(templateOrSnippetId)
-    );
-  } catch {
-    // Ignore
-  }
+  storage.remove(getManualTestStorageKey(templateOrSnippetId));
 }

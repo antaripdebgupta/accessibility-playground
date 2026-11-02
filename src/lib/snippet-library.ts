@@ -81,12 +81,12 @@ const SnippetExportItemSchema = z.object({
   css: z.string().max(200_000).optional().default(""),
 });
 
-export const SnippetExportSchema = z.object({
+const SnippetExportSchema = z.object({
   version: z.literal(1),
   snippets: z.array(SnippetExportItemSchema).min(1).max(500),
 });
 
-export type SnippetExportPayload = z.infer<typeof SnippetExportSchema>;
+type SnippetExportPayload = z.infer<typeof SnippetExportSchema>;
 
 /**
  * Export selected snippets (or all) as a JSON string.

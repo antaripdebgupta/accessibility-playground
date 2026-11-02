@@ -8,7 +8,7 @@ import { decodeSnippet } from "@/lib/snippet-share";
 import { storage, STORAGE_KEYS } from "@/lib/storage";
 import { useToast } from "@accessly-ui/react";
 
-export const MAX_DOCUMENT_BYTES = 200 * 1024; // 200KB hard input cap (§B.4)
+const MAX_DOCUMENT_BYTES = 200 * 1024; // 200KB hard input cap (§B.4)
 
 export function usePlaygroundDocument(onDocumentChange?: () => void) {
   const searchParams = useSearchParams();

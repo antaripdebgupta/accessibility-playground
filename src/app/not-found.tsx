@@ -1,5 +1,3 @@
-"use client";
-
 import { PageContainer } from "@/components/PageContainer";
 import { ButtonLink } from "@/components/ui/ButtonLink";
 

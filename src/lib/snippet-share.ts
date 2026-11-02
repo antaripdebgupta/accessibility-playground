@@ -1,12 +1,6 @@
 import { z } from "zod";
 
-/**
- * Maximum safe length for base64 encoded URL query parameter (6 KB).
- * Browsers and HTTP proxies typically cap URLs at 8 KB total.
- */
-export const MAX_SHARE_URL_ENCODED_LENGTH = 6144;
-
-export const SnippetPayloadSchema = z.object({
+const SnippetPayloadSchema = z.object({
   h: z.string().max(200_000),
   c: z.string().max(200_000).optional().default(""),
 });
@@ -18,10 +12,6 @@ export function encodeSnippet(html: string, css: string): string {
       String.fromCharCode(parseInt(p, 16))
     )
   );
-}
-
-export function isShareableLength(encoded: string): boolean {
-  return encoded.length <= MAX_SHARE_URL_ENCODED_LENGTH;
 }
 
 export function decodeSnippet(

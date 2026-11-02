@@ -1,0 +1,10 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "ignore": ["public/axe.min.js"],
+  "ignoreDependencies": [
+    "@accessly-ui/primitives",
+    "@accessly-ui/utils",
+    "axe-core",
+    "lint-staged"
+  ]
+}
