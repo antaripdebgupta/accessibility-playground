@@ -25,6 +25,15 @@ const eslintConfig = defineConfig([
       "no-console": "off",
     },
   },
+  {
+    files: ["src/components/workbench/SplitPane.tsx"],
+    rules: {
+      // WAI-ARIA 1.2: A separator with aria-valuenow is an interactive window splitter widget.
+      // eslint-plugin-jsx-a11y classifies all separators as static/non-interactive structure,
+      // which is a false positive for an accessible splitter with keyboard and pointer handlers.
+      "jsx-a11y/no-noninteractive-element-interactions": "off",
+    },
+  },
   globalIgnores([
     ".next/**",
     "out/**",

@@ -5,7 +5,7 @@ import { fnv1a } from "../hash";
  * Extracts element snippet. If html and sourceRange are present, extracts real source slice
  * up to 300 characters. Otherwise falls back to the opening tag.
  */
-export function getNodeSnippet(node: A11yNode, html?: string): string {
+function getNodeSnippet(node: A11yNode, html?: string): string {
   if (html && node.sourceRange) {
     const [start, end] = node.sourceRange;
     if (start >= 0 && end > start && end <= html.length) {

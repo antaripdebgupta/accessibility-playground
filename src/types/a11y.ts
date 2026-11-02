@@ -59,8 +59,7 @@ export interface NameCalculationStep {
   readonly value?: string;
 }
 
-export type AriaValidityStatus =
-  "valid" | "invalid-value" | "not-allowed" | "unknown";
+type AriaValidityStatus = "valid" | "invalid-value" | "not-allowed" | "unknown";
 
 export interface AriaAttributeValidity {
   readonly attribute: string;
@@ -69,7 +68,7 @@ export interface AriaAttributeValidity {
   readonly explanation: string;
 }
 
-export interface AxeFindingNode {
+interface AxeFindingNode {
   readonly html: string;
   readonly target: readonly string[];
   readonly failureSummary?: string;
@@ -116,13 +115,4 @@ export interface AxeFinding {
   readonly fix?: string;
   readonly nodes: readonly AxeFindingNode[];
   readonly fingerprint?: string;
-}
-
-export interface AnalysisState {
-  readonly ast: A11yNode | null;
-  readonly selectedNodeId: string | null;
-  readonly violations: readonly AxeFinding[];
-  readonly isScanning: boolean;
-  readonly scanError: string | null;
-  readonly parseError: string | null;
 }

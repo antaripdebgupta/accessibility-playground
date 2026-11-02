@@ -1,7 +1,7 @@
 import type { A11yNode, AxeFinding } from "@/types/a11y";
 import { setAttributeInSource, removeAttributeFromSource } from "./mutate-html";
 
-export const AUTO_FIXABLE_RULE_IDS = [
+const AUTO_FIXABLE_RULE_IDS = [
   "positive-tabindex",
   "aria-hidden-focusable",
   "img-missing-alt",

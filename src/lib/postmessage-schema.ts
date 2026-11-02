@@ -59,7 +59,7 @@ const IframeFocusOrderMessageSchema = z.object({
   elements: z.array(FocusOrderPositionSchema),
 });
 
-export const IframeRuntimeErrorMessageSchema = z.object({
+const IframeRuntimeErrorMessageSchema = z.object({
   type: z.literal("runtime-error"),
   message: z.string(),
   source: z.string().optional(),
@@ -110,11 +110,3 @@ export const HostFocusElementMessageSchema = z.object({
   type: z.literal("focus-element"),
   id: z.string(),
 });
-
-export const HostMessageSchema = z.discriminatedUnion("type", [
-  HostSelectNodeMessageSchema,
-  HostRunScanMessageSchema,
-  HostFocusElementMessageSchema,
-]);
-
-export type HostMessage = z.infer<typeof HostMessageSchema>;

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { storage } from "@/lib/storage";
 
 export interface SplitPaneProps {
   direction?: "row" | "column";
@@ -67,12 +68,8 @@ export function SplitPane({
         onSizeChange?.(clamped);
       } else {
         setInternalSize(clamped);
-        if (storageKey && typeof window !== "undefined") {
-          try {
-            localStorage.setItem(storageKey, String(clamped));
-          } catch {
-            // ignore
-          }
+        if (storageKey) {
+          storage.set(storageKey, String(clamped));
         }
       }
     },
@@ -138,8 +135,8 @@ export function SplitPane({
         {primary}
       </div>
 
-      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions --
-          WAI-ARIA 1.2: a separator with aria-valuenow is an interactive window splitter. */}
+      {/* WAI-ARIA 1.2: A separator with aria-valuenow and tabIndex={0} represents
+          a focusable, keyboard-interactive window splitter widget. */}
       <div
         role="separator"
         tabIndex={0}

@@ -1,6 +1,6 @@
 import { encodeSnippet } from "@/lib/snippet-share";
 
-export interface LearnTopicLink {
+interface LearnTopicLink {
   readonly title: string;
   readonly url: string;
   readonly source: "W3C WAI" | "WAI-ARIA APG" | "MDN";

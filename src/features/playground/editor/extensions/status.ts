@@ -6,7 +6,7 @@ export interface EditorStatusState {
   selectionLength: number;
 }
 
-export function computeEditorStatus(view: EditorView): EditorStatusState {
+function computeEditorStatus(view: EditorView): EditorStatusState {
   const selection = view.state.selection.main;
   const lineObj = view.state.doc.lineAt(selection.head);
   const line = lineObj.number;

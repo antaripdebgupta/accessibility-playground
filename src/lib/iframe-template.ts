@@ -93,8 +93,19 @@ export function generatePreviewSrcDoc(
       function sendParent(msg) {
         try {
           window.parent.postMessage(msg, "*");
-        } catch (e) {
-          console.error("Failed to post message to parent:", e);
+        } catch (_) {}
+      }
+
+      var lastReportedErrorTime = 0;
+      function reportIframeError(context, err) {
+        var now = Date.now();
+        if (now - lastReportedErrorTime > 2000) {
+          lastReportedErrorTime = now;
+          sendParent({
+            type: "runtime-error",
+            message: context + (err ? ": " + (err.message || String(err)) : ""),
+            timestamp: new Date().toISOString()
+          });
         }
       }
 
@@ -283,7 +294,11 @@ export function generatePreviewSrcDoc(
             var targetEl = document.querySelector('[data-a11y-id="' + e.data.id + '"]');
             if (targetEl) {
               targetEl.classList.add("a11y-inspect-selected");
-              try { targetEl.scrollIntoView({ block: "nearest", inline: "nearest" }); } catch (err) {}
+              try {
+                targetEl.scrollIntoView({ block: "nearest", inline: "nearest" });
+              } catch (err) {
+                reportIframeError("scrollIntoView failed", err);
+              }
             }
           }
         } else if (e.data.type === "run-scan") {
@@ -294,8 +309,16 @@ export function generatePreviewSrcDoc(
           if (targetEl) {
             var focusableChild = targetEl.querySelector('a, button, input, select, textarea, [tabindex]') || targetEl;
             if (focusableChild && typeof focusableChild.focus === "function") {
-              try { focusableChild.focus(); } catch (err) {}
-              targetEl.scrollIntoView({ block: "nearest", inline: "nearest" });
+              try {
+                focusableChild.focus();
+              } catch (err) {
+                reportIframeError("focusElement failed", err);
+              }
+              try {
+                targetEl.scrollIntoView({ block: "nearest", inline: "nearest" });
+              } catch (err) {
+                reportIframeError("scrollIntoView failed", err);
+              }
             }
           }
         }

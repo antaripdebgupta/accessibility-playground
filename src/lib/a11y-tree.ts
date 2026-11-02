@@ -78,7 +78,7 @@ function extractTagRanges(html: string): {
   };
 }
 
-export function getElementStructuralPath(element: Element): string {
+function getElementStructuralPath(element: Element): string {
   const segments: string[] = [];
   let current: Element | null = element;
 

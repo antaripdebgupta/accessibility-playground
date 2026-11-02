@@ -1,7 +1,6 @@
 export type WcagLevel = "A" | "AA" | "AAA";
 
-export type WcagPrinciple =
-  "Perceivable" | "Operable" | "Understandable" | "Robust";
+type WcagPrinciple = "Perceivable" | "Operable" | "Understandable" | "Robust";
 
 export interface WcagCriterion {
   readonly id: string;

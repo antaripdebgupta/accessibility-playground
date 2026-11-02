@@ -8,8 +8,6 @@ import {
   type RuleContext,
 } from "./rules";
 
-export { RULES } from "./rules";
-
 /**
  * Executes registered custom accessibility rules against the computed A11y tree and custom CSS.
  */

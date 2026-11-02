@@ -6,7 +6,7 @@ import { MANUAL_TESTS, type ManualTestRecord } from "@/data/manual-tests";
  * Report metadata
  * ──────────────────────────────────────────────────────────── */
 
-export interface ReportMetadata {
+interface ReportMetadata {
   readonly generatedAt: string; // ISO 8601
   readonly engines: readonly string[];
   readonly axeVersion?: string;
@@ -71,7 +71,7 @@ function countBySeverity(findings: readonly Finding[]): SeverityCounts {
  * JSON export
  * ──────────────────────────────────────────────────────────── */
 
-export interface JsonReport {
+interface JsonReport {
   readonly meta: ReportMetadata;
   readonly summary: {
     readonly byStatus: StatusCounts;

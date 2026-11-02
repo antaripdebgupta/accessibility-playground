@@ -8,7 +8,7 @@ import type { Finding } from "@/types/a11y";
  * - `remaining`:      Still present (fingerprint match).
  * - `introduced`:     New finding not present in the baseline.
  */
-export type CompareDisposition =
+type CompareDisposition =
   "resolved" | "element-removed" | "remaining" | "introduced";
 
 export interface ComparedFinding {

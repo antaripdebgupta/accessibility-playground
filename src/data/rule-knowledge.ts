@@ -1,4 +1,4 @@
-export type WhoIsAffected =
+type WhoIsAffected =
   | "screen-reader"
   | "keyboard"
   | "magnification"
@@ -6,10 +6,9 @@ export type WhoIsAffected =
   | "switch-device"
   | "low-vision-contrast";
 
-export type InspectorTarget =
-  "tree" | "aria" | "accname" | "focus" | "announce";
+type InspectorTarget = "tree" | "aria" | "accname" | "focus" | "announce";
 
-export interface RuleResource {
+interface RuleResource {
   readonly title: string;
   readonly url: string;
 }

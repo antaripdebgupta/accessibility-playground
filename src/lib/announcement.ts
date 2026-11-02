@@ -1,6 +1,6 @@
 import type { A11yNode } from "@/types/a11y";
 
-export interface AnnouncementPart {
+interface AnnouncementPart {
   type: "name" | "role" | "state";
   label: string;
   value: string;

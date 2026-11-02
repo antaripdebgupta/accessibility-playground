@@ -1,15 +1,15 @@
 import { StateField, StateEffect } from "@codemirror/state";
 import { EditorView, Decoration, type DecorationSet } from "@codemirror/view";
 
-export interface RevealTarget {
+interface RevealTarget {
   from: number;
   to: number;
 }
 
-export const setRevealEffect = StateEffect.define<RevealTarget | null>();
+const setRevealEffect = StateEffect.define<RevealTarget | null>();
 export const clearRevealEffect = StateEffect.define<void>();
 
-export const revealDecoration = Decoration.mark({
+const revealDecoration = Decoration.mark({
   class: "cm-a11y-selected",
 });
 

@@ -12,7 +12,6 @@ export const autocompleteCompartment = new Compartment();
 export const lineNumbersCompartment = new Compartment();
 export const ariaLabelCompartment = new Compartment();
 export const indentWithTabCompartment = new Compartment();
-export const readOnlyCompartment = new Compartment();
 export const lintCompartment = new Compartment();
 
 export function createFontSizeExtension(fontSizePx: number) {

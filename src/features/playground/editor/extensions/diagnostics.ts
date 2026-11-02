@@ -3,9 +3,9 @@ import { setDiagnostics } from "@codemirror/lint";
 import type { EditorView } from "@codemirror/view";
 import type { A11yNode, AxeFinding, Finding } from "@/types/a11y";
 
-export type AnyFinding = AxeFinding | Finding;
+type AnyFinding = AxeFinding | Finding;
 
-export interface BuildDiagnosticsOptions {
+interface BuildDiagnosticsOptions {
   ast: A11yNode | null;
   findings: readonly AnyFinding[];
   parseError?: string | null;
@@ -13,7 +13,7 @@ export interface BuildDiagnosticsOptions {
   onSelectFinding?: (findingId: string) => void;
 }
 
-export function findNodeByTarget(
+function findNodeByTarget(
   root: A11yNode | null,
   targetId: string
 ): A11yNode | null {

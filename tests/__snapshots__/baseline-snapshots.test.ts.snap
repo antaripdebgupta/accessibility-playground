@@ -1,0 +1,213 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Baseline Behavior Snapshots > locks findings output for every challenge (starter and solution) 1`] = `
+{
+  "accordion": {
+    "solutionLegacyRuleIds": [],
+    "solutionNormalizedRuleIds": [],
+    "starterLegacyRuleIds": [
+      "click-on-non-interactive",
+      "click-on-non-interactive",
+      "click-on-non-interactive",
+    ],
+    "starterNormalizedRuleIds": [
+      "click-on-non-interactive",
+      "click-on-non-interactive",
+      "click-on-non-interactive",
+    ],
+  },
+  "color-contrast": {
+    "solutionLegacyRuleIds": [],
+    "solutionNormalizedRuleIds": [],
+    "starterLegacyRuleIds": [],
+    "starterNormalizedRuleIds": [],
+  },
+  "empty-button": {
+    "solutionLegacyRuleIds": [],
+    "solutionNormalizedRuleIds": [],
+    "starterLegacyRuleIds": [
+      "empty-interactive-name",
+      "empty-interactive-name",
+      "empty-interactive-name",
+    ],
+    "starterNormalizedRuleIds": [
+      "empty-interactive-name",
+      "empty-interactive-name",
+      "empty-interactive-name",
+    ],
+  },
+  "form-labels": {
+    "solutionLegacyRuleIds": [],
+    "solutionNormalizedRuleIds": [],
+    "starterLegacyRuleIds": [
+      "input-no-label",
+      "input-placeholder-only",
+      "input-placeholder-only",
+    ],
+    "starterNormalizedRuleIds": [
+      "input-no-label",
+      "input-placeholder-only",
+      "input-placeholder-only",
+    ],
+  },
+  "heading-order": {
+    "solutionLegacyRuleIds": [],
+    "solutionNormalizedRuleIds": [],
+    "starterLegacyRuleIds": [
+      "heading-order",
+      "heading-order",
+    ],
+    "starterNormalizedRuleIds": [
+      "heading-order",
+      "heading-order",
+    ],
+  },
+  "image-alt": {
+    "solutionLegacyRuleIds": [],
+    "solutionNormalizedRuleIds": [],
+    "starterLegacyRuleIds": [
+      "img-missing-alt",
+      "img-missing-alt",
+    ],
+    "starterNormalizedRuleIds": [
+      "img-missing-alt",
+      "img-missing-alt",
+    ],
+  },
+  "live-status": {
+    "solutionLegacyRuleIds": [],
+    "solutionNormalizedRuleIds": [],
+    "starterLegacyRuleIds": [],
+    "starterNormalizedRuleIds": [],
+  },
+  "modal-dialog": {
+    "solutionLegacyRuleIds": [],
+    "solutionNormalizedRuleIds": [],
+    "starterLegacyRuleIds": [
+      "dialog-no-name",
+    ],
+    "starterNormalizedRuleIds": [
+      "dialog-no-name",
+    ],
+  },
+  "skip-link": {
+    "solutionLegacyRuleIds": [],
+    "solutionNormalizedRuleIds": [],
+    "starterLegacyRuleIds": [],
+    "starterNormalizedRuleIds": [],
+  },
+  "tabs-keyboard": {
+    "solutionLegacyRuleIds": [],
+    "solutionNormalizedRuleIds": [],
+    "starterLegacyRuleIds": [
+      "click-on-non-interactive",
+      "click-on-non-interactive",
+      "click-on-non-interactive",
+    ],
+    "starterNormalizedRuleIds": [
+      "click-on-non-interactive",
+      "click-on-non-interactive",
+      "click-on-non-interactive",
+    ],
+  },
+}
+`;
+
+exports[`Baseline Behavior Snapshots > locks findings output for every starter template 1`] = `
+{
+  "accordion": {
+    "legacyRuleIds": [],
+    "normalizedRuleIds": [],
+  },
+  "bad-div-button": {
+    "legacyRuleIds": [
+      "click-on-non-interactive",
+    ],
+    "normalizedRuleIds": [
+      "click-on-non-interactive",
+    ],
+  },
+  "combobox": {
+    "legacyRuleIds": [],
+    "normalizedRuleIds": [],
+  },
+  "custom-switch": {
+    "legacyRuleIds": [],
+    "normalizedRuleIds": [],
+  },
+  "data-table": {
+    "legacyRuleIds": [],
+    "normalizedRuleIds": [],
+  },
+  "dialog": {
+    "legacyRuleIds": [],
+    "normalizedRuleIds": [],
+  },
+  "form-field": {
+    "legacyRuleIds": [],
+    "normalizedRuleIds": [],
+  },
+  "image-alt": {
+    "legacyRuleIds": [],
+    "normalizedRuleIds": [],
+  },
+  "input-placeholder-only": {
+    "legacyRuleIds": [
+      "input-placeholder-only",
+    ],
+    "normalizedRuleIds": [
+      "input-placeholder-only",
+    ],
+  },
+  "link-as-button": {
+    "legacyRuleIds": [
+      "link-as-button",
+    ],
+    "normalizedRuleIds": [
+      "link-as-button",
+    ],
+  },
+  "live-region": {
+    "legacyRuleIds": [],
+    "normalizedRuleIds": [],
+  },
+  "low-contrast": {
+    "legacyRuleIds": [],
+    "normalizedRuleIds": [],
+  },
+  "nav-menu": {
+    "legacyRuleIds": [],
+    "normalizedRuleIds": [],
+  },
+  "outline-removed": {
+    "legacyRuleIds": [
+      "outline-removed",
+    ],
+    "normalizedRuleIds": [
+      "outline-removed",
+    ],
+  },
+  "tabs": {
+    "legacyRuleIds": [],
+    "normalizedRuleIds": [],
+  },
+  "tailwind-form-field": {
+    "legacyRuleIds": [],
+    "normalizedRuleIds": [],
+  },
+  "tailwind-tabs": {
+    "legacyRuleIds": [],
+    "normalizedRuleIds": [],
+  },
+  "tiny-target": {
+    "legacyRuleIds": [],
+    "normalizedRuleIds": [],
+  },
+  "welcome": {
+    "legacyRuleIds": [],
+    "normalizedRuleIds": [],
+  },
+}
+`;
+
+exports[`Baseline Behavior Snapshots > locks rendered HTML structure of Home Page 1`] = `"<div class="flex flex-1 flex-col"><section class="hero"><div class="wrap"><div class="hero-inner"><h1>You can&#x27;t fix what you can&#x27;t see.</h1><p class="lede">Paste HTML into a live editor and watch its accessibility tree, ARIA state, and screen-reader announcement compute in real time — inside a sandboxed, standards-driven inspector.</p><div class="hero-actions"><a class="btn btn-primary" href="/playground">Open the Playground</a><a class="btn btn-ghost" href="/playground?pattern=button-vs-div">Browse the pattern library</a></div><p class="hero-micro">Runs entirely in your browser · no account · <kbd>Tab</kbd> works everywhere on this page</p></div></div></section><section class="inspector-section" aria-label="Live demonstration"><div class="inspector-canvas"><div class="wrap"><div class="devtools-window"><div class="window-chrome"><div class="window-dots" aria-hidden="true"><span></span><span></span><span></span></div><span class="window-url">inspector — localhost/playground</span></div><div class="tab-strip" role="tablist" aria-label="Devtools panel (illustrative)"><button type="button" role="tab" aria-selected="false">Elements</button><button type="button" role="tab" aria-selected="true" data-active="true">Accessibility</button><button type="button" role="tab" aria-selected="false">Console</button></div><div class="window-body"><div class="compare-grid"><div class="element-card" data-kind="bad"><div class="element-card-head"><span class="selector">div.fake-btn</span><span class="tag tag-bad">anti-pattern</span></div><div class="demo-target fake-btn" id="fakeBtn" tabindex="-1">Save changes</div><dl class="readout"><div class="readout-row"><dt>Role</dt><dd>none</dd></div><div class="readout-row"><dt>Accessible name</dt><dd>— not exposed</dd></div><div class="readout-row"><dt>Reachable by Tab</dt><dd>no</dd></div><div class="readout-row"><dt>Enter / Space</dt><dd>does nothing</dd></div></dl></div><div class="element-card" data-kind="good"><div class="element-card-head"><span class="selector">button</span><span class="tag tag-good">accessible</span></div><button type="button" class="demo-target real-btn" id="realBtn">Save changes</button><dl class="readout"><div class="readout-row"><dt>Role</dt><dd>button</dd></div><div class="readout-row"><dt>Accessible name</dt><dd>&quot;Save changes&quot;</dd></div><div class="readout-row"><dt>Reachable by Tab</dt><dd>yes</dd></div><div class="readout-row"><dt>Enter / Space</dt><dd>activates</dd></div></dl></div></div><div class="announce-strip"><span class="label">Screen reader hears</span><span class="value" id="announceValue" style="color:inherit;transition:color 1.4s ease">&quot;Save changes, button&quot;</span></div></div></div><p class="inspector-caption">Try pressing <kbd>Tab</kbd> from the buttons above — notice the left one is physically impossible to reach. That&#x27;s not a bug in this demo. That&#x27;s the bug.</p></div></div></section><section class="capabilities"><div class="wrap"><div class="cap-heading"><h2>What the inspector shows you</h2><p>Six views into the same markup, each answering a question a screen reader user is already asking.</p></div><div class="cap-list"><div class="cap-row"><div><h3>Computed accessibility tree</h3><p>The hierarchy a screen reader actually constructs from your markup — not the visual DOM you see in the inspector.</p></div><span class="cap-sc">SC 1.3.1</span></div><div class="cap-row"><div><h3>ARIA validity</h3><p>Every attribute checked against its role model, and flagged the moment it&#x27;s invalid, redundant, or missing something required.</p></div><span class="cap-sc">SC 4.1.2</span></div><div class="cap-row"><div><h3>Accessible name trace</h3><p>Step through the exact algorithm a browser runs to decide what gets spoken aloud for any element you select.</p></div><span class="cap-sc">SC 4.1.2</span></div><div class="cap-row"><div><h3>Keyboard &amp; focus order</h3><p>See the real tab sequence your markup produces, and catch a focus trap before a keyboard user finds it for you.</p></div><span class="cap-sc">SC 2.1.1</span></div><div class="cap-row"><div><h3>Contrast engine</h3><p>Exact ratios for any two colors against AA and AAA thresholds, with a one-click nearest passing suggestion.</p></div><span class="cap-sc">SC 1.4.3</span></div><div class="cap-row"><div><h3>Sandboxed axe-core scan</h3><p>Automated checks run locally against the rendered preview, isolated in a sandboxed frame with no external calls.</p></div><span class="cap-sc">Automated</span></div></div></div></section><section class="cta-band"><div class="wrap"><div><h2>See what&#x27;s invisible in your own markup.</h2><p>No signup. Paste HTML, get an answer in under a second.</p></div><a class="btn btn-primary" href="/playground">Open the Playground</a></div></section><footer class="site-footer"><div class="wrap"><span>Accessibility Playground — a WCAG 2.2 inspector, built for developers.</span><a href="https://www.w3.org/WAI/WCAG22/quickref/" target="_blank" rel="noreferrer">WCAG 2.2 Quick Reference</a></div></footer></div>"`;

@@ -6,6 +6,7 @@
  */
 
 import { z } from "zod";
+import { storage } from "./storage";
 
 const STORAGE_KEY_PREFIX = "ap_challenge_v1_";
 
@@ -31,27 +32,14 @@ function storageKey(challengeId: string): string {
 export function loadChallengeProgress(
   challengeId: string
 ): ChallengeProgress | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = localStorage.getItem(storageKey(challengeId));
-    if (!raw) return null;
-    const parsed: unknown = JSON.parse(raw);
-    return ChallengeProgressSchema.parse(parsed);
-  } catch {
-    return null;
-  }
+  return storage.getJSON(storageKey(challengeId), ChallengeProgressSchema);
 }
 
 export function saveChallengeProgress(
   challengeId: string,
   progress: ChallengeProgress
 ): void {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(storageKey(challengeId), JSON.stringify(progress));
-  } catch {
-    // Storage full — silently ignore
-  }
+  storage.setJSON(storageKey(challengeId), progress);
 }
 
 export function defaultProgress(): ChallengeProgress {

@@ -6,6 +6,8 @@ import { EditorView, lineNumbers } from "@codemirror/view";
 import type { Diagnostic } from "@codemirror/lint";
 
 import { useEditorSettings } from "./editor/useEditorSettings";
+import { useCompartment } from "./editor/useCompartment";
+import { useLatest } from "@/hooks/useLatest";
 import {
   languageCompartment,
   tabSizeCompartment,
@@ -38,7 +40,7 @@ export interface RevealRequest {
   readonly focus?: boolean;
 }
 
-export interface CodeEditorProps {
+interface CodeEditorProps {
   value: string;
   onChange: (val: string) => void;
   language: "html" | "css";
@@ -56,7 +58,7 @@ export interface CodeEditorProps {
   onOpenShortcuts?: () => void;
 }
 
-export function CodeEditor({
+function CodeEditor({
   value,
   onChange,
   language,
@@ -78,21 +80,43 @@ export function CodeEditor({
   // Stable event bus: decoupled from render, no refs during render
   const [bus] = React.useState(() => new EventTarget());
 
+  // Keep volatile callbacks and values in a latest ref to avoid listener churn
+  const latestCallbacks = useLatest({
+    onChange,
+    onCaretChange,
+    onForceScan,
+    onStatusChange,
+    onEscapeAnnounce,
+    onOpenShortcuts,
+    language,
+    tabSize: settings.tabSize,
+  });
+
+  // Effect 1: Event bus subscriptions (attached once, routes to latest callbacks)
   React.useEffect(() => {
     const onDocChange = (e: Event) =>
-      onChange((e as CustomEvent<string>).detail);
+      latestCallbacks.current.onChange((e as CustomEvent<string>).detail);
     const onCaret = (e: Event) =>
-      onCaretChange?.((e as CustomEvent<number>).detail);
-    const onScan = () => onForceScan?.();
+      latestCallbacks.current.onCaretChange?.(
+        (e as CustomEvent<number>).detail
+      );
+    const onScan = () => latestCallbacks.current.onForceScan?.();
     const onFmt = (e: Event) => {
       const view = (e as CustomEvent<EditorView>).detail;
-      formatDocument(view, { language, tabSize: settings.tabSize });
+      formatDocument(view, {
+        language: latestCallbacks.current.language,
+        tabSize: latestCallbacks.current.tabSize,
+      });
     };
     const onStatus = (e: Event) =>
-      onStatusChange?.((e as CustomEvent<EditorStatusState>).detail);
+      latestCallbacks.current.onStatusChange?.(
+        (e as CustomEvent<EditorStatusState>).detail
+      );
     const onEsc = (e: Event) =>
-      onEscapeAnnounce?.((e as CustomEvent<string>).detail);
-    const onShortcuts = () => onOpenShortcuts?.();
+      latestCallbacks.current.onEscapeAnnounce?.(
+        (e as CustomEvent<string>).detail
+      );
+    const onShortcuts = () => latestCallbacks.current.onOpenShortcuts?.();
 
     bus.addEventListener("docChange", onDocChange);
     bus.addEventListener("caretChange", onCaret);
@@ -111,32 +135,73 @@ export function CodeEditor({
       bus.removeEventListener("escapeAnnounce", onEsc);
       bus.removeEventListener("openShortcuts", onShortcuts);
     };
-  }, [
-    bus,
-    onChange,
-    onCaretChange,
-    onForceScan,
-    language,
-    settings.tabSize,
-    onStatusChange,
-    onEscapeAnnounce,
-    onOpenShortcuts,
-  ]);
+  }, [bus, latestCallbacks]);
 
-  // Base extensions assembled ONCE for the lifetime of this component
-  const extensions = React.useMemo(() => {
-    return createEditorBaseExtensions({
+  // Base extensions assembled ONCE on mount for the lifetime of this component
+  const [extensions] = React.useState(() =>
+    createEditorBaseExtensions({
       language,
       useTailwind,
       settings,
       indentWithTab,
       ariaLabel,
       bus,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bus]);
+    })
+  );
 
-  // Minimal-diff external value sync (Part A5)
+  // Dynamic Compartment updates using useCompartment hook
+  const langExtension = React.useMemo(
+    () =>
+      language === "html"
+        ? createHtmlLanguageExtension(useTailwind)
+        : createCssLanguageExtension(),
+    [language, useTailwind]
+  );
+  useCompartment(editorRef, languageCompartment, langExtension);
+
+  const tabSizeExtension = React.useMemo(
+    () => createTabSizeExtension(settings.tabSize),
+    [settings.tabSize]
+  );
+  useCompartment(editorRef, tabSizeCompartment, tabSizeExtension);
+
+  const fontSizeExtension = React.useMemo(
+    () => createFontSizeExtension(settings.fontSize),
+    [settings.fontSize]
+  );
+  useCompartment(editorRef, fontSizeCompartment, fontSizeExtension);
+
+  const wrapExtension = React.useMemo(
+    () => (settings.lineWrapping ? EditorView.lineWrapping : []),
+    [settings.lineWrapping]
+  );
+  useCompartment(editorRef, wrapCompartment, wrapExtension);
+
+  const lineNumbersExtension = React.useMemo(
+    () => (settings.lineNumbers ? lineNumbers() : []),
+    [settings.lineNumbers]
+  );
+  useCompartment(editorRef, lineNumbersCompartment, lineNumbersExtension);
+
+  const autocompleteExtension = React.useMemo(
+    () => createAutocompleteExtension(settings.autocomplete),
+    [settings.autocomplete]
+  );
+  useCompartment(editorRef, autocompleteCompartment, autocompleteExtension);
+
+  const indentWithTabExtension = React.useMemo(
+    () => createIndentWithTabExtension(indentWithTab),
+    [indentWithTab]
+  );
+  useCompartment(editorRef, indentWithTabCompartment, indentWithTabExtension);
+
+  const ariaLabelExtension = React.useMemo(
+    () => createAriaLabelExtension(ariaLabel),
+    [ariaLabel]
+  );
+  useCompartment(editorRef, ariaLabelCompartment, ariaLabelExtension);
+
+  // Effect 2: Minimal-diff external value sync (Part A5)
   React.useEffect(() => {
     const view = editorRef.current?.view;
     if (view && view.state.doc.toString() !== value) {
@@ -144,134 +209,35 @@ export function CodeEditor({
     }
   }, [value]);
 
-  // One-shot reveal command (Part A1)
+  // Effect 3: Reveal request and selectionRange sync (Part A1)
   const lastRevealIdRef = React.useRef<number | null>(null);
-  React.useEffect(() => {
-    if (revealRequest && revealRequest.id !== lastRevealIdRef.current) {
-      lastRevealIdRef.current = revealRequest.id;
-      const view = editorRef.current?.view;
-      if (view) {
-        revealRange(view, revealRequest.range, revealRequest.focus);
-      }
-    }
-  }, [revealRequest]);
-
-  // Handle deprecated selectionRange prop (only if revealRequest not provided)
   const lastSelectionRangeRef = React.useRef<readonly [number, number] | null>(
     null
   );
   React.useEffect(() => {
-    if (
+    const view = editorRef.current?.view;
+    if (!view) return;
+
+    if (revealRequest && revealRequest.id !== lastRevealIdRef.current) {
+      lastRevealIdRef.current = revealRequest.id;
+      revealRange(view, revealRequest.range, revealRequest.focus);
+    } else if (
       !revealRequest &&
       selectionRange &&
       selectionRange !== lastSelectionRangeRef.current
     ) {
       lastSelectionRangeRef.current = selectionRange;
-      const view = editorRef.current?.view;
-      if (view) {
-        revealRange(view, selectionRange, false);
-      }
+      revealRange(view, selectionRange, false);
     }
   }, [revealRequest, selectionRange]);
 
-  // Diagnostics sync (Part B7)
+  // Effect 4: Diagnostics sync (Part B7)
   React.useEffect(() => {
     const view = editorRef.current?.view;
     if (view && diagnostics) {
       updateEditorDiagnostics(view, diagnostics);
     }
   }, [diagnostics]);
-
-  // Dynamic Compartment updates (Part A2)
-  React.useEffect(() => {
-    const view = editorRef.current?.view;
-    if (view) {
-      const nextLang =
-        language === "html"
-          ? createHtmlLanguageExtension(useTailwind)
-          : createCssLanguageExtension();
-      view.dispatch({
-        effects: languageCompartment.reconfigure(nextLang),
-      });
-    }
-  }, [language, useTailwind]);
-
-  React.useEffect(() => {
-    const view = editorRef.current?.view;
-    if (view) {
-      view.dispatch({
-        effects: tabSizeCompartment.reconfigure(
-          createTabSizeExtension(settings.tabSize)
-        ),
-      });
-    }
-  }, [settings.tabSize]);
-
-  React.useEffect(() => {
-    const view = editorRef.current?.view;
-    if (view) {
-      view.dispatch({
-        effects: fontSizeCompartment.reconfigure(
-          createFontSizeExtension(settings.fontSize)
-        ),
-      });
-    }
-  }, [settings.fontSize]);
-
-  React.useEffect(() => {
-    const view = editorRef.current?.view;
-    if (view) {
-      view.dispatch({
-        effects: wrapCompartment.reconfigure(
-          settings.lineWrapping ? EditorView.lineWrapping : []
-        ),
-      });
-    }
-  }, [settings.lineWrapping]);
-
-  React.useEffect(() => {
-    const view = editorRef.current?.view;
-    if (view) {
-      view.dispatch({
-        effects: lineNumbersCompartment.reconfigure(
-          settings.lineNumbers ? lineNumbers() : []
-        ),
-      });
-    }
-  }, [settings.lineNumbers]);
-
-  React.useEffect(() => {
-    const view = editorRef.current?.view;
-    if (view) {
-      view.dispatch({
-        effects: autocompleteCompartment.reconfigure(
-          createAutocompleteExtension(settings.autocomplete)
-        ),
-      });
-    }
-  }, [settings.autocomplete]);
-
-  React.useEffect(() => {
-    const view = editorRef.current?.view;
-    if (view) {
-      view.dispatch({
-        effects: indentWithTabCompartment.reconfigure(
-          createIndentWithTabExtension(indentWithTab)
-        ),
-      });
-    }
-  }, [indentWithTab]);
-
-  React.useEffect(() => {
-    const view = editorRef.current?.view;
-    if (view) {
-      view.dispatch({
-        effects: ariaLabelCompartment.reconfigure(
-          createAriaLabelExtension(ariaLabel)
-        ),
-      });
-    }
-  }, [ariaLabel]);
 
   // Stable empty onChange for CodeMirror so @uiw/react-codemirror never reconfigures
   const handleStableCodeMirrorChange = React.useCallback(() => {}, []);

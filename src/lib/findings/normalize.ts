@@ -9,7 +9,7 @@ import { RULES } from "@/lib/rules";
 import { WCAG_CRITERIA_BY_ID } from "@/data/wcag";
 import { fnv1a } from "@/lib/hash";
 
-export function normalizeHtmlSnippet(html: string): string {
+function normalizeHtmlSnippet(html: string): string {
   return html
     .replace(/\s*data-a11y-id="[^"]*"/g, "")
     .replace(/\s+/g, " ")
@@ -45,7 +45,7 @@ export function isEquivalentRule(
   return false;
 }
 
-export function parseWcagRefs(wcag?: readonly string[]): readonly WcagRef[] {
+function parseWcagRefs(wcag?: readonly string[]): readonly WcagRef[] {
   if (!wcag || wcag.length === 0) return [];
 
   const refs: WcagRef[] = [];
@@ -76,7 +76,6 @@ export function parseWcagRefs(wcag?: readonly string[]): readonly WcagRef[] {
 
   return refs;
 }
-
 
 export function normalizeFindings(
   customFindings: readonly AxeFinding[] = [],
@@ -208,4 +207,28 @@ export function normalizeFindings(
   }
 
   return result;
+}
+
+/**
+ * Maps a canonical Finding to the legacy AxeFinding representation
+ * used by consumers like auto-fix and legacy issue cards.
+ */
+function findingToAxeFinding(finding: Finding): AxeFinding {
+  return {
+    id: finding.ruleId,
+    impact: finding.impact,
+    help: finding.help,
+    description: finding.description,
+    helpUrl: finding.helpUrl,
+    wcag: finding.wcag.map((w) => w.id),
+    fix: finding.fix,
+    nodes: finding.nodes,
+    fingerprint: finding.fingerprint,
+  };
+}
+
+export function findingsToAxeFindings(
+  findings: readonly Finding[]
+): AxeFinding[] {
+  return findings.map(findingToAxeFinding);
 }
