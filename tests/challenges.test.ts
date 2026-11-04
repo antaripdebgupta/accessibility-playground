@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { CHALLENGES, getChallengeById } from "@/data/challenges";
+import {
+  CHALLENGES,
+  loadAllChallenges,
+  getChallengeMetadata,
+  type Challenge,
+} from "@/data/challenges";
 import { parseHtmlToA11yTree } from "@/lib/a11y-tree";
 import { runCustomRules } from "@/lib/custom-rules";
 
@@ -15,8 +20,13 @@ function getTriggeredRuleIds(html: string, css?: string): string[] {
   return [...new Set(findings.map((f) => f.id))];
 }
 
+/**
+ * All content-dependent tests load challenges once and share them.
+ */
+let allChallenges: Challenge[];
+
 describe("Challenge data integrity", () => {
-  it("CHALLENGES array is non-empty", () => {
+  it("CHALLENGES metadata array is non-empty", () => {
     expect(CHALLENGES.length).toBeGreaterThanOrEqual(5);
   });
 
@@ -25,11 +35,11 @@ describe("Challenge data integrity", () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it("getChallengeById returns the correct challenge", () => {
+  it("getChallengeMetadata returns the correct metadata", () => {
     for (const c of CHALLENGES) {
-      expect(getChallengeById(c.id)).toBe(c);
+      expect(getChallengeMetadata(c.id)).toBe(c);
     }
-    expect(getChallengeById("nonexistent")).toBeUndefined();
+    expect(getChallengeMetadata("nonexistent")).toBeUndefined();
   });
 
   it("every challenge has at least one objective", () => {
@@ -38,9 +48,9 @@ describe("Challenge data integrity", () => {
     }
   });
 
-  it("every challenge has at least one hint", () => {
+  it("every challenge has at least one hint (hintsCount > 0)", () => {
     for (const c of CHALLENGES) {
-      expect(c.hints.length).toBeGreaterThan(0);
+      expect(c.hintsCount).toBeGreaterThan(0);
     }
   });
 
@@ -49,11 +59,17 @@ describe("Challenge data integrity", () => {
       expect(["beginner", "intermediate", "advanced"]).toContain(c.difficulty);
     }
   });
+});
 
-  it("every challenge has non-empty startHtml and solutionHtml", () => {
-    for (const c of CHALLENGES) {
+describe("Challenge content integrity (async loaded)", () => {
+  it("loads all challenges and verifies content fields", async () => {
+    allChallenges = await loadAllChallenges();
+    expect(allChallenges.length).toBe(CHALLENGES.length);
+
+    for (const c of allChallenges) {
       expect(c.startHtml.trim().length).toBeGreaterThan(0);
       expect(c.solutionHtml.trim().length).toBeGreaterThan(0);
+      expect(c.hints.length).toBeGreaterThan(0);
     }
   });
 });
@@ -80,14 +96,16 @@ describe("Challenge starter code triggers expected playground rules", () => {
     "tab-pattern-incomplete",
   ]);
 
-  for (const challenge of CHALLENGES) {
-    const expectedPlaygroundRules = challenge.expected
-      .map((e) => e.ruleId)
-      .filter((id) => playgroundRuleIds.has(id));
+  it("starter code triggers expected rules for each challenge", async () => {
+    if (!allChallenges) allChallenges = await loadAllChallenges();
 
-    if (expectedPlaygroundRules.length === 0) continue;
+    for (const challenge of allChallenges) {
+      const expectedPlaygroundRules = challenge.expected
+        .map((e: { ruleId: string }) => e.ruleId)
+        .filter((id: string) => playgroundRuleIds.has(id));
 
-    it(`"${challenge.id}" starter triggers: ${expectedPlaygroundRules.join(", ")}`, () => {
+      if (expectedPlaygroundRules.length === 0) continue;
+
       const triggered = getTriggeredRuleIds(
         challenge.startHtml,
         challenge.startCss
@@ -98,37 +116,41 @@ describe("Challenge starter code triggers expected playground rules", () => {
           `Expected rule "${expectedRule}" to be triggered by "${challenge.id}" starter code`
         ).toContain(expectedRule);
       }
-    });
-  }
+    }
+  });
 });
 
 describe("Challenge solution code resolves expected rules", () => {
-  for (const challenge of CHALLENGES) {
-    const playgroundMustBeAbsent = challenge.verify.ruleIdsMustBeAbsent.filter(
-      (id) =>
-        [
-          "img-missing-alt",
-          "empty-interactive-name",
-          "input-placeholder-only",
-          "input-no-label",
-          "heading-order",
-          "click-on-non-interactive",
-          "dialog-no-name",
-          "positive-tabindex",
-          "aria-hidden-focusable",
-          "interactive-role-not-focusable",
-          "link-as-button",
-          "outline-removed",
-          "duplicate-id",
-          "aria-broken-reference",
-          "invalid-aria",
-          "tab-pattern-incomplete",
-        ].includes(id)
-    );
+  it("solution does not trigger must-be-absent rules", async () => {
+    if (!allChallenges) allChallenges = await loadAllChallenges();
 
-    if (playgroundMustBeAbsent.length === 0) continue;
+    const playgroundRules = [
+      "img-missing-alt",
+      "empty-interactive-name",
+      "input-placeholder-only",
+      "input-no-label",
+      "heading-order",
+      "click-on-non-interactive",
+      "dialog-no-name",
+      "positive-tabindex",
+      "aria-hidden-focusable",
+      "interactive-role-not-focusable",
+      "link-as-button",
+      "outline-removed",
+      "duplicate-id",
+      "aria-broken-reference",
+      "invalid-aria",
+      "tab-pattern-incomplete",
+    ];
 
-    it(`"${challenge.id}" solution does not trigger: ${playgroundMustBeAbsent.join(", ")}`, () => {
+    for (const challenge of allChallenges) {
+      const playgroundMustBeAbsent =
+        challenge.verify.ruleIdsMustBeAbsent.filter((id: string) =>
+          playgroundRules.includes(id)
+        );
+
+      if (playgroundMustBeAbsent.length === 0) continue;
+
       const triggered = getTriggeredRuleIds(
         challenge.solutionHtml,
         challenge.solutionCss
@@ -139,13 +161,15 @@ describe("Challenge solution code resolves expected rules", () => {
           `Rule "${absent}" should NOT be triggered by "${challenge.id}" solution code`
         ).not.toContain(absent);
       }
-    });
-  }
+    }
+  });
 });
 
 describe("Challenge solution does not introduce new playground violations", () => {
-  for (const challenge of CHALLENGES) {
-    it(`"${challenge.id}" solution introduces no new violations`, () => {
+  it("no new violations in any challenge solution", async () => {
+    if (!allChallenges) allChallenges = await loadAllChallenges();
+
+    for (const challenge of allChallenges) {
       const starterRules = getTriggeredRuleIds(
         challenge.startHtml,
         challenge.startCss
@@ -161,8 +185,8 @@ describe("Challenge solution does not introduce new playground violations", () =
         newViolations,
         `Solution for "${challenge.id}" should not introduce new violations, but found: ${newViolations.join(", ")}`
       ).toEqual([]);
-    });
-  }
+    }
+  });
 });
 
 describe("Challenge progress storage", () => {

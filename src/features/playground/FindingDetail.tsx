@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import type { AxeFinding, Finding } from "@/types/a11y";
-import { getRuleKnowledge, type RuleKnowledge } from "@/data/rule-knowledge";
 import { getLearnTopicForRuleId } from "@/data/learn-topics";
 import { FindingStatusBadge } from "./FindingStatusBadge";
 import { Badge } from "@/components/ui/Badge";
@@ -11,15 +11,24 @@ import { WcagBadge } from "@/components/WcagBadge";
 import { CodeSnippet } from "@/components/ui/CodeSnippet";
 import { getImpactMeta } from "@/lib/impact";
 import { isAutoFixable, computeFixPreview } from "@/lib/auto-fix";
-import {
-  ExternalLink,
-  Crosshair,
-  ArrowRight,
-  Wrench,
-  Users,
-  CheckCircle,
-  BookOpen,
-} from "lucide-react";
+import { ExternalLink, Crosshair, Wrench, BookOpen } from "lucide-react";
+
+/**
+ * RuleLesson is loaded lazily so that the large rule-knowledge data
+ * (1,176 lines) is split into its own chunk and not included in the
+ * playground's initial client bundle.
+ */
+const RuleLesson = dynamic(() => import("./RuleLesson"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex animate-pulse flex-col gap-3">
+      <div className="h-3 w-3/4 rounded bg-[var(--color-surface-sunken)]" />
+      <div className="h-3 w-1/2 rounded bg-[var(--color-surface-sunken)]" />
+      <div className="h-3 w-2/3 rounded bg-[var(--color-surface-sunken)]" />
+      <div className="h-3 w-1/3 rounded bg-[var(--color-surface-sunken)]" />
+    </div>
+  ),
+});
 
 export interface FindingDetailProps {
   finding: Finding;
@@ -97,14 +106,6 @@ export function generateContextualFix(
   return defaultGoodExample;
 }
 
-const INSPECTOR_LABELS: Record<string, string> = {
-  tree: "A11y Tree",
-  aria: "ARIA Explorer",
-  accname: "Accessible Name",
-  focus: "Focus Order",
-  announce: "Announcement",
-};
-
 export function FindingDetail({
   finding,
   onSelectNode,
@@ -112,7 +113,6 @@ export function FindingDetail({
   onApplyFix,
 }: FindingDetailProps) {
   const [showAutoFixPreview, setShowAutoFixPreview] = React.useState(false);
-  const knowledge: RuleKnowledge | undefined = getRuleKnowledge(finding.ruleId);
   const learnTopic = getLearnTopicForRuleId(finding.ruleId);
   const impactMeta = getImpactMeta(finding.impact);
   const primaryNode = finding.nodes[0];
@@ -131,10 +131,6 @@ export function FindingDetail({
 
   const hasAutoFix = isAutoFixable(finding.ruleId);
   const fixPreview = hasAutoFix ? computeFixPreview(axeFinding) : null;
-
-  const goodExample = knowledge
-    ? generateContextualFix(finding, knowledge.goodExample)
-    : finding.fix || "";
 
   return (
     <article
@@ -185,59 +181,7 @@ export function FindingDetail({
         </div>
       )}
 
-      {/* 1. What's happening */}
-      <section className="flex flex-col gap-1.5">
-        <h4 className="font-semibold text-[var(--color-text-primary)]">
-          What is happening
-        </h4>
-        <p className="leading-relaxed text-[var(--color-text-secondary)]">
-          {knowledge ? knowledge.whatIsHappening : finding.description}
-        </p>
-      </section>
-
-      {/* 2. Why it matters */}
-      <section className="flex flex-col gap-1.5">
-        <h4 className="font-semibold text-[var(--color-text-primary)]">
-          Why it matters
-        </h4>
-        <p className="leading-relaxed text-[var(--color-text-secondary)]">
-          {knowledge ? knowledge.whyItMatters : finding.help}
-        </p>
-      </section>
-
-      {/* 3. Who is affected */}
-      {knowledge ? (
-        <section className="flex flex-col gap-2">
-          <div className="flex items-center gap-1.5 font-semibold text-[var(--color-text-primary)]">
-            <Users className="h-3.5 w-3.5" aria-hidden="true" />
-            <h4>Who is affected</h4>
-          </div>
-          <div className="flex flex-wrap gap-1.5">
-            {knowledge.whoIsAffected.map((group) => (
-              <span
-                key={group}
-                className="rounded-full border border-[var(--color-border)] bg-[var(--color-surface-sunken)] px-2 py-0.5 text-[11px] text-[var(--color-text-primary)]"
-              >
-                {group.replace(/-/g, " ")}
-              </span>
-            ))}
-          </div>
-          {knowledge.whoIsAffectedNote && (
-            <p className="text-[11px] text-[var(--color-text-secondary)] italic">
-              {knowledge.whoIsAffectedNote}
-            </p>
-          )}
-        </section>
-      ) : (
-        <section className="flex flex-col gap-1 text-[var(--color-text-secondary)]">
-          <h4 className="font-semibold text-[var(--color-text-primary)]">
-            Who is affected
-          </h4>
-          <p>No detailed lesson yet. See external documentation below.</p>
-        </section>
-      )}
-
-      {/* 4. WCAG */}
+      {/* WCAG Success Criteria */}
       {finding.wcag.length > 0 && (
         <section className="flex flex-col gap-2">
           <h4 className="font-semibold text-[var(--color-text-primary)]">
@@ -256,7 +200,7 @@ export function FindingDetail({
         </section>
       )}
 
-      {/* 5. Your code */}
+      {/* Your code */}
       {primaryNode && (
         <section className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
@@ -283,64 +227,7 @@ export function FindingDetail({
         </section>
       )}
 
-      {/* 6. Suggested fix */}
-      {goodExample && (
-        <section className="flex flex-col gap-2">
-          <h4 className="font-semibold text-[var(--color-text-primary)]">
-            Suggested fix
-          </h4>
-          <CodeSnippet code={goodExample} />
-        </section>
-      )}
-
-      {/* 7. Why the fix works */}
-      {knowledge && (
-        <section className="flex flex-col gap-1.5">
-          <h4 className="font-semibold text-[var(--color-text-primary)]">
-            Why the fix works
-          </h4>
-          <p className="leading-relaxed text-[var(--color-text-secondary)]">
-            {knowledge.whyFixWorks}
-          </p>
-        </section>
-      )}
-
-      {/* 8. How to verify */}
-      {knowledge && (
-        <section className="flex flex-col gap-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5 font-semibold text-[var(--color-text-primary)]">
-              <CheckCircle
-                className="h-3.5 w-3.5 text-[var(--color-success-default)]"
-                aria-hidden="true"
-              />
-              <h4>How to verify</h4>
-            </div>
-            {onOpenInspector && (
-              <button
-                type="button"
-                onClick={() => onOpenInspector(knowledge.inspector, targetId)}
-                className="inline-flex items-center gap-1 rounded border border-[var(--color-border)] bg-[var(--color-surface-raised)] px-2 py-1 text-[11px] font-medium text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-focus-ring)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
-              >
-                <span>
-                  Open in{" "}
-                  {INSPECTOR_LABELS[knowledge.inspector] || knowledge.inspector}
-                </span>
-                <ArrowRight className="h-3 w-3" aria-hidden="true" />
-              </button>
-            )}
-          </div>
-          <ol className="list-decimal space-y-1 pl-4 text-[var(--color-text-secondary)]">
-            {knowledge.howToVerify.map((step, idx) => (
-              <li key={idx} className="leading-relaxed">
-                {step}
-              </li>
-            ))}
-          </ol>
-        </section>
-      )}
-
-      {/* 9. Auto-fix preview */}
+      {/* Auto-fix preview */}
       {hasAutoFix && fixPreview && (
         <section className="flex flex-col gap-2 rounded-md border border-[var(--color-border)] bg-[var(--color-surface-sunken)]/60 p-3">
           <div className="flex items-center justify-between">
@@ -391,42 +278,12 @@ export function FindingDetail({
         </section>
       )}
 
-      {/* Resources & References */}
-      <section className="flex flex-col gap-2 border-t border-[var(--color-border)] pt-4">
-        <div className="flex items-center gap-1.5 font-semibold text-[var(--color-text-primary)]">
-          <BookOpen className="h-3.5 w-3.5" aria-hidden="true" />
-          <h4>Official References</h4>
-        </div>
-        <ul className="space-y-1">
-          {knowledge ? (
-            knowledge.resources.map((res) => (
-              <li key={res.url}>
-                <a
-                  href={res.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1 text-[11px] text-[var(--color-focus-ring)] hover:underline"
-                >
-                  <span>{res.title}</span>
-                  <ExternalLink className="h-3 w-3" aria-hidden="true" />
-                </a>
-              </li>
-            ))
-          ) : (
-            <li>
-              <a
-                href={finding.helpUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1 text-[11px] text-[var(--color-focus-ring)] hover:underline"
-              >
-                <span>{finding.help} Documentation</span>
-                <ExternalLink className="h-3 w-3" aria-hidden="true" />
-              </a>
-            </li>
-          )}
-        </ul>
-      </section>
+      {/* Lazily-loaded lesson body (rule knowledge, verification, references) */}
+      <RuleLesson
+        finding={finding}
+        targetId={targetId}
+        onOpenInspector={onOpenInspector}
+      />
     </article>
   );
 }

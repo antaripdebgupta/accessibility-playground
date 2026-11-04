@@ -3,7 +3,7 @@ import React from "react";
 import { renderToString } from "react-dom/server";
 import HomePage from "@/app/(site)/page";
 import { STARTER_TEMPLATES } from "@/data/templates";
-import { CHALLENGES } from "@/data/challenges";
+import { loadAllChallenges } from "@/data/challenges";
 import { parseHtmlToA11yTree } from "@/lib/a11y-tree";
 import { runCustomRules } from "@/lib/custom-rules";
 import {
@@ -32,10 +32,11 @@ describe("Baseline Behavior Snapshots", () => {
     expect(templateFindings).toMatchSnapshot();
   });
 
-  it("locks findings output for every challenge (starter and solution)", () => {
+  it("locks findings output for every challenge (starter and solution)", async () => {
+    const challenges = await loadAllChallenges();
     const challengeFindings: Record<string, unknown> = {};
 
-    for (const challenge of CHALLENGES) {
+    for (const challenge of challenges) {
       const starterAst = parseHtmlToA11yTree(challenge.startHtml).ast;
       const starterCustom = starterAst
         ? runCustomRules(

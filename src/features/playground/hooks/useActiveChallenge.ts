@@ -1,9 +1,12 @@
 import * as React from "react";
-import { getChallengeById, type Challenge } from "@/data/challenges";
+import { loadChallenge, type Challenge } from "@/data/challenges";
 import { useChallengeMode } from "@/hooks/useChallengeMode";
+
+export type ChallengeLoadingStatus = "idle" | "loading" | "ready" | "error";
 
 export interface UseActiveChallengeResult {
   activeChallenge: Challenge | null;
+  status: ChallengeLoadingStatus;
   challengeMode: ReturnType<typeof useChallengeMode>;
   handleLoadSolution: (challenge: Challenge) => void;
   handleResetStarter: (challenge: Challenge) => void;
@@ -15,10 +18,51 @@ export function useActiveChallenge(
   setRawCss: (css: string) => void,
   onLoadChallenge?: () => void
 ): UseActiveChallengeResult {
-  const activeChallenge = React.useMemo<Challenge | null>(
-    () => (challengeParam ? (getChallengeById(challengeParam) ?? null) : null),
-    [challengeParam]
+  const [activeChallenge, setActiveChallenge] =
+    React.useState<Challenge | null>(null);
+  const [status, setStatus] = React.useState<ChallengeLoadingStatus>(
+    challengeParam ? "loading" : "idle"
   );
+  const [prevParam, setPrevParam] = React.useState<string | null>(
+    challengeParam
+  );
+
+  if (prevParam !== challengeParam) {
+    setPrevParam(challengeParam);
+    if (!challengeParam) {
+      setActiveChallenge(null);
+      setStatus("idle");
+    } else {
+      setStatus("loading");
+    }
+  }
+
+  // Load challenge content asynchronously when the param changes
+  React.useEffect(() => {
+    if (!challengeParam) return;
+    let cancelled = false;
+    loadChallenge(challengeParam)
+      .then((challenge) => {
+        if (cancelled) return;
+        if (challenge) {
+          setActiveChallenge(challenge);
+          setStatus("ready");
+        } else {
+          setActiveChallenge(null);
+          setStatus("error");
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setActiveChallenge(null);
+          setStatus("error");
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [challengeParam]);
+
   const challengeMode = useChallengeMode(activeChallenge);
 
   const loadedChallengeRef = React.useRef<string | null>(null);
@@ -51,6 +95,7 @@ export function useActiveChallenge(
 
   return {
     activeChallenge,
+    status,
     challengeMode,
     handleLoadSolution,
     handleResetStarter,

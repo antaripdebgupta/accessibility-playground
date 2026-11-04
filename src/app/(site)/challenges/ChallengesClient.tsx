@@ -134,7 +134,7 @@ export function ChallengesClient() {
                                 {challenge.objectives.length} objectives
                               </span>
                               <span>·</span>
-                              <span>{challenge.hints.length} hints</span>
+                              <span>{challenge.hintsCount} hints</span>
                             </div>
                           </div>
                           <ChevronRight
