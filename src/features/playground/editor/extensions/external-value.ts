@@ -1,5 +1,6 @@
 import { Annotation } from "@codemirror/state";
 import type { EditorView } from "@codemirror/view";
+import { isolateHistory } from "@codemirror/commands";
 
 /**
  * Annotation used on transactions triggered by external value updates
@@ -62,19 +63,30 @@ export function applyExternalValue(
   options?: ApplyExternalValueOptions
 ): boolean {
   const currentDoc = view.state.doc.toString();
-  if (currentDoc === nextValue) {
+  if (currentDoc === nextValue && !options?.isFullReplace) {
     return false;
   }
 
   const prevLen = currentDoc.length;
 
   if (options?.isFullReplace) {
-    view.dispatch({
-      changes: { from: 0, to: prevLen, insert: nextValue },
-      selection: { anchor: 0 },
-      scrollIntoView: true,
-      annotations: [isExternalChange.of(true)],
-    });
+    if (currentDoc === nextValue) {
+      view.dispatch({
+        selection: { anchor: 0 },
+        scrollIntoView: true,
+        annotations: [isExternalChange.of(true)],
+      });
+    } else {
+      view.dispatch({
+        changes: { from: 0, to: prevLen, insert: nextValue },
+        selection: { anchor: 0 },
+        scrollIntoView: true,
+        annotations: [isExternalChange.of(true), isolateHistory.of("before")],
+      });
+    }
+    if (view.scrollDOM) {
+      view.scrollDOM.scrollTop = 0;
+    }
     return true;
   }
 

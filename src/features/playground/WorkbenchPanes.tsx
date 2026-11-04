@@ -25,6 +25,7 @@ export interface EditorPaneProps {
   onSelectTemplate: (template: StarterTemplate) => void;
   useTailwind: boolean;
   onToggleTailwind: (use: boolean) => void;
+  loadRequest?: { readonly id: number } | null;
   revealRequest: RevealRequest | null;
   onCaretChange: (offset: number) => void;
   onForceScan: () => void;
@@ -41,6 +42,7 @@ export function EditorPaneSection({
   onSelectTemplate,
   useTailwind,
   onToggleTailwind,
+  loadRequest,
   revealRequest,
   onCaretChange,
   onForceScan,
@@ -65,6 +67,7 @@ export function EditorPaneSection({
         }
         useTailwind={useTailwind}
         onToggleTailwind={onToggleTailwind}
+        loadRequest={loadRequest}
         revealRequest={revealRequest}
         onCaretChange={onCaretChange}
         onForceScan={onForceScan}

@@ -26,6 +26,7 @@ export interface UseWorkbenchPanesParams {
     useTailwind: boolean;
     setUseTailwind: (val: boolean) => void;
     isOverSizeLimit: boolean;
+    loadRequest?: { readonly id: number } | null;
   };
   analysis: PlaygroundAnalysisResult;
   selection: UsePlaygroundSelectionResult;
@@ -77,6 +78,7 @@ export function useWorkbenchPanes({
       onSelectTemplate={doc.handleSelectTemplate}
       useTailwind={doc.useTailwind}
       onToggleTailwind={doc.setUseTailwind}
+      loadRequest={doc.loadRequest}
       revealRequest={selection.revealRequest}
       onCaretChange={selection.handleCaretChange}
       onForceScan={scan.triggerScan}

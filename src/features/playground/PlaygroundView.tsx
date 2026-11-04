@@ -46,7 +46,7 @@ export function PlaygroundView() {
   }, [scan]);
 
   const doc = usePlaygroundDocument(handleDocumentChange);
-  const { rawHtml, setRawHtml, setRawCss } = doc;
+  const { rawHtml, setRawHtml, setRawCss, triggerLoadRequest } = doc;
 
   // Challenge mode
   const {
@@ -54,7 +54,12 @@ export function PlaygroundView() {
     challengeMode,
     handleLoadSolution,
     handleResetStarter,
-  } = useActiveChallenge(challengeParam, setRawHtml, setRawCss);
+  } = useActiveChallenge(
+    challengeParam,
+    setRawHtml,
+    setRawCss,
+    triggerLoadRequest
+  );
 
   const [analysisTab, setAnalysisTab] = React.useState<string>(
     tabParam || "tree"

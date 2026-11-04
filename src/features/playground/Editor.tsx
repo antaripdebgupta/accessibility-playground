@@ -48,6 +48,7 @@ export interface EditorProps {
   onCopyLink?: () => string;
   useTailwind?: boolean;
   onToggleTailwind?: (enabled: boolean) => void;
+  loadRequest?: { readonly id: number } | null;
   revealRequest?: RevealRequest | null;
   /** @deprecated Use revealRequest */
   selectionRange?: readonly [number, number] | null;
@@ -67,6 +68,7 @@ export function Editor({
   onCopyLink,
   useTailwind = false,
   onToggleTailwind,
+  loadRequest,
   revealRequest,
   selectionRange,
   onCaretChange,
@@ -89,6 +91,15 @@ export function Editor({
   const [liveAnnouncement, setLiveAnnouncement] = React.useState<string | null>(
     null
   );
+  const [localLoadRequest, setLocalLoadRequest] = React.useState<{
+    readonly id: number;
+  } | null>(null);
+
+  const triggerLocalLoad = React.useCallback(() => {
+    setLocalLoadRequest({ id: Date.now() + Math.round(Math.random() * 1000) });
+  }, []);
+
+  const activeLoadRequest = loadRequest ?? localLoadRequest;
 
   const { settings } = useEditorSettings();
   const toast = useToast();
@@ -382,7 +393,10 @@ export function Editor({
           <SnippetsMenu
             html={html}
             css={css}
-            onHtmlChange={onHtmlChange}
+            onHtmlChange={(val) => {
+              triggerLocalLoad();
+              onHtmlChange(val);
+            }}
             onCssChange={onCssChange}
           />
 
@@ -425,6 +439,7 @@ export function Editor({
             value={html}
             onChange={onHtmlChange}
             language="html"
+            loadRequest={activeLoadRequest}
             revealRequest={activeTab === "html" ? revealRequest : null}
             selectionRange={activeTab === "html" ? selectionRange : null}
             onCaretChange={onCaretChange}
@@ -456,6 +471,7 @@ export function Editor({
               value={css}
               onChange={onCssChange}
               language="css"
+              loadRequest={activeLoadRequest}
               onForceScan={onForceScan}
               indentWithTab={indentWithTab}
               ariaLabel="CSS code editor"

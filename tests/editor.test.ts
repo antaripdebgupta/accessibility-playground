@@ -18,6 +18,7 @@ import {
   createTabSizeExtension,
   createFontSizeExtension,
 } from "@/features/playground/editor/compartments";
+import { undo, history } from "@codemirror/commands";
 import { handleWrapSelection } from "@/features/playground/editor/extensions/keymaps";
 import {
   createEditorBaseExtensions,
@@ -87,20 +88,65 @@ describe("Part A & B: CodeMirror Editor Enhancements", () => {
       // Cursor should be mapped cleanly (still at index 8 or after insertion)
       expect(view.state.selection.main.head).toBe(8);
 
-      // Same value should return false
+      // Same value without isFullReplace should return false
       const reapplied = applyExternalValue(view, "<p>hello world</p>");
       expect(reapplied).toBe(false);
 
       view.destroy();
     });
 
-    it("supports full replacement for templates and snippets with undo", () => {
+    it("keeps and maps the caret for a change before, inside, and after it", () => {
+      const container = document.createElement("div");
+
+      // 1. Caret before change: caret at 4, change happens at end of doc
+      const viewBefore = new EditorView({
+        state: EditorState.create({
+          doc: "<p>before</p><p>after</p>",
+          selection: { anchor: 4 },
+        }),
+        parent: container,
+      });
+      applyExternalValue(viewBefore, "<p>before</p><p>after modified</p>");
+      expect(viewBefore.state.selection.main.head).toBe(4);
+      viewBefore.destroy();
+
+      // 2. Caret inside change: caret at 5 (inside "click", range 3..8), replaced with "press"
+      const viewInside = new EditorView({
+        state: EditorState.create({
+          doc: "<p>click me</p>",
+          selection: { anchor: 5 },
+        }),
+        parent: container,
+      });
+      applyExternalValue(viewInside, "<p>press me</p>");
+      // Caret is mapped within the replacement bounds [3, 8]
+      expect(viewInside.state.selection.main.head).toBeGreaterThanOrEqual(3);
+      expect(viewInside.state.selection.main.head).toBeLessThanOrEqual(8);
+      viewInside.destroy();
+
+      // 3. Caret after change: caret at 22, insertion of 10 chars happens before it
+      const viewAfter = new EditorView({
+        state: EditorState.create({
+          doc: "<p>before</p><p>after</p>",
+          selection: { anchor: 22 },
+        }),
+        parent: container,
+      });
+      applyExternalValue(viewAfter, "<p>before extra</p><p>after</p>");
+      expect(viewAfter.state.selection.main.head).toBe(28); // 22 + 6 inserted chars
+      viewAfter.destroy();
+    });
+
+    it("supports full replacement for templates and snippets, resetting caret to 0 even if doc is identical", () => {
       const container = document.createElement("div");
       const state = EditorState.create({
         doc: "<p>template 1</p>",
+        selection: { anchor: 8 },
+        extensions: [history()],
       });
       const view = new EditorView({ state, parent: container });
 
+      // Different doc: full replace
       const applied = applyExternalValue(
         view,
         "<main><h1>Template 2</h1></main>",
@@ -111,6 +157,68 @@ describe("Part A & B: CodeMirror Editor Enhancements", () => {
         "<main><h1>Template 2</h1></main>"
       );
       expect(view.state.selection.main.anchor).toBe(0);
+
+      // Undo restores template 1
+      const undone = undo(view);
+      expect(undone).toBe(true);
+      expect(view.state.doc.toString()).toBe("<p>template 1</p>");
+
+      // Move caret to 5
+      view.dispatch({ selection: { anchor: 5 } });
+      expect(view.state.selection.main.anchor).toBe(5);
+
+      // Reload SAME template: must reset caret to 0
+      const reloaded = applyExternalValue(
+        view,
+        "<main><h1>Template 2</h1></main>",
+        { isFullReplace: true }
+      );
+      expect(reloaded).toBe(true);
+      expect(view.state.selection.main.anchor).toBe(0);
+
+      view.destroy();
+    });
+
+    it("neither minimal diff nor isFullReplace fires docChange on the editor bus", () => {
+      const bus = new EventTarget();
+      const docChangeFn = vi.fn();
+      const caretChangeFn = vi.fn();
+      bus.addEventListener("docChange", docChangeFn);
+      bus.addEventListener("caretChange", caretChangeFn);
+
+      const extensions = createEditorBaseExtensions({
+        language: "html",
+        settings: {
+          tabSize: 2,
+          fontSize: 14,
+          lineWrapping: true,
+          lineNumbers: true,
+          autocomplete: true,
+        },
+        ariaLabel: "HTML code editor",
+        bus,
+      });
+
+      const container = document.createElement("div");
+      const state = EditorState.create({
+        doc: "<main><p>Hello</p></main>",
+        extensions,
+        selection: { anchor: 10 },
+      });
+      const view = new EditorView({ state, parent: container });
+
+      // External minimal edit
+      applyExternalValue(view, "<main><p>Hello world</p></main>");
+      expect(view.state.doc.toString()).toBe("<main><p>Hello world</p></main>");
+      expect(docChangeFn).not.toHaveBeenCalled();
+      expect(caretChangeFn).not.toHaveBeenCalled();
+
+      // External full replace
+      applyExternalValue(view, "<div>Fresh</div>", { isFullReplace: true });
+      expect(view.state.doc.toString()).toBe("<div>Fresh</div>");
+      expect(view.state.selection.main.anchor).toBe(0);
+      expect(docChangeFn).not.toHaveBeenCalled();
+      expect(caretChangeFn).not.toHaveBeenCalled();
 
       view.destroy();
     });

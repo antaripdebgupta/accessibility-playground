@@ -44,6 +44,7 @@ interface CodeEditorProps {
   value: string;
   onChange: (val: string) => void;
   language: "html" | "css";
+  loadRequest?: { readonly id: number } | null;
   revealRequest?: RevealRequest | null;
   /** @deprecated Use revealRequest instead */
   selectionRange?: readonly [number, number] | null;
@@ -62,6 +63,7 @@ function CodeEditor({
   value,
   onChange,
   language,
+  loadRequest,
   revealRequest,
   selectionRange,
   onCaretChange,
@@ -76,9 +78,16 @@ function CodeEditor({
 }: CodeEditorProps) {
   const editorRef = React.useRef<ReactCodeMirrorRef>(null);
   const { settings } = useEditorSettings();
+  const [initialValue] = React.useState(value);
+  const lastLoadRequestIdRef = React.useRef<number | null>(
+    loadRequest?.id ?? null
+  );
 
   // Stable event bus: decoupled from render, no refs during render
   const [bus] = React.useState(() => new EventTarget());
+
+  // Track values emitted by this editor to ignore React prop echoes during typing
+  const emittedValuesRef = React.useRef(new Set<string>());
 
   // Keep volatile callbacks and values in a latest ref to avoid listener churn
   const latestCallbacks = useLatest({
@@ -94,8 +103,15 @@ function CodeEditor({
 
   // Effect 1: Event bus subscriptions (attached once, routes to latest callbacks)
   React.useEffect(() => {
-    const onDocChange = (e: Event) =>
-      latestCallbacks.current.onChange((e as CustomEvent<string>).detail);
+    const onDocChange = (e: Event) => {
+      const val = (e as CustomEvent<string>).detail;
+      emittedValuesRef.current.add(val);
+      if (emittedValuesRef.current.size > 100) {
+        const first = emittedValuesRef.current.values().next().value;
+        if (first !== undefined) emittedValuesRef.current.delete(first);
+      }
+      latestCallbacks.current.onChange(val);
+    };
     const onCaret = (e: Event) =>
       latestCallbacks.current.onCaretChange?.(
         (e as CustomEvent<number>).detail
@@ -204,10 +220,32 @@ function CodeEditor({
   // Effect 2: Minimal-diff external value sync (Part A5)
   React.useEffect(() => {
     const view = editorRef.current?.view;
-    if (view && view.state.doc.toString() !== value) {
-      applyExternalValue(view, value);
+    if (!view) return;
+
+    const isLoad =
+      loadRequest != null && loadRequest.id !== lastLoadRequestIdRef.current;
+    if (isLoad) {
+      lastLoadRequestIdRef.current = loadRequest.id;
+      emittedValuesRef.current.clear();
     }
-  }, [value]);
+
+    // If this value was emitted by this editor, it's an echo of user typing — skip sync
+    if (!isLoad && emittedValuesRef.current.has(value)) {
+      emittedValuesRef.current.delete(value);
+      return;
+    }
+
+    const currentDoc = view.state.doc.toString();
+    if (currentDoc !== value) {
+      applyExternalValue(
+        view,
+        value,
+        isLoad ? { isFullReplace: true } : undefined
+      );
+    } else if (isLoad) {
+      applyExternalValue(view, value, { isFullReplace: true });
+    }
+  }, [value, loadRequest]);
 
   // Effect 3: Reveal request and selectionRange sync (Part A1)
   const lastRevealIdRef = React.useRef<number | null>(null);
@@ -246,7 +284,7 @@ function CodeEditor({
     <div className="relative h-full min-h-0 flex-1">
       <CodeMirror
         ref={editorRef}
-        value={value}
+        value={initialValue}
         onChange={handleStableCodeMirrorChange}
         extensions={extensions}
         basicSetup={false}

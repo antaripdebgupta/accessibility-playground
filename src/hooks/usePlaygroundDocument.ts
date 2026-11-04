@@ -75,6 +75,14 @@ export function usePlaygroundDocument(onDocumentChange?: () => void) {
     storage.set(STORAGE_KEYS.css, debouncedCss);
   }, [debouncedCss]);
 
+  const [loadRequest, setLoadRequest] = React.useState<{
+    readonly id: number;
+  } | null>(null);
+
+  const triggerLoadRequest = React.useCallback(() => {
+    setLoadRequest({ id: Date.now() + Math.round(Math.random() * 1000) });
+  }, []);
+
   // Restore toast on initial mount
   const hasShownRestoreToast = React.useRef(false);
   React.useEffect(() => {
@@ -93,14 +101,16 @@ export function usePlaygroundDocument(onDocumentChange?: () => void) {
 
   const handleSelectTemplate = React.useCallback(
     (template: StarterTemplate) => {
+      triggerLoadRequest();
       setRawHtml(template.html);
       setRawCss(template.css ?? "");
       onDocumentChange?.();
     },
-    [onDocumentChange]
+    [onDocumentChange, triggerLoadRequest]
   );
 
   const handleStartFresh = React.useCallback(() => {
+    triggerLoadRequest();
     storage.remove(STORAGE_KEYS.html);
     storage.remove(STORAGE_KEYS.css);
     setRawHtml(STARTER_TEMPLATES[0]?.html ?? "");
@@ -111,9 +121,10 @@ export function usePlaygroundDocument(onDocumentChange?: () => void) {
       description: "Reset code editor to starter template.",
       variant: "info",
     });
-  }, [onDocumentChange, toast]);
+  }, [onDocumentChange, toast, triggerLoadRequest]);
 
   const handleResetExample = React.useCallback(() => {
+    triggerLoadRequest();
     let targetHtml = STARTER_TEMPLATES[0]?.html ?? "";
     let targetCss = STARTER_TEMPLATES[0]?.css ?? "";
 
@@ -139,7 +150,7 @@ export function usePlaygroundDocument(onDocumentChange?: () => void) {
       description: "Restored code to original starter state.",
       variant: "info",
     });
-  }, [patternParam, sharedParam, onDocumentChange, toast]);
+  }, [patternParam, sharedParam, onDocumentChange, toast, triggerLoadRequest]);
 
   const updateHtml = React.useCallback(
     (valOrUpdater: string | ((prev: string) => string)) => {
@@ -172,5 +183,7 @@ export function usePlaygroundDocument(onDocumentChange?: () => void) {
     handleStartFresh,
     handleResetExample,
     isOverSizeLimit,
+    loadRequest,
+    triggerLoadRequest,
   };
 }

@@ -246,10 +246,15 @@ export function createEditorBaseExtensions(
 
       // 2. Caret change (only when selection set and not doc change, and editor is focused)
       if (update.selectionSet && !update.docChanged && update.view.hasFocus) {
-        const head = update.state.selection.main.head;
-        options.bus?.dispatchEvent(
-          new CustomEvent("caretChange", { detail: head })
+        const isExternal = update.transactions.some((tr) =>
+          tr.annotation(isExternalChange)
         );
+        if (!isExternal) {
+          const head = update.state.selection.main.head;
+          options.bus?.dispatchEvent(
+            new CustomEvent("caretChange", { detail: head })
+          );
+        }
       }
     }),
   ];

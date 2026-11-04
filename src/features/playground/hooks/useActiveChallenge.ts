@@ -12,7 +12,8 @@ export interface UseActiveChallengeResult {
 export function useActiveChallenge(
   challengeParam: string | null,
   setRawHtml: (html: string) => void,
-  setRawCss: (css: string) => void
+  setRawCss: (css: string) => void,
+  onLoadChallenge?: () => void
 ): UseActiveChallengeResult {
   const activeChallenge = React.useMemo<Challenge | null>(
     () => (challengeParam ? (getChallengeById(challengeParam) ?? null) : null),
@@ -24,25 +25,28 @@ export function useActiveChallenge(
   React.useEffect(() => {
     if (activeChallenge && loadedChallengeRef.current !== activeChallenge.id) {
       loadedChallengeRef.current = activeChallenge.id;
+      onLoadChallenge?.();
       setRawHtml(activeChallenge.startHtml);
       setRawCss(activeChallenge.startCss ?? "");
     }
-  }, [activeChallenge, setRawHtml, setRawCss]);
+  }, [activeChallenge, setRawHtml, setRawCss, onLoadChallenge]);
 
   const handleLoadSolution = React.useCallback(
     (c: Challenge) => {
+      onLoadChallenge?.();
       setRawHtml(c.solutionHtml);
       setRawCss(c.solutionCss ?? "");
     },
-    [setRawHtml, setRawCss]
+    [setRawHtml, setRawCss, onLoadChallenge]
   );
 
   const handleResetStarter = React.useCallback(
     (c: Challenge) => {
+      onLoadChallenge?.();
       setRawHtml(c.startHtml);
       setRawCss(c.startCss ?? "");
     },
-    [setRawHtml, setRawCss]
+    [setRawHtml, setRawCss, onLoadChallenge]
   );
 
   return {
