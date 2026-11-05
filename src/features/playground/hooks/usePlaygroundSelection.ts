@@ -1,7 +1,8 @@
+// Manages playground-level selection side-effects (reveal requests, caret sync, simulated focus, and auto-fix execution) layered over the core selection state.
 import * as React from "react";
 import { useSelection, type SelectionSource } from "@/hooks/useSelection";
 import { findA11yNodeAtOffset, findA11yNodeById } from "@/lib/a11y-tree";
-import { applyAutoFixToHtml } from "@/lib/auto-fix";
+import { applyAutoFixToHtml, type ImgAltFixMode } from "@/lib/auto-fix";
 import type { A11yNode, AxeFinding, Finding } from "@/types/a11y";
 import type { RevealRequest } from "../CodeEditor";
 
@@ -24,7 +25,10 @@ export interface UsePlaygroundSelectionResult {
   ) => void;
   handleCaretChange: (offset: number) => void;
   handleSimulateFocus: (id: string) => void;
-  handleApplyFix: (finding: Finding | AxeFinding) => void;
+  handleApplyFix: (
+    finding: Finding | AxeFinding,
+    options?: { mode?: ImgAltFixMode }
+  ) => void;
 }
 
 export function usePlaygroundSelection({
@@ -62,14 +66,14 @@ export function usePlaygroundSelection({
         if (node?.sourceRange) {
           revealSeqRef.current += 1;
           setRevealRequest({
-            id: revealSeqRef.current,
             range: node.sourceRange,
             focus: focusEditor,
+            id: revealSeqRef.current,
           });
         }
       }
     },
-    [handleSelect, ast]
+    [ast, handleSelect]
   );
 
   const handleCaretChange = React.useCallback(
@@ -86,13 +90,16 @@ export function usePlaygroundSelection({
   const handleSimulateFocus = React.useCallback(
     (id: string) => {
       setSimulatedFocusId(id);
-      wrappedHandleSelect(id, "focus");
+      wrappedHandleSelect(id, "focus", false);
     },
     [wrappedHandleSelect]
   );
 
   const handleApplyFix = React.useCallback(
-    (finding: Finding | AxeFinding) => {
+    (
+      finding: Finding | AxeFinding,
+      options?: { mode?: ImgAltFixMode }
+    ) => {
       if (!ast) return;
       const targetId = finding.nodes[0]?.targetId ?? "";
       const node = findA11yNodeById(ast, targetId);
@@ -109,7 +116,19 @@ export function usePlaygroundSelection({
               fix: finding.fix,
               nodes: finding.nodes,
             };
-      setRawHtml((html) => applyAutoFixToHtml(html, axeFinding, node));
+
+      setRawHtml((html) => {
+        const result = applyAutoFixToHtml(html, axeFinding, node, options);
+        if (result.caretOffset !== undefined) {
+          revealSeqRef.current += 1;
+          setRevealRequest({
+            range: [result.caretOffset, result.caretOffset],
+            focus: true,
+            id: revealSeqRef.current,
+          });
+        }
+        return result.html;
+      });
     },
     [ast, setRawHtml]
   );

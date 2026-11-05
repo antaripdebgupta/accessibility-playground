@@ -161,7 +161,7 @@ export interface AnalysisPaneProps {
   isScanning: boolean;
   scanError: string | null;
   hasHtml: boolean;
-  onApplyFix: (finding: Finding | AxeFinding) => void;
+  onApplyFix: (finding: Finding | AxeFinding, options?: import("@/lib/auto-fix").ApplyAutoFixOptions) => void;
   isOverSizeLimit: boolean;
   baseline: BaselineData | null;
   comparison: CompareResult | null;

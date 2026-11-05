@@ -78,7 +78,7 @@ describe("Auto-Fix Suggestions", () => {
       });
 
       const fixed = applyAutoFixToHtml(html, finding, node);
-      expect(fixed).toBe('<button tabindex="0">Submit</button>');
+      expect(fixed.html).toBe('<button tabindex="0">Submit</button>');
     });
   });
 
@@ -106,36 +106,76 @@ describe("Auto-Fix Suggestions", () => {
       });
 
       const fixed = applyAutoFixToHtml(html, finding, node);
-      expect(fixed).toBe("<button>Menu</button>");
+      expect(fixed.html).toBe("<button>Menu</button>");
     });
   });
 
   describe("img-missing-alt auto-fix", () => {
-    it("computes preview with decorative alt='' when no caption exists", () => {
-      const finding = makeFinding(
-        "img-missing-alt",
-        "img-1",
-        '<img src="photo.jpg" />'
-      );
-      const diff = computeFixPreview(finding, false);
-      expect(diff).not.toBeNull();
-      expect(diff?.afterTag).toBe('<img src="photo.jpg" alt="" />');
-    });
-
-    it("computes preview with TODO alt when caption exists", () => {
+    it("never writes 'TODO' placeholder string into user code in any preview or output", () => {
       const finding = makeFinding(
         "img-missing-alt",
         "img-1",
         '<img src="photo.jpg">'
       );
-      const diff = computeFixPreview(finding, true);
+      const previewWithCaption = computeFixPreview(finding, {
+        hasVisibleCaption: true,
+        mode: "use-caption",
+      });
+      const previewInformative = computeFixPreview(finding, {
+        mode: "informative",
+      });
+      const previewDecorative = computeFixPreview(finding, {
+        mode: "decorative",
+      });
+
+      expect(previewWithCaption?.afterTag).not.toContain("TODO");
+      expect(previewInformative?.afterTag).not.toContain("TODO");
+      expect(previewDecorative?.afterTag).not.toContain("TODO");
+    });
+
+    it("computes preview for decorative image (alt='')", () => {
+      const finding = makeFinding(
+        "img-missing-alt",
+        "img-1",
+        '<img src="photo.jpg" />'
+      );
+      const diff = computeFixPreview(finding, { mode: "decorative" });
       expect(diff).not.toBeNull();
-      expect(diff?.afterTag).toBe(
-        '<img src="photo.jpg" alt="TODO: describe this image">'
+      expect(diff?.afterTag).toBe('<img src="photo.jpg" alt="" />');
+    });
+
+    it("computes preview for informative image (alt='') with note", () => {
+      const finding = makeFinding(
+        "img-missing-alt",
+        "img-1",
+        '<img src="photo.jpg" />'
+      );
+      const diff = computeFixPreview(finding, { mode: "informative" });
+      expect(diff).not.toBeNull();
+      expect(diff?.afterTag).toBe('<img src="photo.jpg" alt="" />');
+      expect(diff?.note).toBe(
+        "Describe what the image shows and why it's there."
       );
     });
 
-    it("applies decorative alt='' when no caption is nearby", () => {
+    it("computes preview for use-caption when caption exists", () => {
+      const finding = makeFinding(
+        "img-missing-alt",
+        "img-1",
+        '<img src="photo.jpg">'
+      );
+      const diff = computeFixPreview(finding, {
+        hasVisibleCaption: true,
+        mode: "use-caption",
+      });
+      expect(diff).not.toBeNull();
+      expect(diff?.afterTag).toBe('<img src="photo.jpg" alt="">');
+      expect(diff?.note).toBe(
+        "Nearby caption describes this image; empty alt prevents double announcement."
+      );
+    });
+
+    it("applies informative alt='' and returns caret position inside the quotes", () => {
       const html = '<img src="banner.jpg" />';
       const finding = makeFinding("img-missing-alt", "img-1", html);
       const node = makeNode({
@@ -144,13 +184,18 @@ describe("Auto-Fix Suggestions", () => {
         attributes: { src: "banner.jpg" },
       });
 
-      const fixed = applyAutoFixToHtml(html, finding, node);
-      expect(fixed).toBe('<img src="banner.jpg" alt="" />');
+      const result = applyAutoFixToHtml(html, finding, node, {
+        mode: "informative",
+      });
+      expect(result.html).toBe('<img src="banner.jpg" alt="" />');
+      // Caret must be inside quotes: right after alt="
+      const expectedCaret = result.html.indexOf('alt="') + 'alt="'.length;
+      expect(result.caretOffset).toBe(expectedCaret);
     });
 
-    it("applies TODO alt when image is inside a figure with caption", () => {
+    it("applies decorative alt='' without caret positioning", () => {
+      const html = '<figure><img src="chart.png"><figcaption>Q3 Sales Growth</figcaption></figure>';
       const imgStr = '<img src="chart.png">';
-      const html = `<figure>${imgStr}<figcaption>Q3 Sales Growth</figcaption></figure>`;
       const start = html.indexOf(imgStr);
       const end = start + imgStr.length;
 
@@ -161,10 +206,14 @@ describe("Auto-Fix Suggestions", () => {
         attributes: { src: "chart.png" },
       });
 
-      const fixed = applyAutoFixToHtml(html, finding, node);
-      expect(fixed).toBe(
-        '<figure><img src="chart.png" alt="TODO: describe this image"><figcaption>Q3 Sales Growth</figcaption></figure>'
+      const result = applyAutoFixToHtml(html, finding, node, {
+        mode: "decorative",
+      });
+      expect(result.html).not.toContain("TODO");
+      expect(result.html).toBe(
+        '<figure><img src="chart.png" alt=""><figcaption>Q3 Sales Growth</figcaption></figure>'
       );
+      expect(result.caretOffset).toBeUndefined();
     });
   });
 });

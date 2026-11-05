@@ -13,11 +13,45 @@ export function isAutoFixable(ruleId: string): ruleId is AutoFixableRuleId {
   return (AUTO_FIXABLE_RULE_IDS as readonly string[]).includes(ruleId);
 }
 
+export type ImgAltFixMode = "informative" | "decorative" | "use-caption";
+
+export interface FixPreviewOptions {
+  mode?: ImgAltFixMode;
+  hasVisibleCaption?: boolean;
+}
+
+export interface FixPreviewResult {
+  beforeTag: string;
+  afterTag: string;
+  note?: string;
+}
+
+export interface ApplyAutoFixOptions {
+  mode?: ImgAltFixMode;
+}
+
+export interface AutoFixResult {
+  html: string;
+  caretOffset?: number;
+}
+
 export function computeFixPreview(
   finding: AxeFinding,
-  hasVisibleCaption = false
-): { beforeTag: string; afterTag: string } | null {
+  optionsOrHasCaption: boolean | FixPreviewOptions = false
+): FixPreviewResult | null {
   if (!isAutoFixable(finding.id)) return null;
+
+  const hasVisibleCaption =
+    typeof optionsOrHasCaption === "boolean"
+      ? optionsOrHasCaption
+      : Boolean(optionsOrHasCaption.hasVisibleCaption);
+
+  const mode: ImgAltFixMode =
+    typeof optionsOrHasCaption === "object" && optionsOrHasCaption.mode
+      ? optionsOrHasCaption.mode
+      : hasVisibleCaption
+        ? "use-caption"
+        : "informative";
 
   const htmlSnippet = finding.nodes[0]?.html ?? "";
   const match = htmlSnippet.match(
@@ -26,6 +60,7 @@ export function computeFixPreview(
   const beforeTag = match ? match[0] : htmlSnippet;
 
   let afterTag = beforeTag;
+  let note: string | undefined;
 
   switch (finding.id) {
     case "positive-tabindex":
@@ -43,51 +78,59 @@ export function computeFixPreview(
       break;
 
     case "img-missing-alt": {
-      const altValue = hasVisibleCaption
-        ? 'alt="TODO: describe this image"'
-        : 'alt=""';
+      // Never write TODO into user code.
+      // Both decorative and informative options insert alt=""
+      const altValue = 'alt=""';
       if (/\s*\/>$/.test(beforeTag)) {
         afterTag = beforeTag.replace(/\s*\/>$/, ` ${altValue} />`);
       } else {
         afterTag = beforeTag.replace(/\s*>$/, ` ${altValue}>`);
       }
+
+      if (mode === "informative") {
+        note = "Describe what the image shows and why it's there.";
+      } else if (mode === "use-caption") {
+        note =
+          "Nearby caption describes this image; empty alt prevents double announcement.";
+      } else {
+        note = "Marks image as decorative for assistive technologies.";
+      }
       break;
     }
   }
 
-  return { beforeTag, afterTag };
+  return { beforeTag, afterTag, ...(note ? { note } : {}) };
 }
 
 export function applyAutoFixToHtml(
   html: string,
   finding: AxeFinding,
-  node: A11yNode
-): string {
-  if (!isAutoFixable(finding.id)) return html;
+  node: A11yNode,
+  options?: ApplyAutoFixOptions
+): AutoFixResult {
+  if (!isAutoFixable(finding.id)) return { html };
 
   switch (finding.id) {
     case "positive-tabindex":
-      return setAttributeInSource(html, node, "tabindex", "0");
+      return { html: setAttributeInSource(html, node, "tabindex", "0") };
 
     case "aria-hidden-focusable":
-      return removeAttributeFromSource(html, node, "aria-hidden");
+      return { html: removeAttributeFromSource(html, node, "aria-hidden") };
 
     case "img-missing-alt": {
-      // Check if image is inside a figure with figcaption or has nearby caption
-      const hasCaption =
-        Boolean(node.attributes["aria-labelledby"]) ||
-        Boolean(node.attributes["aria-describedby"]) ||
-        (node.sourceRange
-          ? html
-              .slice(
-                Math.max(0, node.sourceRange[0] - 300),
-                Math.min(html.length, node.sourceRange[1] + 300)
-              )
-              .includes("<figcaption")
-          : false);
+      const mode = options?.mode ?? "informative";
+      const fixedHtml = setAttributeInSource(html, node, "alt", "");
 
-      const altVal = hasCaption ? "TODO: describe this image" : "";
-      return setAttributeInSource(html, node, "alt", altVal);
+      if (mode === "informative") {
+        // Place caret inside quotes: right after alt="
+        const tagStart = node.sourceRange ? node.sourceRange[0] : 0;
+        const altIndex = fixedHtml.indexOf('alt="', tagStart);
+        const caretOffset =
+          altIndex !== -1 ? altIndex + 'alt="'.length : undefined;
+        return { html: fixedHtml, caretOffset };
+      }
+
+      return { html: fixedHtml };
     }
   }
 }

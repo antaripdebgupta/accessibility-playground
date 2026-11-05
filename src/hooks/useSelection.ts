@@ -1,3 +1,4 @@
+// Core accessibility tree selection state, node rematching across re-renders, and tab routing.
 "use client";
 
 import * as React from "react";

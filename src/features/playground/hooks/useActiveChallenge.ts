@@ -1,3 +1,4 @@
+// Challenge lifecycle loading (dynamic code-splitting of content, loading status, and starter/solution editor synchronization).
 import * as React from "react";
 import { loadChallenge, type Challenge } from "@/data/challenges";
 import { useChallengeMode } from "@/hooks/useChallengeMode";

@@ -1,3 +1,4 @@
+// Challenge progress state management (localStorage persistence, hint reveals, solution inspection, and verification).
 "use client";
 
 import * as React from "react";

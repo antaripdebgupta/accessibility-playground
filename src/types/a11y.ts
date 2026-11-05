@@ -68,7 +68,7 @@ export interface AriaAttributeValidity {
   readonly explanation: string;
 }
 
-interface AxeFindingNode {
+export interface AxeFindingNode {
   readonly html: string;
   readonly target: readonly string[];
   readonly failureSummary?: string;

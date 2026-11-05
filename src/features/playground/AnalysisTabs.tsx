@@ -75,7 +75,7 @@ export interface AnalysisTabsProps {
   isScanning: boolean;
   scanError: string | null;
   hasHtml: boolean;
-  onApplyFix: (finding: AxeFinding) => void;
+  onApplyFix: (finding: AxeFinding, options?: import("@/lib/auto-fix").ApplyAutoFixOptions) => void;
   isOverSizeLimit?: boolean;
   baseline?: BaselineData | null;
   comparison?: CompareResult | null;
