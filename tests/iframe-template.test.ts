@@ -41,6 +41,8 @@ describe("generatePreviewSrcDoc template", () => {
     const scriptMatch = srcDoc.match(/<script>([\s\S]*?)<\/script>/);
     expect(scriptMatch).not.toBeNull();
     const scriptCode = scriptMatch ? scriptMatch[1] : "";
+    expect(scriptCode).toBeTruthy();
+    if (!scriptCode) return;
 
     // Test that the script body parses as valid JavaScript
     expect(() => new Function(scriptCode)).not.toThrow();

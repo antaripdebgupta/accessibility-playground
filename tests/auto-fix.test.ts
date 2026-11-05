@@ -194,7 +194,8 @@ describe("Auto-Fix Suggestions", () => {
     });
 
     it("applies decorative alt='' without caret positioning", () => {
-      const html = '<figure><img src="chart.png"><figcaption>Q3 Sales Growth</figcaption></figure>';
+      const html =
+        '<figure><img src="chart.png"><figcaption>Q3 Sales Growth</figcaption></figure>';
       const imgStr = '<img src="chart.png">';
       const start = html.indexOf(imgStr);
       const end = start + imgStr.length;

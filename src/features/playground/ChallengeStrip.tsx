@@ -3,15 +3,13 @@
 import * as React from "react";
 import type { Challenge } from "@/data/challenges";
 import type { ChallengeMode } from "@/hooks/useChallengeMode";
+import { RotateCcw, CircleDot } from "lucide-react";
+import { ChallengeHints } from "./challenge/ChallengeHints";
 import {
-  Check,
-  Lightbulb,
-  Eye,
-  RotateCcw,
-  Trophy,
-  AlertCircle,
-  CircleDot,
-} from "lucide-react";
+  ChallengeCheckResults,
+  type CheckResultData,
+} from "./challenge/ChallengeCheckResults";
+import { ChallengeSolutionDialog } from "./challenge/ChallengeSolutionDialog";
 
 interface ChallengeStripProps {
   readonly challengeMode: ChallengeMode;
@@ -41,10 +39,9 @@ export function ChallengeStrip({
   } = challengeMode;
 
   const [showSolutionConfirm, setShowSolutionConfirm] = React.useState(false);
-  const [checkResult, setCheckResult] = React.useState<{
-    resolved: readonly string[];
-    remaining: readonly string[];
-  } | null>(null);
+  const [checkResult, setCheckResult] = React.useState<CheckResultData | null>(
+    null
+  );
 
   if (!challenge) return null;
 
@@ -122,42 +119,24 @@ export function ChallengeStrip({
         >
           <span
             style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "4px",
               fontSize: "0.6875rem",
-              fontWeight: 600,
+              fontWeight: 700,
               textTransform: "uppercase",
-              letterSpacing: "0.04em",
+              letterSpacing: "0.05em",
+              padding: "2px 6px",
+              borderRadius: "4px",
               color: difficultyColors[challenge.difficulty],
               background: difficultyBgColors[challenge.difficulty],
-              padding: "2px 8px",
-              borderRadius: "4px",
             }}
           >
             {challenge.difficulty}
           </span>
-          {progress.completed && (
-            <span
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "3px",
-                fontSize: "0.6875rem",
-                fontWeight: 600,
-                color: "var(--green)",
-              }}
-            >
-              <Trophy className="h-3 w-3" aria-hidden="true" />
-              Completed
-            </span>
-          )}
         </div>
         <h2
           style={{
-            fontSize: "0.9375rem",
+            fontSize: "1rem",
             fontWeight: 700,
-            margin: 0,
+            margin: "0 0 6px",
             color: "var(--color-text-primary)",
           }}
         >
@@ -165,7 +144,7 @@ export function ChallengeStrip({
         </h2>
         <p
           style={{
-            margin: "4px 0 0",
+            margin: 0,
             color: "var(--color-text-secondary)",
             fontSize: "0.8125rem",
           }}
@@ -227,239 +206,25 @@ export function ChallengeStrip({
       </div>
 
       {/* Hints (progressive disclosure) */}
-      <div
-        style={{
-          padding: "12px 16px",
-          borderBottom: "1px solid var(--color-border)",
-        }}
-      >
-        <h3
-          style={{
-            fontSize: "0.75rem",
-            fontWeight: 700,
-            textTransform: "uppercase",
-            letterSpacing: "0.05em",
-            color: "var(--color-text-secondary)",
-            margin: "0 0 8px",
-          }}
-        >
-          Hints ({progress.hintsRevealed}/{challenge.hints.length})
-        </h3>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-          {challenge.hints.slice(0, progress.hintsRevealed).map((hint, i) => (
-            <div
-              key={i}
-              style={{
-                padding: "8px 10px",
-                background: "var(--color-surface-sunken, #f5f5f4)",
-                borderRadius: "6px",
-                fontSize: "0.8125rem",
-                color: "var(--color-text-primary)",
-              }}
-            >
-              <span
-                style={{
-                  fontWeight: 600,
-                  color: "var(--color-accent, var(--focus))",
-                  marginRight: "4px",
-                }}
-              >
-                Hint {i + 1}:
-              </span>
-              {hint}
-            </div>
-          ))}
-        </div>
-
-        {progress.hintsRevealed < challenge.hints.length && (
-          <button
-            type="button"
-            onClick={revealNextHint}
-            className="challenge-strip-btn"
-            style={{
-              marginTop: "8px",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "4px",
-            }}
-          >
-            <Lightbulb className="h-3.5 w-3.5" aria-hidden="true" />
-            Show next hint
-          </button>
-        )}
-      </div>
+      <ChallengeHints
+        hints={challenge.hints}
+        hintsRevealed={progress.hintsRevealed}
+        onRevealNextHint={revealNextHint}
+      />
 
       {/* Check my fix */}
-      <div
-        style={{
-          padding: "12px 16px",
-          borderBottom: "1px solid var(--color-border)",
-        }}
-      >
-        <button
-          type="button"
-          onClick={handleCheckFix}
-          className="challenge-strip-btn challenge-strip-btn--primary"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-            width: "100%",
-            justifyContent: "center",
-          }}
-        >
-          <Check className="h-4 w-4" aria-hidden="true" />
-          Check my fix
-        </button>
-
-        {checkResult && (
-          <div role="status" aria-live="polite" style={{ marginTop: "10px" }}>
-            {checkResult.remaining.length === 0 ? (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  padding: "10px 12px",
-                  background: "var(--green-bg, #ecfdf5)",
-                  borderRadius: "6px",
-                  color: "var(--green, #065f46)",
-                  fontWeight: 600,
-                }}
-              >
-                <Trophy className="h-4 w-4" aria-hidden="true" />
-                All expected issues resolved!
-              </div>
-            ) : (
-              <div
-                style={{
-                  padding: "10px 12px",
-                  background: "var(--amber-bg, #fff7e8)",
-                  borderRadius: "6px",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    color: "var(--amber, #92400e)",
-                    fontWeight: 600,
-                    marginBottom: "6px",
-                  }}
-                >
-                  <AlertCircle
-                    className="h-4 w-4 shrink-0"
-                    aria-hidden="true"
-                  />
-                  {checkResult.remaining.length} issue
-                  {checkResult.remaining.length === 1 ? "" : "s"} still present
-                </div>
-                {checkResult.resolved.length > 0 && (
-                  <ul
-                    style={{
-                      margin: "0 0 4px",
-                      padding: "0 0 0 16px",
-                      fontSize: "0.75rem",
-                    }}
-                  >
-                    {checkResult.resolved.map((r) => (
-                      <li key={r} style={{ color: "var(--green, #065f46)" }}>
-                        ✓ <code>{r}</code> — resolved
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                <ul
-                  style={{
-                    margin: 0,
-                    padding: "0 0 0 16px",
-                    fontSize: "0.75rem",
-                  }}
-                >
-                  {checkResult.remaining.map((r) => (
-                    <li key={r} style={{ color: "var(--red, #b91c1c)" }}>
-                      ✕ <code>{r}</code> — still present
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+      <ChallengeCheckResults
+        checkResult={checkResult}
+        onCheckFix={handleCheckFix}
+      />
 
       {/* Show solution */}
-      <div
-        style={{
-          padding: "12px 16px",
-          borderBottom: "1px solid var(--color-border)",
-        }}
-      >
-        {progress.solutionViewed ? (
-          <p
-            style={{
-              margin: 0,
-              color: "var(--color-text-secondary)",
-              fontSize: "0.75rem",
-              fontStyle: "italic",
-            }}
-          >
-            Solution was viewed. You can reset the challenge to try again.
-          </p>
-        ) : showSolutionConfirm ? (
-          <div
-            style={{
-              padding: "10px 12px",
-              background: "var(--amber-bg, #fff7e8)",
-              borderRadius: "6px",
-              border: "1px solid var(--amber-line, #f0d9a8)",
-            }}
-          >
-            <p
-              style={{
-                margin: "0 0 8px",
-                fontSize: "0.8125rem",
-                color: "var(--amber, #92400e)",
-                fontWeight: 600,
-              }}
-            >
-              Are you sure? Try using hints first.
-            </p>
-            <div style={{ display: "flex", gap: "6px" }}>
-              <button
-                type="button"
-                onClick={handleShowSolution}
-                className="challenge-strip-btn challenge-strip-btn--danger"
-              >
-                Show solution
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowSolutionConfirm(false)}
-                className="challenge-strip-btn"
-              >
-                Keep trying
-              </button>
-            </div>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setShowSolutionConfirm(true)}
-            className="challenge-strip-btn"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-            }}
-          >
-            <Eye className="h-3.5 w-3.5" aria-hidden="true" />
-            Show solution
-          </button>
-        )}
-      </div>
+      <ChallengeSolutionDialog
+        solutionViewed={progress.solutionViewed}
+        showConfirm={showSolutionConfirm}
+        setShowConfirm={setShowSolutionConfirm}
+        onShowSolution={handleShowSolution}
+      />
 
       {/* Manual verification steps */}
       {challenge.manualSteps.length > 0 && (

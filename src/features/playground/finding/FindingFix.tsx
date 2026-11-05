@@ -25,16 +25,17 @@ export function FindingFix({
   onApplyFix,
 }: FindingFixProps) {
   const [showAutoFixPreview, setShowAutoFixPreview] = React.useState(false);
-  const [imgAltMode, setImgAltMode] = React.useState<ImgAltFixMode>("informative");
+  const [imgAltMode, setImgAltMode] =
+    React.useState<ImgAltFixMode>("informative");
 
   const hasAutoFix = isAutoFixable(ruleId);
   if (!hasAutoFix) return null;
 
   const hasNearbyCaption = Boolean(
     primaryNode?.html &&
-      (/\baria-labelledby\b/i.test(primaryNode.html) ||
-        /\baria-describedby\b/i.test(primaryNode.html) ||
-        /<figcaption\b/i.test(primaryNode.html))
+    (/\baria-labelledby\b/i.test(primaryNode.html) ||
+      /\baria-describedby\b/i.test(primaryNode.html) ||
+      /<figcaption\b/i.test(primaryNode.html))
   );
 
   const fixPreview = computeFixPreview(axeFinding, {

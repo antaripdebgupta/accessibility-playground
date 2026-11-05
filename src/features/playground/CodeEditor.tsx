@@ -46,8 +46,6 @@ interface CodeEditorProps {
   language: "html" | "css";
   loadRequest?: { readonly id: number } | null;
   revealRequest?: RevealRequest | null;
-  /** @deprecated Use revealRequest instead */
-  selectionRange?: readonly [number, number] | null;
   onCaretChange?: (offset: number) => void;
   onForceScan?: () => void;
   indentWithTab?: boolean;
@@ -65,7 +63,6 @@ function CodeEditor({
   language,
   loadRequest,
   revealRequest,
-  selectionRange,
   onCaretChange,
   onForceScan,
   indentWithTab = true,
@@ -247,11 +244,8 @@ function CodeEditor({
     }
   }, [value, loadRequest]);
 
-  // Effect 3: Reveal request and selectionRange sync (Part A1)
+  // Effect 3: Reveal request sync
   const lastRevealIdRef = React.useRef<number | null>(null);
-  const lastSelectionRangeRef = React.useRef<readonly [number, number] | null>(
-    null
-  );
   React.useEffect(() => {
     const view = editorRef.current?.view;
     if (!view) return;
@@ -259,15 +253,8 @@ function CodeEditor({
     if (revealRequest && revealRequest.id !== lastRevealIdRef.current) {
       lastRevealIdRef.current = revealRequest.id;
       revealRange(view, revealRequest.range, revealRequest.focus);
-    } else if (
-      !revealRequest &&
-      selectionRange &&
-      selectionRange !== lastSelectionRangeRef.current
-    ) {
-      lastSelectionRangeRef.current = selectionRange;
-      revealRange(view, selectionRange, false);
     }
-  }, [revealRequest, selectionRange]);
+  }, [revealRequest]);
 
   // Effect 4: Diagnostics sync (Part B7)
   React.useEffect(() => {

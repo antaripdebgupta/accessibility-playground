@@ -57,10 +57,7 @@ export default async function TopicDetailPage({ params }: TopicPageProps) {
   const goodPlaygroundUrl = getPlaygroundUrlForExample(topic.goodExample);
 
   return (
-    <main
-      id="main-content"
-      className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12"
-    >
+    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
       {/* Navigation Breadcrumb */}
       <nav aria-label="Breadcrumb" className="mb-6">
         <Link
@@ -363,6 +360,6 @@ export default async function TopicDetailPage({ params }: TopicPageProps) {
           </ul>
         </section>
       </div>
-    </main>
+    </div>
   );
 }

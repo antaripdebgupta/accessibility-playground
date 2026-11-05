@@ -1,8 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  computeAnnouncement,
-  computeAnnouncementDetails,
-} from "@/lib/announcement";
+import { computeAnnouncementDetails } from "@/lib/announcement";
 import type { A11yNode } from "@/types/a11y";
 
 function createMockNode(overrides: Partial<A11yNode>): A11yNode {
@@ -33,7 +30,6 @@ describe("Screen-reader Announcement computation", () => {
       accessibleNameSource: "subtree text",
     });
 
-    expect(computeAnnouncement(node)).toBe("Submit, button");
     const details = computeAnnouncementDetails(node);
     expect(details.text).toBe("Submit, button");
     expect(details.parts).toEqual([
@@ -51,7 +47,9 @@ describe("Screen-reader Announcement computation", () => {
       ariaAttributes: { "aria-checked": "true" },
     });
 
-    expect(computeAnnouncement(node)).toBe("Accept terms, checkbox, checked");
+    expect(computeAnnouncementDetails(node).text).toBe(
+      "Accept terms, checkbox, checked"
+    );
   });
 
   it("computes announcement for an expanded disclosure button", () => {
@@ -63,7 +61,9 @@ describe("Screen-reader Announcement computation", () => {
       ariaAttributes: { "aria-expanded": "true" },
     });
 
-    expect(computeAnnouncement(node)).toBe("Details, button, expanded");
+    expect(computeAnnouncementDetails(node).text).toBe(
+      "Details, button, expanded"
+    );
   });
 
   it("computes announcement for an invalid required input", () => {
@@ -78,7 +78,7 @@ describe("Screen-reader Announcement computation", () => {
       },
     });
 
-    expect(computeAnnouncement(node)).toBe(
+    expect(computeAnnouncementDetails(node).text).toBe(
       "Email, textbox, invalid entry, required"
     );
   });
@@ -92,7 +92,9 @@ describe("Screen-reader Announcement computation", () => {
       ariaAttributes: { "aria-current": "page" },
     });
 
-    expect(computeAnnouncement(node)).toBe("Home, link, current page");
+    expect(computeAnnouncementDetails(node).text).toBe(
+      "Home, link, current page"
+    );
   });
 
   it("handles dimmed state for disabled elements", () => {
@@ -104,7 +106,7 @@ describe("Screen-reader Announcement computation", () => {
       attributes: { disabled: "" },
     });
 
-    expect(computeAnnouncement(node)).toBe("Save, button, dimmed");
+    expect(computeAnnouncementDetails(node).text).toBe("Save, button, dimmed");
   });
 
   it("handles partially checked checkbox", () => {
@@ -116,7 +118,7 @@ describe("Screen-reader Announcement computation", () => {
       ariaAttributes: { "aria-checked": "mixed" },
     });
 
-    expect(computeAnnouncement(node)).toBe(
+    expect(computeAnnouncementDetails(node).text).toBe(
       "Select all, checkbox, partially checked"
     );
   });

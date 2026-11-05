@@ -7,6 +7,10 @@ export interface AccessibleNameComputation {
   hasAccessibleName: boolean;
 }
 
+function normalizeWhitespace(val: string): string {
+  return val.replace(/\s+/g, " ").trim();
+}
+
 const ALLOWS_NAME_FROM_CONTENT = new Set([
   "button",
   "a",
@@ -65,12 +69,12 @@ export function computeAccessibleName(
     const resolvedTexts: string[] = [];
     for (const id of idList) {
       const referenced = doc?.getElementById(id);
-      if (referenced) {
-        const text = referenced.textContent?.trim();
+      if (referenced && referenced.textContent) {
+        const text = normalizeWhitespace(referenced.textContent);
         if (text) resolvedTexts.push(text);
       }
     }
-    const resolvedName = resolvedTexts.join(" ").trim();
+    const resolvedName = normalizeWhitespace(resolvedTexts.join(" "));
     const applied = resolvedName.length > 0;
     steps.push({
       step: "2. aria-labelledby",
@@ -97,8 +101,9 @@ export function computeAccessibleName(
   }
 
   // 3. aria-label
-  const ariaLabel = element.getAttribute("aria-label")?.trim();
-  if (ariaLabel && ariaLabel.length > 0) {
+  const rawAriaLabel = element.getAttribute("aria-label");
+  const ariaLabel = rawAriaLabel ? normalizeWhitespace(rawAriaLabel) : "";
+  if (ariaLabel.length > 0) {
     steps.push({
       step: "3. aria-label",
       description:
@@ -127,29 +132,38 @@ export function computeAccessibleName(
     const elementId = element.getAttribute("id");
     if (elementId && doc) {
       const labelEl = doc.querySelector(`label[for="${elementId}"]`);
-      if (labelEl && labelEl.textContent?.trim()) {
-        nativeLabel = labelEl.textContent.trim();
-        nativeSource = "<label for>";
+      if (labelEl && labelEl.textContent) {
+        const text = normalizeWhitespace(labelEl.textContent);
+        if (text) {
+          nativeLabel = text;
+          nativeSource = "<label for>";
+        }
       }
     }
     if (!nativeLabel) {
       const parentLabel = element.closest("label");
-      if (parentLabel && parentLabel.textContent?.trim()) {
-        nativeLabel = parentLabel.textContent.trim();
-        nativeSource = "enclosing <label>";
+      if (parentLabel && parentLabel.textContent) {
+        const text = normalizeWhitespace(parentLabel.textContent);
+        if (text) {
+          nativeLabel = text;
+          nativeSource = "enclosing <label>";
+        }
       }
     }
   } else if (tagName === "img" || tagName === "area") {
     const alt = element.getAttribute("alt");
     if (alt !== null) {
-      nativeLabel = alt.trim();
+      nativeLabel = normalizeWhitespace(alt);
       nativeSource = "alt attribute";
     }
   } else if (tagName === "svg") {
     const titleEl = element.querySelector("title");
-    if (titleEl && titleEl.textContent?.trim()) {
-      nativeLabel = titleEl.textContent.trim();
-      nativeSource = "<title> element";
+    if (titleEl && titleEl.textContent) {
+      const text = normalizeWhitespace(titleEl.textContent);
+      if (text) {
+        nativeLabel = text;
+        nativeSource = "<title> element";
+      }
     }
   }
 
@@ -183,9 +197,9 @@ export function computeAccessibleName(
         role
       ));
 
-  if (allowsContent) {
-    const textContent = element.textContent?.trim();
-    if (textContent && textContent.length > 0) {
+  if (allowsContent && element.textContent) {
+    const textContent = normalizeWhitespace(element.textContent);
+    if (textContent.length > 0) {
       steps.push({
         step: "5. Subtree Text Content",
         description:
@@ -209,8 +223,9 @@ export function computeAccessibleName(
   });
 
   // 6. Placeholder attribute
-  const placeholder = element.getAttribute("placeholder")?.trim();
-  if (placeholder && placeholder.length > 0) {
+  const rawPlaceholder = element.getAttribute("placeholder");
+  const placeholder = rawPlaceholder ? normalizeWhitespace(rawPlaceholder) : "";
+  if (placeholder.length > 0) {
     steps.push({
       step: "6. Placeholder Attribute",
       description:
@@ -233,8 +248,9 @@ export function computeAccessibleName(
   });
 
   // 7. Title attribute
-  const title = element.getAttribute("title")?.trim();
-  if (title && title.length > 0) {
+  const rawTitle = element.getAttribute("title");
+  const title = rawTitle ? normalizeWhitespace(rawTitle) : "";
+  if (title.length > 0) {
     steps.push({
       step: "7. Title Attribute",
       description:

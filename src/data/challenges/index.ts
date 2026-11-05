@@ -1,6 +1,6 @@
 import type { Challenge, ChallengeContent, ChallengeMetadata } from "./types";
 
-export type { Challenge, ChallengeContent, ChallengeMetadata };
+export type { Challenge, ChallengeMetadata };
 
 export const CHALLENGES: readonly ChallengeMetadata[] = [
   {

@@ -3,7 +3,7 @@ import * as React from "react";
 import { loadChallenge, type Challenge } from "@/data/challenges";
 import { useChallengeMode } from "@/hooks/useChallengeMode";
 
-export type ChallengeLoadingStatus = "idle" | "loading" | "ready" | "error";
+type ChallengeLoadingStatus = "idle" | "loading" | "ready" | "error";
 
 export interface UseActiveChallengeResult {
   activeChallenge: Challenge | null;

@@ -96,10 +96,7 @@ export function usePlaygroundSelection({
   );
 
   const handleApplyFix = React.useCallback(
-    (
-      finding: Finding | AxeFinding,
-      options?: { mode?: ImgAltFixMode }
-    ) => {
+    (finding: Finding | AxeFinding, options?: { mode?: ImgAltFixMode }) => {
       if (!ast) return;
       const targetId = finding.nodes[0]?.targetId ?? "";
       const node = findA11yNodeById(ast, targetId);

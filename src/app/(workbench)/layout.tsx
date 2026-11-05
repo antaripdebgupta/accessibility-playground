@@ -13,7 +13,8 @@ export default function WorkbenchLayout({
       </a>
       <main
         id="main-content"
-        className="flex h-dvh min-h-0 flex-col overflow-hidden"
+        tabIndex={-1}
+        className="flex h-dvh min-h-0 flex-col overflow-hidden outline-none"
       >
         {children}
       </main>

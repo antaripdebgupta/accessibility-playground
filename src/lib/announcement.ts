@@ -72,22 +72,6 @@ const STATE_PHRASES: Array<{
     attribute: "aria-current=page",
   },
 ];
-
-export function computeAnnouncement(node: A11yNode): string {
-  const parts: string[] = [];
-  if (node.hasAccessibleName && node.accessibleName.trim()) {
-    parts.push(node.accessibleName.trim());
-  }
-  parts.push(node.role);
-
-  const allAttrs = { ...node.attributes, ...node.ariaAttributes };
-  for (const { match, phrase } of STATE_PHRASES) {
-    if (match(allAttrs)) parts.push(phrase(allAttrs));
-  }
-
-  return parts.join(", ");
-}
-
 export function computeAnnouncementDetails(node: A11yNode): AnnouncementResult {
   const parts: AnnouncementPart[] = [];
   if (node.hasAccessibleName && node.accessibleName.trim()) {

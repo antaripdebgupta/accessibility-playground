@@ -70,4 +70,28 @@ describe("Accessible Name Computation (W3C AccName 1.2)", () => {
     expect(res.hasAccessibleName).toBe(false);
     expect(res.source).toBe("hidden");
   });
+
+  it("normalizes multi-line and excessive whitespace in subtree text", () => {
+    document.body.innerHTML = `
+      <button id="btn">
+        <span>Click</span>
+        \n\n\t
+        <span>Here   Now</span>
+      </button>
+    `;
+    const btn = document.getElementById("btn")!;
+    const res = computeAccessibleName(btn, document);
+    expect(res.name).toBe("Click Here Now");
+    expect(res.hasAccessibleName).toBe(true);
+  });
+
+  it("normalizes excessive whitespace in aria-label and aria-labelledby", () => {
+    document.body.innerHTML = `
+      <div id="lbl">   Heading \n\t  Title   </div>
+      <button id="btn" aria-labelledby="lbl"></button>
+    `;
+    const btn = document.getElementById("btn")!;
+    const res = computeAccessibleName(btn, document);
+    expect(res.name).toBe("Heading Title");
+  });
 });

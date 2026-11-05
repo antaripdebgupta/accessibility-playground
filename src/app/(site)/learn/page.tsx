@@ -12,10 +12,7 @@ export const metadata: Metadata = {
 
 export default function LearnIndexPage() {
   return (
-    <main
-      id="main-content"
-      className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12"
-    >
+    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
       {/* Header */}
       <header className="mb-10 flex flex-col gap-3 border-b border-[var(--color-border)] pb-8">
         <div className="flex items-center gap-2 text-sm font-semibold text-[var(--color-accent)]">
@@ -79,6 +76,6 @@ export default function LearnIndexPage() {
           </article>
         ))}
       </div>
-    </main>
+    </div>
   );
 }

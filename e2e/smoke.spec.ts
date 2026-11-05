@@ -12,6 +12,8 @@ for (const route of ALL_ROUTES) {
 
       const accessibilityScanResults = await new AxeBuilder({ page })
         .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+        .disableRules(["color-contrast-enhanced"])
+        .exclude(".cm-scroller")
         .analyze();
 
       expect(accessibilityScanResults.violations).toEqual([]);

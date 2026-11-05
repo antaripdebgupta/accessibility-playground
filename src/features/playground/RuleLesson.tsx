@@ -4,7 +4,7 @@ import * as React from "react";
 import type { Finding } from "@/types/a11y";
 import { getRuleKnowledge, type RuleKnowledge } from "@/data/rule-knowledge";
 import { CodeSnippet } from "@/components/ui/CodeSnippet";
-import { generateContextualFix } from "./FindingDetail";
+import { generateContextualFix } from "@/lib/contextual-fix";
 import {
   ExternalLink,
   ArrowRight,

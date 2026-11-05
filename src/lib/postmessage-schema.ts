@@ -110,3 +110,11 @@ export const HostFocusElementMessageSchema = z.object({
   type: z.literal("focus-element"),
   id: z.string(),
 });
+
+export const HostMessageSchema = z.discriminatedUnion("type", [
+  HostSelectNodeMessageSchema,
+  HostRunScanMessageSchema,
+  HostFocusElementMessageSchema,
+]);
+
+export type HostMessage = z.infer<typeof HostMessageSchema>;

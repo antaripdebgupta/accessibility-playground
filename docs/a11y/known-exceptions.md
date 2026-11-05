@@ -1,0 +1,39 @@
+# Known Accessibility Exceptions & Triage Decisions
+
+This document records accessibility scanner warnings and findings that were investigated and formally accepted as intentional, benign, or false positives, along with their technical rationale.
+
+---
+
+## F1. Color Contrast Enhanced (WCAG AAA Advisory)
+
+- **Rule:** `color-contrast-enhanced` (WCAG AAA SC 1.4.6)
+- **Status:** **Accepted Advisory / Non-blocker**
+- **Target Standard:** WCAG 2.2 Level AA
+- **Details:**
+  Automated auditing extensions (such as Axe DevTools or WAVE in strict mode) may flag secondary metadata, subtle borders, and muted keyboard shortcut badges that meet the WCAG 2.2 AA requirement (4.5:1 for regular text, 3:1 for large text/graphical objects) but fall short of the stricter AAA requirement (7:1).
+- **Rationale:**
+  The platform strictly enforces and guarantees WCAG 2.2 Level AA compliance across all routes and interactive states. WCAG AAA contrast for secondary helper text and borders is an advisory goal where feasible, but strict AAA contrast across muted elements can reduce visual hierarchy for users with certain cognitive or visual conditions.
+
+---
+
+## F2. CodeMirror Scroller Keyboard Focus (`scrollable-region-focusable`)
+
+- **Rule:** `scrollable-region-focusable` (WCAG 2.1.1)
+- **Status:** **Accepted Architectural Implementation**
+- **Affected Elements:** `.cm-scroller` inside CodeMirror 6 code editor instances (`HTML` and `CSS` panels).
+- **Details:**
+  Axe may flag `.cm-scroller` because the outer `div` has `overflow: scroll` or `auto` without an explicit `tabindex="0"`.
+- **Rationale:**
+  CodeMirror 6 implements full WAI-ARIA textbox semantics on `.cm-content` with `role="textbox"` and manages internal caret movements, line jumps, scrolling, and keyboard focus via standard keys (arrows, Home/End, PageUp/PageDown). Making the intermediate scroll container `.cm-scroller` also focusable with `tabindex="0"` would introduce an extra, redundant tab stop for keyboard and screen reader users before reaching the actual editable surface, degrading keyboard navigation ergonomics. Keyboard accessibility is fully supported through the editor's inner focusable element and the dedicated Escape-key focus exit pattern.
+
+---
+
+## F3. Accessibility Tree Virtual / Flattened List (`aria-required-children`)
+
+- **Rule:** `aria-required-children`
+- **Status:** **Accepted Component Implementation**
+- **Affected Elements:** Accessibility Tree inspector panel rows and tree view representation.
+- **Details:**
+  Certain linters flag custom roving tabindex implementations or list containers when tree item rows contain composite status badges, tags, or disclosure toggles.
+- **Rationale:**
+  The playground's tree inspection panel uses explicit accessible names, roving tabindex on interactive item rows, and clear expansion states (`aria-expanded`) to represent parsed DOM and virtual a11y trees without locking screen reader users into rigid, legacy tree widget constraints. All nodes are operable via keyboard and announce their role, name, and hierarchical depth.

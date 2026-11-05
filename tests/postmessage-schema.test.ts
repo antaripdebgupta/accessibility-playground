@@ -4,6 +4,7 @@ import {
   HostSelectNodeMessageSchema,
   HostRunScanMessageSchema,
   HostFocusElementMessageSchema,
+  HostMessageSchema,
 } from "@/lib/postmessage-schema";
 
 describe("PostMessage Schema Validation (Task 5d)", () => {
@@ -132,5 +133,11 @@ describe("PostMessage Schema Validation (Task 5d)", () => {
       id: "a11y-5",
     });
     expect(focusMsg.success).toBe(true);
+
+    const unionMsg = HostMessageSchema.safeParse({
+      type: "run-scan",
+      scanId: "scan-789",
+    });
+    expect(unionMsg.success).toBe(true);
   });
 });

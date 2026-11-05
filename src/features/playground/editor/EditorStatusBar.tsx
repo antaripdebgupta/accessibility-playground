@@ -77,7 +77,8 @@ export function EditorStatusBar({
             type="button"
             onClick={onOpenShortcuts}
             className="flex items-center gap-1 rounded px-1.5 py-0.5 text-[var(--color-text-secondary)] hover:bg-[var(--color-surface)] hover:text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
-            aria-label="Open keyboard shortcuts (F1)"
+            aria-label="Help — Keyboard shortcuts (F1)"
+            aria-keyshortcuts="F1"
             title="Keyboard Shortcuts (F1)"
           >
             <HelpCircle className="h-3 w-3" aria-hidden="true" />

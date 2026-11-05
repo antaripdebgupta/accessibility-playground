@@ -24,7 +24,10 @@ export interface IssuesPanelProps {
     inspector: "tree" | "aria" | "accname" | "focus" | "announce",
     nodeId?: string
   ) => void;
-  onApplyFix?: (finding: AxeFinding, options?: import("@/lib/auto-fix").ApplyAutoFixOptions) => void;
+  onApplyFix?: (
+    finding: AxeFinding,
+    options?: import("@/lib/auto-fix").ApplyAutoFixOptions
+  ) => void;
 }
 
 function isNormalizedFinding(f: AxeFinding | Finding): f is Finding {
