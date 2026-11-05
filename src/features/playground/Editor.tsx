@@ -8,7 +8,7 @@ import { ShortcutsDialog } from "./editor/ShortcutsDialog";
 import { useEditorSettings } from "./editor/useEditorSettings";
 import { EditorToolbar } from "./editor/EditorToolbar";
 import { EditorPanels } from "./editor/EditorPanels";
-import type { RevealRequest } from "./CodeEditor";
+import type { RevealRequest, ExternalEdit } from "./CodeEditor";
 import type { Diagnostic } from "@codemirror/lint";
 import type { EditorStatusState } from "./editor/extensions/status";
 
@@ -21,7 +21,7 @@ export interface EditorProps {
   onCopyLink?: () => string;
   useTailwind?: boolean;
   onToggleTailwind?: (enabled: boolean) => void;
-  loadRequest?: { readonly id: number } | null;
+  externalEdit?: ExternalEdit | null;
   revealRequest?: RevealRequest | null;
   onCaretChange?: (offset: number) => void;
   onForceScan?: () => void;
@@ -39,7 +39,7 @@ export function Editor({
   onCopyLink,
   useTailwind = false,
   onToggleTailwind,
-  loadRequest,
+  externalEdit,
   revealRequest,
   onCaretChange,
   onForceScan,
@@ -61,15 +61,20 @@ export function Editor({
   const [liveAnnouncement, setLiveAnnouncement] = React.useState<string | null>(
     null
   );
-  const [localLoadRequest, setLocalLoadRequest] = React.useState<{
-    readonly id: number;
-  } | null>(null);
+  const [localExternalEdit, setLocalExternalEdit] =
+    React.useState<ExternalEdit | null>(null);
+  const localEditSeqRef = React.useRef(0);
 
-  const triggerLocalLoad = React.useCallback(() => {
-    setLocalLoadRequest({ id: Date.now() + Math.round(Math.random() * 1000) });
+  const triggerLocalLoad = React.useCallback((text: string) => {
+    localEditSeqRef.current += 1;
+    setLocalExternalEdit({
+      id: localEditSeqRef.current,
+      kind: "replace",
+      text,
+    });
   }, []);
 
-  const activeLoadRequest = loadRequest ?? localLoadRequest;
+  const activeExternalEdit = externalEdit ?? localExternalEdit;
 
   const { settings } = useEditorSettings();
   const toast = useToast();
@@ -192,8 +197,8 @@ export function Editor({
 
   const handleSelectTemplate = React.useCallback(
     (tmpl: StarterTemplate) => {
-      triggerLocalLoad();
       onSelectTemplate(tmpl);
+      triggerLocalLoad(tmpl.html);
       setLiveAnnouncement(`Template loaded: ${tmpl.label}`);
     },
     [onSelectTemplate, triggerLocalLoad]
@@ -240,7 +245,7 @@ export function Editor({
         css={css}
         onHtmlChange={onHtmlChange}
         onCssChange={onCssChange}
-        activeLoadRequest={activeLoadRequest}
+        activeExternalEdit={activeExternalEdit}
         revealRequest={revealRequest}
         onCaretChange={onCaretChange}
         onForceScan={onForceScan}

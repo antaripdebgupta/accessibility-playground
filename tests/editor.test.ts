@@ -495,4 +495,100 @@ describe("Part A & B: CodeMirror Editor Enhancements", () => {
       view.destroy();
     });
   });
+
+  describe("Item 1: ExternalEdit (patch and replace) data flow", () => {
+    it("updates editor when patch is identical to an earlier typed document, and does not emit docChange", () => {
+      const bus = new EventTarget();
+      const docChangeCalls: string[] = [];
+      bus.addEventListener("docChange", (e) => {
+        docChangeCalls.push((e as CustomEvent<string>).detail);
+      });
+
+      const container = document.createElement("div");
+      const extensions = createEditorBaseExtensions({
+        language: "html",
+        settings: {
+          autocomplete: false,
+          fontSize: 13,
+          tabSize: 2,
+          lineWrapping: true,
+          lineNumbers: true,
+        },
+        ariaLabel: "Test Editor",
+        bus,
+      });
+
+      // User starts with doc 'A'
+      const view = new EditorView({
+        state: EditorState.create({
+          doc: '<button aria-label="x">Save</button>',
+          extensions,
+        }),
+        parent: container,
+      });
+
+      // 1. External edit patches to 'B' ("y")
+      applyExternalValue(view, '<button aria-label="y">Save</button>');
+      expect(view.state.doc.toString()).toBe(
+        '<button aria-label="y">Save</button>'
+      );
+      expect(docChangeCalls).toEqual([]); // External edit must NOT emit docChange!
+
+      // 2. External edit patches back to 'A' ("x", identical to earlier document)
+      const updated = applyExternalValue(
+        view,
+        '<button aria-label="x">Save</button>'
+      );
+      expect(updated).toBe(true);
+      expect(view.state.doc.toString()).toBe(
+        '<button aria-label="x">Save</button>'
+      );
+      expect(docChangeCalls).toEqual([]); // Still no docChange emitted!
+
+      view.destroy();
+    });
+
+    it("replace sets caret to 0, scroll top to 0, and does not emit docChange", () => {
+      const bus = new EventTarget();
+      const docChangeCalls: string[] = [];
+      bus.addEventListener("docChange", (e) => {
+        docChangeCalls.push((e as CustomEvent<string>).detail);
+      });
+
+      const container = document.createElement("div");
+      const extensions = createEditorBaseExtensions({
+        language: "html",
+        settings: {
+          autocomplete: false,
+          fontSize: 13,
+          tabSize: 2,
+          lineWrapping: true,
+          lineNumbers: true,
+        },
+        ariaLabel: "Test Editor",
+        bus,
+      });
+
+      const view = new EditorView({
+        state: EditorState.create({
+          doc: "<p>Original text that will be replaced</p>",
+          selection: { anchor: 20 },
+          extensions,
+        }),
+        parent: container,
+      });
+
+      const fullTemplate = "<h1>Fresh Template</h1>\n<p>New content</p>";
+      const applied = applyExternalValue(view, fullTemplate, {
+        isFullReplace: true,
+      });
+
+      expect(applied).toBe(true);
+      expect(view.state.doc.toString()).toBe(fullTemplate);
+      expect(view.state.selection.main.head).toBe(0);
+      expect(docChangeCalls).toEqual([]);
+
+      view.destroy();
+    });
+  });
 });

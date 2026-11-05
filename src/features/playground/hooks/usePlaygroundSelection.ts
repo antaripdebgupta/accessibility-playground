@@ -4,12 +4,13 @@ import { useSelection, type SelectionSource } from "@/hooks/useSelection";
 import { findA11yNodeAtOffset, findA11yNodeById } from "@/lib/a11y-tree";
 import { applyAutoFixToHtml, type ImgAltFixMode } from "@/lib/auto-fix";
 import type { A11yNode, AxeFinding, Finding } from "@/types/a11y";
-import type { RevealRequest } from "../CodeEditor";
+import type { RevealRequest, ExternalEdit } from "../CodeEditor";
 
 export interface UsePlaygroundSelectionParams {
   ast: A11yNode | null;
   onTabChange: (tab: string) => void;
   setRawHtml: React.Dispatch<React.SetStateAction<string>>;
+  pushExternalEdit?: (kind: ExternalEdit["kind"], text: string) => void;
 }
 
 export interface UsePlaygroundSelectionResult {
@@ -35,6 +36,7 @@ export function usePlaygroundSelection({
   ast,
   onTabChange,
   setRawHtml,
+  pushExternalEdit,
 }: UsePlaygroundSelectionParams): UsePlaygroundSelectionResult {
   const {
     selectedId: activeNodeId,
@@ -124,10 +126,11 @@ export function usePlaygroundSelection({
             id: revealSeqRef.current,
           });
         }
+        pushExternalEdit?.("patch", result.html);
         return result.html;
       });
     },
-    [ast, setRawHtml]
+    [ast, setRawHtml, pushExternalEdit]
   );
 
   return {

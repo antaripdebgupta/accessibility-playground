@@ -13,6 +13,7 @@ import type { Diagnostic } from "@codemirror/lint";
 import type { PlaygroundAnalysisResult } from "./usePlaygroundAnalysis";
 import type { UsePlaygroundSelectionResult } from "./usePlaygroundSelection";
 import type { useBaseline } from "@/hooks/useBaseline";
+import type { ExternalEdit } from "../CodeEditor";
 
 export interface UseWorkbenchPanesParams {
   doc: {
@@ -26,7 +27,8 @@ export interface UseWorkbenchPanesParams {
     useTailwind: boolean;
     setUseTailwind: (val: boolean) => void;
     isOverSizeLimit: boolean;
-    loadRequest?: { readonly id: number } | null;
+    externalEdit?: ExternalEdit | null;
+    pushExternalEdit?: (kind: ExternalEdit["kind"], text: string) => void;
   };
   analysis: PlaygroundAnalysisResult;
   selection: UsePlaygroundSelectionResult;
@@ -78,7 +80,7 @@ export function useWorkbenchPanes({
       onSelectTemplate={doc.handleSelectTemplate}
       useTailwind={doc.useTailwind}
       onToggleTailwind={doc.setUseTailwind}
-      loadRequest={doc.loadRequest}
+      externalEdit={doc.externalEdit}
       revealRequest={selection.revealRequest}
       onCaretChange={selection.handleCaretChange}
       onForceScan={scan.triggerScan}
@@ -120,16 +122,29 @@ export function useWorkbenchPanes({
       onSelectNode={(id) => selection.wrappedHandleSelect(id, "tree")}
       onUpdateAttribute={(attr, value) => {
         if (selection.selectedNode) {
-          doc.setRawHtml((h) =>
-            setAttributeInSource(h, selection.selectedNode!, attr, value)
-          );
+          doc.setRawHtml((h) => {
+            const newHtml = setAttributeInSource(
+              h,
+              selection.selectedNode!,
+              attr,
+              value
+            );
+            doc.pushExternalEdit?.("patch", newHtml);
+            return newHtml;
+          });
         }
       }}
       onRemoveAttribute={(attr) => {
         if (selection.selectedNode) {
-          doc.setRawHtml((h) =>
-            removeAttributeFromSource(h, selection.selectedNode!, attr)
-          );
+          doc.setRawHtml((h) => {
+            const newHtml = removeAttributeFromSource(
+              h,
+              selection.selectedNode!,
+              attr
+            );
+            doc.pushExternalEdit?.("patch", newHtml);
+            return newHtml;
+          });
         }
       }}
       computedFocusOrder={analysis.focusOrder}

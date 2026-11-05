@@ -46,7 +46,7 @@ export function PlaygroundView() {
   }, [scan]);
 
   const doc = usePlaygroundDocument(handleDocumentChange);
-  const { rawHtml, setRawHtml, setRawCss, triggerLoadRequest } = doc;
+  const { rawHtml, setRawHtml, setRawCss, pushExternalEdit } = doc;
 
   // Challenge mode
   const {
@@ -58,7 +58,7 @@ export function PlaygroundView() {
     challengeParam,
     setRawHtml,
     setRawCss,
-    triggerLoadRequest
+    pushExternalEdit
   );
 
   const [analysisTab, setAnalysisTab] = React.useState<string>(
@@ -84,6 +84,7 @@ export function PlaygroundView() {
     ast: analysis.ast,
     onTabChange: setAnalysisTab,
     setRawHtml,
+    pushExternalEdit,
   });
 
   const toast = useToast();

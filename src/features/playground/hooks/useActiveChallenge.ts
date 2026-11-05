@@ -2,6 +2,7 @@
 import * as React from "react";
 import { loadChallenge, type Challenge } from "@/data/challenges";
 import { useChallengeMode } from "@/hooks/useChallengeMode";
+import type { ExternalEdit } from "@/features/playground/CodeEditor";
 
 type ChallengeLoadingStatus = "idle" | "loading" | "ready" | "error";
 
@@ -17,7 +18,7 @@ export function useActiveChallenge(
   challengeParam: string | null,
   setRawHtml: (html: string) => void,
   setRawCss: (css: string) => void,
-  onLoadChallenge?: () => void
+  pushExternalEdit?: (kind: ExternalEdit["kind"], text: string) => void
 ): UseActiveChallengeResult {
   const [activeChallenge, setActiveChallenge] =
     React.useState<Challenge | null>(null);
@@ -70,28 +71,28 @@ export function useActiveChallenge(
   React.useEffect(() => {
     if (activeChallenge && loadedChallengeRef.current !== activeChallenge.id) {
       loadedChallengeRef.current = activeChallenge.id;
-      onLoadChallenge?.();
       setRawHtml(activeChallenge.startHtml);
       setRawCss(activeChallenge.startCss ?? "");
+      pushExternalEdit?.("replace", activeChallenge.startHtml);
     }
-  }, [activeChallenge, setRawHtml, setRawCss, onLoadChallenge]);
+  }, [activeChallenge, setRawHtml, setRawCss, pushExternalEdit]);
 
   const handleLoadSolution = React.useCallback(
     (c: Challenge) => {
-      onLoadChallenge?.();
       setRawHtml(c.solutionHtml);
       setRawCss(c.solutionCss ?? "");
+      pushExternalEdit?.("replace", c.solutionHtml);
     },
-    [setRawHtml, setRawCss, onLoadChallenge]
+    [setRawHtml, setRawCss, pushExternalEdit]
   );
 
   const handleResetStarter = React.useCallback(
     (c: Challenge) => {
-      onLoadChallenge?.();
       setRawHtml(c.startHtml);
       setRawCss(c.startCss ?? "");
+      pushExternalEdit?.("replace", c.startHtml);
     },
-    [setRawHtml, setRawCss, onLoadChallenge]
+    [setRawHtml, setRawCss, pushExternalEdit]
   );
 
   return {

@@ -3,7 +3,7 @@
 import * as React from "react";
 import dynamic from "next/dynamic";
 import { AlertTriangle } from "lucide-react";
-import type { RevealRequest } from "../CodeEditor";
+import type { RevealRequest, ExternalEdit } from "../CodeEditor";
 import type { Diagnostic } from "@codemirror/lint";
 import type { EditorStatusState } from "./extensions/status";
 
@@ -23,7 +23,7 @@ export interface EditorPanelsProps {
   css: string;
   onHtmlChange: (val: string) => void;
   onCssChange: (val: string) => void;
-  activeLoadRequest?: { readonly id: number } | null;
+  activeExternalEdit?: ExternalEdit | null;
   revealRequest?: RevealRequest | null;
   onCaretChange?: (offset: number) => void;
   onForceScan?: () => void;
@@ -43,7 +43,7 @@ export function EditorPanels({
   css,
   onHtmlChange,
   onCssChange,
-  activeLoadRequest,
+  activeExternalEdit,
   revealRequest,
   onCaretChange,
   onForceScan,
@@ -74,7 +74,7 @@ export function EditorPanels({
           value={html}
           onChange={onHtmlChange}
           language="html"
-          loadRequest={activeLoadRequest}
+          externalEdit={activeExternalEdit}
           revealRequest={activeTab === "html" ? revealRequest : null}
           onCaretChange={onCaretChange}
           onForceScan={onForceScan}
@@ -106,7 +106,7 @@ export function EditorPanels({
             value={css}
             onChange={onCssChange}
             language="css"
-            loadRequest={activeLoadRequest}
+            externalEdit={activeExternalEdit}
             onForceScan={onForceScan}
             indentWithTab={indentWithTab}
             ariaLabel="CSS code editor"

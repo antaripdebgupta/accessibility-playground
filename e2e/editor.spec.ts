@@ -15,9 +15,9 @@ test.describe("Editor stability and external sync (FIX-1)", () => {
     );
     await page.keyboard.press("Backspace");
 
-    // Type rapid string
-    const testString = "Rapid Typing Integrity Check 1234567890";
-    await page.keyboard.type(testString, { delay: 5 });
+    // Type rapid 300-char string at 0ms delay
+    const testString = "A".repeat(300);
+    await page.keyboard.type(testString, { delay: 0 });
 
     // Verify exact content without character drop or echo corruption
     await expect(editor).toContainText(testString);

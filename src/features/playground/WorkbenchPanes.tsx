@@ -12,7 +12,7 @@ import type {
 } from "@/types/a11y";
 import type { ComputedFocusOrder } from "@/lib/focus-order";
 import type { StarterTemplate } from "@/data/templates";
-import type { RevealRequest } from "./CodeEditor";
+import type { RevealRequest, ExternalEdit } from "./CodeEditor";
 import type { Diagnostic } from "@codemirror/lint";
 import type { BaselineData } from "@/hooks/useBaseline";
 import type { CompareResult } from "@/lib/compare";
@@ -25,7 +25,7 @@ export interface EditorPaneProps {
   onSelectTemplate: (template: StarterTemplate) => void;
   useTailwind: boolean;
   onToggleTailwind: (use: boolean) => void;
-  loadRequest?: { readonly id: number } | null;
+  externalEdit?: ExternalEdit | null;
   revealRequest: RevealRequest | null;
   onCaretChange: (offset: number) => void;
   onForceScan: () => void;
@@ -42,7 +42,7 @@ export function EditorPaneSection({
   onSelectTemplate,
   useTailwind,
   onToggleTailwind,
-  loadRequest,
+  externalEdit,
   revealRequest,
   onCaretChange,
   onForceScan,
@@ -67,7 +67,7 @@ export function EditorPaneSection({
         }
         useTailwind={useTailwind}
         onToggleTailwind={onToggleTailwind}
-        loadRequest={loadRequest}
+        externalEdit={externalEdit}
         revealRequest={revealRequest}
         onCaretChange={onCaretChange}
         onForceScan={onForceScan}

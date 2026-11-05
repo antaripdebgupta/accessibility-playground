@@ -7,6 +7,7 @@ import { STARTER_TEMPLATES, type StarterTemplate } from "@/data/templates";
 import { decodeSnippet } from "@/lib/snippet-share";
 import { storage, STORAGE_KEYS } from "@/lib/storage";
 import { useToast } from "@accessly-ui/react";
+import type { ExternalEdit } from "@/features/playground/CodeEditor";
 
 const MAX_DOCUMENT_BYTES = 200 * 1024; // 200KB hard input cap (§B.4)
 
@@ -75,13 +76,19 @@ export function usePlaygroundDocument(onDocumentChange?: () => void) {
     storage.set(STORAGE_KEYS.css, debouncedCss);
   }, [debouncedCss]);
 
-  const [loadRequest, setLoadRequest] = React.useState<{
-    readonly id: number;
-  } | null>(null);
+  // External edit state: single channel for all programmatic updates
+  const externalEditSeqRef = React.useRef(0);
+  const [externalEdit, setExternalEdit] = React.useState<ExternalEdit | null>(
+    null
+  );
 
-  const triggerLoadRequest = React.useCallback(() => {
-    setLoadRequest({ id: Date.now() + Math.round(Math.random() * 1000) });
-  }, []);
+  const pushExternalEdit = React.useCallback(
+    (kind: ExternalEdit["kind"], text: string) => {
+      externalEditSeqRef.current += 1;
+      setExternalEdit({ id: externalEditSeqRef.current, kind, text });
+    },
+    []
+  );
 
   // Restore toast on initial mount
   const hasShownRestoreToast = React.useRef(false);
@@ -101,30 +108,30 @@ export function usePlaygroundDocument(onDocumentChange?: () => void) {
 
   const handleSelectTemplate = React.useCallback(
     (template: StarterTemplate) => {
-      triggerLoadRequest();
       setRawHtml(template.html);
       setRawCss(template.css ?? "");
+      pushExternalEdit("replace", template.html);
       onDocumentChange?.();
     },
-    [onDocumentChange, triggerLoadRequest]
+    [onDocumentChange, pushExternalEdit]
   );
 
   const handleStartFresh = React.useCallback(() => {
-    triggerLoadRequest();
+    const freshHtml = STARTER_TEMPLATES[0]?.html ?? "";
     storage.remove(STORAGE_KEYS.html);
     storage.remove(STORAGE_KEYS.css);
-    setRawHtml(STARTER_TEMPLATES[0]?.html ?? "");
+    setRawHtml(freshHtml);
     setRawCss(STARTER_TEMPLATES[0]?.css ?? "");
+    pushExternalEdit("replace", freshHtml);
     onDocumentChange?.();
     toast.push({
       title: "Started fresh",
       description: "Reset code editor to starter template.",
       variant: "info",
     });
-  }, [onDocumentChange, toast, triggerLoadRequest]);
+  }, [onDocumentChange, toast, pushExternalEdit]);
 
   const handleResetExample = React.useCallback(() => {
-    triggerLoadRequest();
     let targetHtml = STARTER_TEMPLATES[0]?.html ?? "";
     let targetCss = STARTER_TEMPLATES[0]?.css ?? "";
 
@@ -144,13 +151,14 @@ export function usePlaygroundDocument(onDocumentChange?: () => void) {
 
     setRawHtml(targetHtml);
     setRawCss(targetCss);
+    pushExternalEdit("replace", targetHtml);
     onDocumentChange?.();
     toast.push({
       title: "Example reset",
       description: "Restored code to original starter state.",
       variant: "info",
     });
-  }, [patternParam, sharedParam, onDocumentChange, toast, triggerLoadRequest]);
+  }, [patternParam, sharedParam, onDocumentChange, toast, pushExternalEdit]);
 
   const updateHtml = React.useCallback(
     (valOrUpdater: string | ((prev: string) => string)) => {
@@ -183,7 +191,7 @@ export function usePlaygroundDocument(onDocumentChange?: () => void) {
     handleStartFresh,
     handleResetExample,
     isOverSizeLimit,
-    loadRequest,
-    triggerLoadRequest,
+    externalEdit,
+    pushExternalEdit,
   };
 }

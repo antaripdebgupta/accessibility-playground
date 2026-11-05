@@ -40,11 +40,15 @@ export interface RevealRequest {
   readonly focus?: boolean;
 }
 
+export type ExternalEdit =
+  | { readonly id: number; readonly kind: "replace"; readonly text: string }
+  | { readonly id: number; readonly kind: "patch"; readonly text: string };
+
 interface CodeEditorProps {
   value: string;
   onChange: (val: string) => void;
   language: "html" | "css";
-  loadRequest?: { readonly id: number } | null;
+  externalEdit?: ExternalEdit | null;
   revealRequest?: RevealRequest | null;
   onCaretChange?: (offset: number) => void;
   onForceScan?: () => void;
@@ -61,7 +65,7 @@ function CodeEditor({
   value,
   onChange,
   language,
-  loadRequest,
+  externalEdit,
   revealRequest,
   onCaretChange,
   onForceScan,
@@ -76,15 +80,12 @@ function CodeEditor({
   const editorRef = React.useRef<ReactCodeMirrorRef>(null);
   const { settings } = useEditorSettings();
   const [initialValue] = React.useState(value);
-  const lastLoadRequestIdRef = React.useRef<number | null>(
-    loadRequest?.id ?? null
+  const lastExternalEditIdRef = React.useRef<number | null>(
+    externalEdit?.id ?? null
   );
 
   // Stable event bus: decoupled from render, no refs during render
   const [bus] = React.useState(() => new EventTarget());
-
-  // Track values emitted by this editor to ignore React prop echoes during typing
-  const emittedValuesRef = React.useRef(new Set<string>());
 
   // Keep volatile callbacks and values in a latest ref to avoid listener churn
   const latestCallbacks = useLatest({
@@ -102,11 +103,6 @@ function CodeEditor({
   React.useEffect(() => {
     const onDocChange = (e: Event) => {
       const val = (e as CustomEvent<string>).detail;
-      emittedValuesRef.current.add(val);
-      if (emittedValuesRef.current.size > 100) {
-        const first = emittedValuesRef.current.values().next().value;
-        if (first !== undefined) emittedValuesRef.current.delete(first);
-      }
       latestCallbacks.current.onChange(val);
     };
     const onCaret = (e: Event) =>
@@ -214,35 +210,19 @@ function CodeEditor({
   );
   useCompartment(editorRef, ariaLabelCompartment, ariaLabelExtension);
 
-  // Effect 2: Minimal-diff external value sync (Part A5)
+  // Effect 2: Apply external edits (replace or patch) by id, once per new id
   React.useEffect(() => {
     const view = editorRef.current?.view;
-    if (!view) return;
+    if (!view || !externalEdit) return;
+    if (externalEdit.id === lastExternalEditIdRef.current) return;
 
-    const isLoad =
-      loadRequest != null && loadRequest.id !== lastLoadRequestIdRef.current;
-    if (isLoad) {
-      lastLoadRequestIdRef.current = loadRequest.id;
-      emittedValuesRef.current.clear();
-    }
-
-    // If this value was emitted by this editor, it's an echo of user typing — skip sync
-    if (!isLoad && emittedValuesRef.current.has(value)) {
-      emittedValuesRef.current.delete(value);
-      return;
-    }
-
-    const currentDoc = view.state.doc.toString();
-    if (currentDoc !== value) {
-      applyExternalValue(
-        view,
-        value,
-        isLoad ? { isFullReplace: true } : undefined
-      );
-    } else if (isLoad) {
-      applyExternalValue(view, value, { isFullReplace: true });
-    }
-  }, [value, loadRequest]);
+    lastExternalEditIdRef.current = externalEdit.id;
+    applyExternalValue(
+      view,
+      externalEdit.text,
+      externalEdit.kind === "replace" ? { isFullReplace: true } : undefined
+    );
+  }, [externalEdit]);
 
   // Effect 3: Reveal request sync
   const lastRevealIdRef = React.useRef<number | null>(null);
