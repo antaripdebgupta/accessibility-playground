@@ -1,8 +1,11 @@
-// Challenge lifecycle loading (dynamic code-splitting of content, loading status, and starter/solution editor synchronization).
 import * as React from "react";
 import { loadChallenge, type Challenge } from "@/data/challenges";
 import { useChallengeMode } from "@/hooks/useChallengeMode";
+import { useLatest } from "@/hooks/useLatest";
 import type { ExternalEdit } from "@/features/playground/CodeEditor";
+import { useToast } from "@accessly-ui/react";
+import { reportError } from "@/lib/report-error";
+import { STARTER_TEMPLATES } from "@/data/templates";
 
 type ChallengeLoadingStatus = "idle" | "loading" | "ready" | "error";
 
@@ -20,6 +23,14 @@ export function useActiveChallenge(
   setRawCss: (css: string) => void,
   pushExternalEdit?: (kind: ExternalEdit["kind"], text: string) => void
 ): UseActiveChallengeResult {
+  const toast = useToast();
+  const toastRef = useLatest(toast);
+  const callbacksRef = useLatest({
+    setRawHtml,
+    setRawCss,
+    pushExternalEdit,
+  });
+
   const [activeChallenge, setActiveChallenge] =
     React.useState<Challenge | null>(null);
   const [status, setStatus] = React.useState<ChallengeLoadingStatus>(
@@ -43,27 +54,56 @@ export function useActiveChallenge(
   React.useEffect(() => {
     if (!challengeParam) return;
     let cancelled = false;
+
+    const handleFailure = (
+      err?: unknown,
+      reason: "unknown-id" | "load-failed" = "load-failed"
+    ) => {
+      if (cancelled) return;
+      setActiveChallenge(null);
+      setStatus("error");
+      reportError(
+        err ?? new Error(`Failed to load challenge: ${challengeParam}`),
+        {
+          challengeId: challengeParam,
+          reason,
+        }
+      );
+      toastRef.current.push({
+        title: "Challenge error",
+        description:
+          "Couldn't load this challenge. Showing the default example.",
+        variant: "danger",
+      });
+      const defaultTemplate = STARTER_TEMPLATES[0];
+      if (defaultTemplate) {
+        callbacksRef.current.setRawHtml(defaultTemplate.html);
+        callbacksRef.current.setRawCss(defaultTemplate.css ?? "");
+        callbacksRef.current.pushExternalEdit?.(
+          "replace",
+          defaultTemplate.html
+        );
+      }
+    };
+
     loadChallenge(challengeParam)
-      .then((challenge) => {
+      .then((res) => {
         if (cancelled) return;
-        if (challenge) {
-          setActiveChallenge(challenge);
+        if (res.ok) {
+          setActiveChallenge(res.challenge);
           setStatus("ready");
         } else {
-          setActiveChallenge(null);
-          setStatus("error");
+          handleFailure(undefined, res.reason);
         }
       })
-      .catch(() => {
-        if (!cancelled) {
-          setActiveChallenge(null);
-          setStatus("error");
-        }
+      .catch((err) => {
+        handleFailure(err, "load-failed");
       });
+
     return () => {
       cancelled = true;
     };
-  }, [challengeParam]);
+  }, [challengeParam, callbacksRef, toastRef]);
 
   const challengeMode = useChallengeMode(activeChallenge);
 

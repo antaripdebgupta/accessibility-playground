@@ -164,33 +164,44 @@ export function getChallengeMetadata(
   return CHALLENGES.find((c) => c.id === id);
 }
 
+export type LoadChallengeResult =
+  | { ok: true; challenge: Challenge }
+  | { ok: false; reason: "unknown-id" | "load-failed" };
+
 /**
  * Loads a challenge content module on-demand and merges it with metadata.
- * Returns null if the challenge id is unknown or loading fails.
+ * Returns a typed LoadChallengeResult indicating success or failure reason.
  */
-export async function loadChallenge(id: string): Promise<Challenge | null> {
+export async function loadChallenge(id: string): Promise<LoadChallengeResult> {
   const meta = getChallengeMetadata(id);
   const loader = CHALLENGE_LOADERS[id];
-  if (!meta || !loader) return null;
+  if (!meta || !loader) {
+    return { ok: false, reason: "unknown-id" };
+  }
 
   try {
     const mod = await loader();
     return {
-      ...meta,
-      ...mod.default,
+      ok: true,
+      challenge: {
+        ...meta,
+        ...mod.default,
+      },
     };
-  } catch (error) {
-    console.error(`Failed to load challenge "${id}":`, error);
-    return null;
+  } catch {
+    return { ok: false, reason: "load-failed" };
   }
 }
 
 /**
  * Loads all challenges. Useful for test suites and offline static verification.
+ * Used in tests/baseline-snapshots.test.ts and tests/challenges.test.ts.
  */
 export async function loadAllChallenges(): Promise<Challenge[]> {
   const results = await Promise.all(
     CHALLENGES.map((meta) => loadChallenge(meta.id))
   );
-  return results.filter((c): c is Challenge => c !== null);
+  return results
+    .filter((r): r is { ok: true; challenge: Challenge } => r.ok)
+    .map((r) => r.challenge);
 }
