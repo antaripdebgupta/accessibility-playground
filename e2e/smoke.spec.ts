@@ -1,7 +1,14 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
-const ALL_ROUTES = ["/", "/playground", "/contrast", "/about"];
+const ALL_ROUTES = [
+  "/",
+  "/about",
+  "/contrast",
+  "/learn",
+  "/challenges",
+  "/playground",
+];
 const SITE_ROUTES = ["/", "/contrast", "/about"];
 
 for (const route of ALL_ROUTES) {
@@ -11,7 +18,14 @@ for (const route of ALL_ROUTES) {
       await page.waitForLoadState("networkidle");
 
       const accessibilityScanResults = await new AxeBuilder({ page })
-        .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
+        .withTags([
+          "wcag2a",
+          "wcag2aa",
+          "wcag21a",
+          "wcag21aa",
+          "wcag22aa",
+          "best-practice",
+        ])
         .disableRules(["color-contrast-enhanced"])
         .options({
           rules: { "label-content-name-mismatch": { enabled: true } },

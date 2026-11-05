@@ -9,6 +9,8 @@ This document records accessibility scanner warnings and findings that were inve
 - **Rule:** `color-contrast-enhanced` (WCAG AAA SC 1.4.6)
 - **Status:** **Accepted Advisory / Non-blocker**
 - **Target Standard:** WCAG 2.2 Level AA
+- **Review Date:** 2026-11-05
+- **Evidence:** Verified across all routes via axe-core automated audit and manual color picker sampling. All body and interactive text meets AA threshold (>= 4.5:1).
 - **Details:**
   Automated auditing extensions (such as Axe DevTools or WAVE in strict mode) may flag secondary metadata, subtle borders, and muted keyboard shortcut badges that meet the WCAG 2.2 AA requirement (4.5:1 for regular text, 3:1 for large text/graphical objects) but fall short of the stricter AAA requirement (7:1).
 - **Rationale:**
@@ -21,6 +23,8 @@ This document records accessibility scanner warnings and findings that were inve
 - **Rule:** `scrollable-region-focusable` (WCAG 2.1.1)
 - **Status:** **Accepted Architectural Implementation**
 - **Affected Elements:** `.cm-scroller` inside CodeMirror 6 code editor instances (`HTML` and `CSS` panels).
+- **Review Date:** 2026-11-05
+- **Evidence:** Verified in `tests/editor.test.ts` and `e2e/editor.spec.ts`. Scroller contains inner `.cm-content` with `role="textbox"` and `tabindex="0"`.
 - **Details:**
   Axe may flag `.cm-scroller` because the outer `div` has `overflow: scroll` or `auto` without an explicit `tabindex="0"`.
 - **Rationale:**
@@ -30,9 +34,11 @@ This document records accessibility scanner warnings and findings that were inve
 
 ## F3. Accessibility Tree Virtual / Flattened List (`aria-required-children`)
 
-- **Rule:** `aria-required-children`
+- **Rule:** `aria-required-children` / focus-order heuristic
 - **Status:** **Accepted Component Implementation**
 - **Affected Elements:** Accessibility Tree inspector panel rows and tree view representation.
+- **Review Date:** 2026-11-05
+- **Evidence:** Verified in `tests/workbench-keys.test.ts` and `tests/findings-normalize.test.ts`. Focus navigates correctly via arrow keys and Enter/Space activates nodes.
 - **Details:**
   Certain linters flag custom roving tabindex implementations or list containers when tree item rows contain composite status badges, tags, or disclosure toggles.
 - **Rationale:**
