@@ -35,4 +35,20 @@ describe("generatePreviewSrcDoc template", () => {
     expect(srcDoc).not.toContain("</style>';");
     expect(srcDoc).toContain("<\\/style>';");
   });
+
+  it("produces valid JavaScript with no empty catch blocks", () => {
+    const srcDoc = generatePreviewSrcDoc("<p>Test</p>");
+    const scriptMatch = srcDoc.match(/<script>([\s\S]*?)<\/script>/);
+    expect(scriptMatch).not.toBeNull();
+    const scriptCode = scriptMatch ? scriptMatch[1] : "";
+
+    // Test that the script body parses as valid JavaScript
+    expect(() => new Function(scriptCode)).not.toThrow();
+
+    // Verify there are no empty catch blocks: catch (...) { }
+    // Note: comments inside catch blocks are permitted, but completely empty braces are prohibited
+    const emptyCatchRegex = /catch\s*\([^)]*\)\s*\{\s*\}/g;
+    const emptyMatches = scriptCode.match(emptyCatchRegex);
+    expect(emptyMatches).toBeNull();
+  });
 });

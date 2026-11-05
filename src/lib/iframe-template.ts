@@ -93,7 +93,9 @@ export function generatePreviewSrcDoc(
       function sendParent(msg) {
         try {
           window.parent.postMessage(msg, "*");
-        } catch (_) {}
+        } catch (_) {
+          // Parent window may be unreachable or destroyed during iframe teardown; postMessage is best-effort
+        }
       }
 
       var lastReportedErrorTime = 0;
@@ -217,7 +219,9 @@ export function generatePreviewSrcDoc(
                       }
                     }
                   }
-                } catch (err) {}
+                } catch (err) {
+                  reportIframeError("target-resolution", err);
+                }
 
                 var normalizedTarget = (n.target || []).map(function(t) {
                   return Array.isArray(t) ? t.join(" ") : String(t);
