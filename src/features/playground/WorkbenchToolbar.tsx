@@ -79,12 +79,15 @@ export function WorkbenchToolbar({
 
       {/* Rescan Button */}
       {onForceScan && (
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={onForceScan}
-          disabled={isScanning}
-          className="h-7 gap-1.5 px-2.5 text-xs font-medium"
+        <button
+          type="button"
+          onClick={() => {
+            if (!isScanning) {
+              onForceScan();
+            }
+          }}
+          aria-disabled={isScanning}
+          className="focus-ring-safe inline-flex h-7 items-center justify-center gap-1.5 rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-surface)] px-2.5 text-xs font-medium text-[var(--color-text-primary)] shadow-xs transition-[color,background-color,border-color,box-shadow,scale] duration-150 ease-out hover:bg-[var(--color-surface-raised)] active:scale-[0.98] aria-disabled:cursor-not-allowed aria-disabled:opacity-50 aria-disabled:active:scale-100"
           aria-label={
             isScanning
               ? "Scanning in progress"
@@ -98,7 +101,7 @@ export function WorkbenchToolbar({
             aria-hidden="true"
           />
           <span>{isScanning ? "Scanning…" : "Rescan"}</span>
-        </Button>
+        </button>
       )}
 
       {/* Layout Menu */}

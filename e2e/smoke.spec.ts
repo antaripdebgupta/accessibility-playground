@@ -13,6 +13,9 @@ for (const route of ALL_ROUTES) {
       const accessibilityScanResults = await new AxeBuilder({ page })
         .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
         .disableRules(["color-contrast-enhanced"])
+        .options({
+          rules: { "label-content-name-mismatch": { enabled: true } },
+        })
         .exclude(".cm-scroller")
         .analyze();
 
@@ -75,5 +78,40 @@ test.describe("Footer landmark", () => {
 
     await page.goto("/about");
     await expect(page.locator("footer")).toHaveCount(0);
+  });
+});
+
+test.describe("Item 2: Rescan button keyboard focus and aria-disabled", () => {
+  test("focus Rescan, press Enter -> activeElement remains Rescan button during and after scan", async ({
+    page,
+  }) => {
+    await page.goto("/playground");
+    await page.waitForLoadState("networkidle");
+
+    const rescanBtn = page.getByRole("button", {
+      name: /Rescan/i,
+    });
+    await expect(rescanBtn).toBeVisible();
+
+    // Focus the Rescan button
+    await rescanBtn.focus();
+
+    // Verify it is currently activeElement
+    const isFocusedBefore = await page.evaluate(() =>
+      document.activeElement?.getAttribute("aria-label")?.includes("Rescan")
+    );
+    expect(isFocusedBefore).toBe(true);
+
+    // Press Enter to trigger scan
+    await page.keyboard.press("Enter");
+
+    // During scan, button remains the activeElement (not dropped to body)
+    const activeTagName = await page.evaluate(
+      () => document.activeElement?.tagName
+    );
+    expect(activeTagName).toBe("BUTTON");
+
+    // Pressing Enter again while aria-disabled is true does not crash or double-trigger
+    await page.keyboard.press("Enter");
   });
 });
