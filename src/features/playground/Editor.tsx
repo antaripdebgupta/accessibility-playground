@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { useToast } from "@accessly-ui/react";
-import type { StarterTemplate } from "@/data/templates";
 import { EditorStatusBar } from "./editor/EditorStatusBar";
 import { ShortcutsDialog } from "./editor/ShortcutsDialog";
 import { useEditorSettings } from "./editor/useEditorSettings";
@@ -17,7 +16,6 @@ export interface EditorProps {
   css: string;
   onHtmlChange: (value: string) => void;
   onCssChange: (value: string) => void;
-  onSelectTemplate: (template: StarterTemplate) => void;
   onCopyLink?: () => string;
   useTailwind?: boolean;
   onToggleTailwind?: (enabled: boolean) => void;
@@ -35,7 +33,6 @@ export function Editor({
   css,
   onHtmlChange,
   onCssChange,
-  onSelectTemplate,
   onCopyLink,
   useTailwind = false,
   onToggleTailwind,
@@ -49,7 +46,6 @@ export function Editor({
 }: EditorProps) {
   const [activeTab, setActiveTab] = React.useState<"html" | "css">("html");
   const [hasOpenedCss, setHasOpenedCss] = React.useState(false);
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = React.useState(false);
   const [indentWithTab, setIndentWithTab] = React.useState(true);
   const [linkCopied, setLinkCopied] = React.useState(false);
@@ -90,22 +86,6 @@ export function Editor({
   }, [activeContent]);
 
   const isOversized = byteLength > 50000;
-
-  // Window-level shortcut for Cmd/Ctrl+K (ignore when editor is focused)
-  React.useEffect(() => {
-    const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
-        const activeEl = document.activeElement;
-        if (activeEl?.closest(".cm-editor")) {
-          return;
-        }
-        e.preventDefault();
-        setIsMenuOpen((prev) => !prev);
-      }
-    };
-    window.addEventListener("keydown", handleGlobalKeyDown);
-    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
-  }, []);
 
   const handleTabChange = React.useCallback((tab: "html" | "css") => {
     setActiveTab(tab);
@@ -195,15 +175,6 @@ export function Editor({
     }
   }, [onCopyLink, toast]);
 
-  const handleSelectTemplate = React.useCallback(
-    (tmpl: StarterTemplate) => {
-      onSelectTemplate(tmpl);
-      triggerLocalLoad(tmpl.html);
-      setLiveAnnouncement(`Template loaded: ${tmpl.label}`);
-    },
-    [onSelectTemplate, triggerLocalLoad]
-  );
-
   const handleToggleIndentWithTab = React.useCallback((checked: boolean) => {
     setIndentWithTab(checked);
     setLiveAnnouncement(
@@ -226,9 +197,6 @@ export function Editor({
         onToggleIndentWithTab={handleToggleIndentWithTab}
         useTailwind={useTailwind}
         onToggleTailwind={onToggleTailwind}
-        isMenuOpen={isMenuOpen}
-        setIsMenuOpen={setIsMenuOpen}
-        onSelectTemplate={handleSelectTemplate}
         html={html}
         css={css}
         onHtmlChange={onHtmlChange}

@@ -37,22 +37,23 @@ const ManualTestStoragePayloadSchema = z.object({
 
 type ManualTestStoragePayload = z.infer<typeof ManualTestStoragePayloadSchema>;
 
-function getManualTestStorageKey(id: string): string {
-  return `${STORAGE_PREFIX}${id}`;
+/** Generates storage key for a document ID ("default", challenge ID, or share ID) */
+function getManualTestStorageKey(documentId: string): string {
+  return `${STORAGE_PREFIX}${documentId}`;
 }
 
 export function loadManualTestResults(
-  templateOrSnippetId: string
+  documentId: string
 ): Record<string, ManualTestRecord> {
   const payload = storage.getJSON(
-    getManualTestStorageKey(templateOrSnippetId),
+    getManualTestStorageKey(documentId),
     ManualTestStoragePayloadSchema
   );
   return payload ? payload.records : {};
 }
 
 export function saveManualTestResult(
-  templateOrSnippetId: string,
+  documentId: string,
   record: ManualTestRecord
 ): { success: boolean; error?: string } {
   const validation = ManualTestRecordSchema.safeParse(record);
@@ -64,17 +65,14 @@ export function saveManualTestResult(
     };
   }
 
-  const current = loadManualTestResults(templateOrSnippetId);
+  const current = loadManualTestResults(documentId);
   current[record.testId] = validation.data;
 
   const payload: ManualTestStoragePayload = {
     version: 1,
     records: current,
   };
-  const saved = storage.setJSON(
-    getManualTestStorageKey(templateOrSnippetId),
-    payload
-  );
+  const saved = storage.setJSON(getManualTestStorageKey(documentId), payload);
   if (!saved) {
     return {
       success: false,
@@ -84,6 +82,6 @@ export function saveManualTestResult(
   return { success: true };
 }
 
-export function clearManualTestResults(templateOrSnippetId: string): void {
-  storage.remove(getManualTestStorageKey(templateOrSnippetId));
+export function clearManualTestResults(documentId: string): void {
+  storage.remove(getManualTestStorageKey(documentId));
 }

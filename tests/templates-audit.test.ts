@@ -1,11 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { STARTER_TEMPLATES } from "@/data/templates";
+import { TEMPLATE_FIXTURES } from "./fixtures/template-fixtures";
 import { parseHtmlToA11yTree } from "@/lib/a11y-tree";
 import { runCustomRules } from "@/lib/custom-rules";
 
 describe("Starter Templates Audit (W8 False Positives Resolution)", () => {
   it("verifies all starter templates parse cleanly", () => {
-    for (const template of STARTER_TEMPLATES) {
+    for (const template of TEMPLATE_FIXTURES) {
       const result = parseHtmlToA11yTree(template.html);
       expect(
         result.error,
@@ -36,7 +36,7 @@ describe("Starter Templates Audit (W8 False Positives Resolution)", () => {
     ];
 
     for (const id of accessibleTemplates) {
-      const template = STARTER_TEMPLATES.find((t) => t.id === id);
+      const template = TEMPLATE_FIXTURES.find((t) => t.id === id);
       expect(template, `Template ${id} must exist`).toBeDefined();
 
       const parseResult = parseHtmlToA11yTree(template!.html);
@@ -64,7 +64,7 @@ describe("Starter Templates Audit (W8 False Positives Resolution)", () => {
     for (const [templateId, expectedRuleId] of Object.entries(
       teachingIntentExpected
     )) {
-      const template = STARTER_TEMPLATES.find((t) => t.id === templateId);
+      const template = TEMPLATE_FIXTURES.find((t) => t.id === templateId);
       expect(template, `Template ${templateId} must exist`).toBeDefined();
 
       const parseResult = parseHtmlToA11yTree(template!.html);

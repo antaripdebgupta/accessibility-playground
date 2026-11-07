@@ -21,9 +21,6 @@ export interface UseWorkbenchPanesParams {
     rawCss: string;
     setRawHtml: React.Dispatch<React.SetStateAction<string>>;
     setRawCss: (val: string) => void;
-    handleSelectTemplate: (
-      template: import("@/data/templates").StarterTemplate
-    ) => void;
     useTailwind: boolean;
     setUseTailwind: (val: boolean) => void;
     isOverSizeLimit: boolean;
@@ -54,7 +51,8 @@ export interface UseWorkbenchPanesParams {
   setFocusPositions: (p: readonly FocusOrderPosition[]) => void;
   analysisTab: string;
   setAnalysisTab: (t: string) => void;
-  activeTemplateId: string;
+  /** Active document ID ("default", challenge ID, or share ID) */
+  activeDocumentId: string;
 }
 
 export function useWorkbenchPanes({
@@ -69,7 +67,7 @@ export function useWorkbenchPanes({
   setFocusPositions,
   analysisTab,
   setAnalysisTab,
-  activeTemplateId,
+  activeDocumentId,
 }: UseWorkbenchPanesParams) {
   const editorPane = (
     <EditorPaneSection
@@ -77,7 +75,6 @@ export function useWorkbenchPanes({
       rawCss={doc.rawCss}
       onHtmlChange={(val) => doc.setRawHtml(val)}
       onCssChange={(val) => doc.setRawCss(val)}
-      onSelectTemplate={doc.handleSelectTemplate}
       useTailwind={doc.useTailwind}
       onToggleTailwind={doc.setUseTailwind}
       externalEdit={doc.externalEdit}
@@ -161,7 +158,7 @@ export function useWorkbenchPanes({
       rawHtml={doc.rawHtml}
       onSetBaseline={baselineState.setBaseline}
       onClearBaseline={baselineState.clearBaseline}
-      templateOrSnippetId={activeTemplateId}
+      documentId={activeDocumentId}
     />
   );
 

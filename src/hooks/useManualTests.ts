@@ -12,21 +12,25 @@ import {
   clearManualTestResults,
 } from "@/lib/manual-tests-storage";
 
-export function useManualTests(templateOrSnippetId: string) {
-  const [prevId, setPrevId] = React.useState(templateOrSnippetId);
+/**
+ * Hook to manage manual test records for the current document.
+ * @param documentId Active document ID ("default", challenge ID, or share ID)
+ */
+export function useManualTests(documentId: string) {
+  const [prevId, setPrevId] = React.useState(documentId);
   const [records, setRecords] = React.useState<
     Record<string, ManualTestRecord>
   >(() => {
-    return loadManualTestResults(templateOrSnippetId);
+    return loadManualTestResults(documentId);
   });
   const [validationErrors, setValidationErrors] = React.useState<
     Record<string, string>
   >({});
 
-  // When template or snippet ID changes, sync records during render
-  if (prevId !== templateOrSnippetId) {
-    setPrevId(templateOrSnippetId);
-    setRecords(loadManualTestResults(templateOrSnippetId));
+  // When document ID changes, sync records during render
+  if (prevId !== documentId) {
+    setPrevId(documentId);
+    setRecords(loadManualTestResults(documentId));
     setValidationErrors({});
   }
 
@@ -47,7 +51,7 @@ export function useManualTests(templateOrSnippetId: string) {
         updatedAt: new Date().toISOString(),
       };
 
-      const result = saveManualTestResult(templateOrSnippetId, record);
+      const result = saveManualTestResult(documentId, record);
       if (result.success) {
         setRecords((prev) => ({
           ...prev,
@@ -67,14 +71,14 @@ export function useManualTests(templateOrSnippetId: string) {
         return false;
       }
     },
-    [templateOrSnippetId]
+    [documentId]
   );
 
   const clearAll = React.useCallback(() => {
-    clearManualTestResults(templateOrSnippetId);
+    clearManualTestResults(documentId);
     setRecords({});
     setValidationErrors({});
-  }, [templateOrSnippetId]);
+  }, [documentId]);
 
   const stats = React.useMemo(() => {
     let passed = 0;

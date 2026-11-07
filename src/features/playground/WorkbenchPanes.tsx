@@ -11,7 +11,6 @@ import type {
   FocusOrderPosition,
 } from "@/types/a11y";
 import type { ComputedFocusOrder } from "@/lib/focus-order";
-import type { StarterTemplate } from "@/data/templates";
 import type { RevealRequest, ExternalEdit } from "./CodeEditor";
 import type { Diagnostic } from "@codemirror/lint";
 import type { BaselineData } from "@/hooks/useBaseline";
@@ -22,7 +21,6 @@ export interface EditorPaneProps {
   rawCss: string;
   onHtmlChange: (val: string) => void;
   onCssChange: (val: string) => void;
-  onSelectTemplate: (template: StarterTemplate) => void;
   useTailwind: boolean;
   onToggleTailwind: (use: boolean) => void;
   externalEdit?: ExternalEdit | null;
@@ -39,7 +37,6 @@ export function EditorPaneSection({
   rawCss,
   onHtmlChange,
   onCssChange,
-  onSelectTemplate,
   useTailwind,
   onToggleTailwind,
   externalEdit,
@@ -61,7 +58,6 @@ export function EditorPaneSection({
         css={rawCss}
         onHtmlChange={onHtmlChange}
         onCssChange={onCssChange}
-        onSelectTemplate={onSelectTemplate}
         onCopyLink={() =>
           `${location.origin}/playground?s=${encodeSnippet(rawHtml, rawCss)}`
         }
@@ -171,7 +167,8 @@ export interface AnalysisPaneProps {
   rawHtml: string;
   onSetBaseline: (data?: BaselineData) => void;
   onClearBaseline: (reason?: string) => void;
-  templateOrSnippetId: string;
+  /** Active document ID ("default", challenge ID, or share ID) */
+  documentId: string;
 }
 
 export function AnalysisPaneSection({
@@ -200,7 +197,7 @@ export function AnalysisPaneSection({
   rawHtml,
   onSetBaseline,
   onClearBaseline,
-  templateOrSnippetId,
+  documentId,
 }: AnalysisPaneProps) {
   return (
     <section
@@ -245,7 +242,7 @@ export function AnalysisPaneSection({
         rawHtml={rawHtml}
         onSetBaseline={onSetBaseline}
         onClearBaseline={onClearBaseline}
-        templateOrSnippetId={templateOrSnippetId}
+        documentId={documentId}
       />
     </section>
   );

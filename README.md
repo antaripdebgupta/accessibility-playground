@@ -80,7 +80,7 @@ npm run start
 │   ├── components/        # Shared application components (Header, Footer, ThemeToggle, PanelBoundary)
 │   │   ├── ui/            # Shared UI components (Badge, CodeSnippet)
 │   │   └── workbench/     # Workbench layout primitives (SplitPane)
-│   ├── data/              # Static typed content (WCAG criteria, starter templates, editor snippets)
+│   ├── data/              # Static typed content (WCAG criteria, default document, editor snippets)
 │   ├── features/          # Feature components (Playground, ContrastChecker)
 │   ├── hooks/             # Custom React hooks (useWorkbenchLayout, usePlaygroundDocument, useScanState)
 │   ├── lib/               # Pure business logic (AST parser, rules registry, AccName trace, storage, postmessage)

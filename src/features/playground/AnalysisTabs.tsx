@@ -85,7 +85,8 @@ export interface AnalysisTabsProps {
   rawHtml?: string;
   onSetBaseline?: () => void;
   onClearBaseline?: () => void;
-  templateOrSnippetId?: string;
+  /** Active document ID ("default", challenge ID, or share ID) */
+  documentId?: string;
 }
 
 export const AnalysisTabs = React.memo(function AnalysisTabs({
@@ -113,7 +114,7 @@ export const AnalysisTabs = React.memo(function AnalysisTabs({
   rawHtml = "",
   onSetBaseline,
   onClearBaseline,
-  templateOrSnippetId = "default",
+  documentId = "default",
 }: AnalysisTabsProps) {
   const normalizedFindings = React.useMemo(() => {
     return normalizeFindings([], mergedViolations, axeIncomplete);
@@ -301,7 +302,7 @@ export const AnalysisTabs = React.memo(function AnalysisTabs({
 
         <TabsContent value="manual" className="m-0 h-full">
           <PanelBoundary name="Manual Tests">
-            <ManualTestsPanel templateOrSnippetId={templateOrSnippetId} />
+            <ManualTestsPanel documentId={documentId} />
           </PanelBoundary>
         </TabsContent>
       </div>

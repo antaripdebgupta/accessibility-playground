@@ -63,7 +63,7 @@ describe("useReportExport", () => {
 
     const { result, unmount } = mountHook(() =>
       useReportExport({
-        activeTemplateId: "test-template",
+        activeDocumentId: "test-document",
         findings: [],
         comparison: null,
       })
@@ -87,7 +87,7 @@ describe("useReportExport", () => {
 
     const { result, unmount } = mountHook(() =>
       useReportExport({
-        activeTemplateId: "test-template",
+        activeDocumentId: "test-document",
         findings: [],
         comparison: null,
       })

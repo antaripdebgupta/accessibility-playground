@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import React from "react";
 import { renderToString } from "react-dom/server";
 import HomePage from "@/app/(site)/page";
-import { STARTER_TEMPLATES } from "@/data/templates";
+import { TEMPLATE_FIXTURES } from "./fixtures/template-fixtures";
 import { loadAllChallenges } from "@/data/challenges";
 import { parseHtmlToA11yTree } from "@/lib/a11y-tree";
 import { runCustomRules } from "@/lib/custom-rules";
@@ -15,7 +15,7 @@ describe("Baseline Behavior Snapshots", () => {
   it("locks findings output for every starter template", () => {
     const templateFindings: Record<string, unknown> = {};
 
-    for (const template of STARTER_TEMPLATES) {
+    for (const template of TEMPLATE_FIXTURES) {
       const { ast } = parseHtmlToA11yTree(template.html);
       const customFindings = ast
         ? runCustomRules(ast, template.css || "", template.html)

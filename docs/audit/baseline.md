@@ -45,7 +45,7 @@ Total Prerendered Static Routes: 24 routes (including 15 `/learn/[topic]` paths)
 ## 4. Snapshot Tests Locked (Batch 0 Safety Gate)
 
 - `tests/baseline-snapshots.test.ts` added and passing:
-  1. Findings output for every starter template (19 templates).
+  1. Findings output for template fixtures (19 fixtures).
   2. Findings output for every challenge (both starter HTML and solution HTML).
   3. Rendered HTML structure and landmarks for the marketing home page (`/`).
 

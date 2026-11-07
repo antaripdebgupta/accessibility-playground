@@ -11,16 +11,15 @@ import {
 import { ManualTestList } from "./manual-tests/ManualTestList";
 
 interface ManualTestsPanelProps {
-  templateOrSnippetId: string;
+  /** Active document ID ("default", challenge ID, or share ID) */
+  documentId: string;
 }
 
-export function ManualTestsPanel({
-  templateOrSnippetId,
-}: ManualTestsPanelProps) {
+export function ManualTestsPanel({ documentId }: ManualTestsPanelProps) {
   const [selectedCategory, setSelectedCategory] =
     React.useState<FilterCategory>("all");
   const { records, validationErrors, updateTestStatus, clearAll, stats } =
-    useManualTests(templateOrSnippetId);
+    useManualTests(documentId);
 
   const filteredTests = React.useMemo(() => {
     if (selectedCategory === "all") return MANUAL_TESTS;

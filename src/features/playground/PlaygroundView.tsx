@@ -88,11 +88,8 @@ export function PlaygroundView() {
   });
 
   const toast = useToast();
-  const activeTemplateId =
-    challengeParam ||
-    searchParams.get("pattern") ||
-    searchParams.get("s") ||
-    "default";
+  /** Active document ID ("default", challenge ID, or share ID) */
+  const activeDocumentId = challengeParam || searchParams.get("s") || "default";
 
   const handleBaselineCleared = React.useCallback(
     (reason: string) => {
@@ -106,14 +103,14 @@ export function PlaygroundView() {
   );
 
   const baselineState = useBaseline(
-    activeTemplateId,
+    activeDocumentId,
     analysis.findings,
     rawHtml,
     handleBaselineCleared
   );
 
   const reportExport = useReportExport({
-    activeTemplateId,
+    activeDocumentId,
     findings: analysis.findings,
     comparison: baselineState.comparison,
   });
@@ -148,7 +145,7 @@ export function PlaygroundView() {
     setFocusPositions,
     analysisTab,
     setAnalysisTab,
-    activeTemplateId,
+    activeDocumentId,
   });
 
   return (
@@ -158,7 +155,7 @@ export function PlaygroundView() {
         onForceScan={scan.triggerScan}
         isScanning={scan.isScanning}
         onStartFresh={() => {
-          baselineState.clearBaseline("Started fresh with default template");
+          baselineState.clearBaseline("Started fresh with the default example");
           doc.handleStartFresh();
         }}
         onResetExample={doc.handleResetExample}

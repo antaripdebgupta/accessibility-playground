@@ -1,4 +1,4 @@
-export interface StarterTemplate {
+export interface TemplateFixture {
   readonly id: string;
   readonly label: string;
   readonly description: string;
@@ -6,7 +6,7 @@ export interface StarterTemplate {
   readonly css?: string;
 }
 
-export const STARTER_TEMPLATES: readonly StarterTemplate[] = [
+export const TEMPLATE_FIXTURES: readonly TemplateFixture[] = [
   {
     id: "welcome",
     label: "Welcome",

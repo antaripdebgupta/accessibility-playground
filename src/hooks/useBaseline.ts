@@ -84,13 +84,13 @@ export function useBaseline(
 
   const activeIdRef = React.useRef(activeId);
 
-  // Clear baseline if active template/snippet ID changes
+  // Clear baseline if active document ID changes
   React.useEffect(() => {
     if (activeIdRef.current !== activeId) {
       activeIdRef.current = activeId;
       setBaselineState(loadBaselineFromSession(activeId));
       if (baseline) {
-        onBaselineCleared?.("Switched template or snippet");
+        onBaselineCleared?.("Switched example or snippet");
       }
     }
   }, [activeId, baseline, onBaselineCleared]);

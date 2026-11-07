@@ -6,7 +6,8 @@ import type { Finding } from "@/types/a11y";
 import type { CompareResult } from "@/lib/compare";
 
 export interface UseReportExportParams {
-  activeTemplateId: string;
+  /** Active document ID ("default", challenge ID, or share ID) */
+  activeDocumentId: string;
   findings: Finding[];
   comparison?: CompareResult | null;
 }
@@ -19,14 +20,14 @@ export interface UseReportExportResult {
 }
 
 export function useReportExport({
-  activeTemplateId,
+  activeDocumentId,
   findings,
   comparison,
 }: UseReportExportParams): UseReportExportResult {
   const toast = useToast();
 
   const handleExportJson = React.useCallback(() => {
-    const manualTests = loadManualTestResults(activeTemplateId);
+    const manualTests = loadManualTestResults(activeDocumentId);
     const jsonString = toJson(
       findings,
       comparison ?? undefined,
@@ -43,10 +44,10 @@ export function useReportExport({
       description: "Downloaded JSON report.",
       variant: "success",
     });
-  }, [findings, comparison, activeTemplateId, toast]);
+  }, [findings, comparison, activeDocumentId, toast]);
 
   const handleExportCsv = React.useCallback(() => {
-    const manualTests = loadManualTestResults(activeTemplateId);
+    const manualTests = loadManualTestResults(activeDocumentId);
     const csvString = toCsv(findings, comparison ?? undefined, manualTests);
     downloadBlob(
       csvString,
@@ -58,10 +59,10 @@ export function useReportExport({
       description: "Downloaded CSV spreadsheet.",
       variant: "success",
     });
-  }, [findings, comparison, activeTemplateId, toast]);
+  }, [findings, comparison, activeDocumentId, toast]);
 
   const handleExportMarkdown = React.useCallback(() => {
-    const manualTests = loadManualTestResults(activeTemplateId);
+    const manualTests = loadManualTestResults(activeDocumentId);
     const mdString = toMarkdown(
       findings,
       comparison ?? undefined,
@@ -78,10 +79,10 @@ export function useReportExport({
       description: "Downloaded Markdown report.",
       variant: "success",
     });
-  }, [findings, comparison, activeTemplateId, toast]);
+  }, [findings, comparison, activeDocumentId, toast]);
 
   const handleCopyReport = React.useCallback(() => {
-    const manualTests = loadManualTestResults(activeTemplateId);
+    const manualTests = loadManualTestResults(activeDocumentId);
     const mdString = toMarkdown(
       findings,
       comparison ?? undefined,
@@ -97,7 +98,7 @@ export function useReportExport({
         });
       });
     }
-  }, [findings, comparison, activeTemplateId, toast]);
+  }, [findings, comparison, activeDocumentId, toast]);
 
   return {
     handleExportJson,

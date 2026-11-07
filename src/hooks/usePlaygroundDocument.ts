@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useSearchParams } from "next/navigation";
 import { useDebounce } from "@/hooks/useDebounce";
-import { STARTER_TEMPLATES, type StarterTemplate } from "@/data/templates";
+import { DEFAULT_DOCUMENT } from "@/data/default-document";
 import { decodeSnippet } from "@/lib/snippet-share";
 import { storage, STORAGE_KEYS } from "@/lib/storage";
 import { useToast } from "@accessly-ui/react";
@@ -13,7 +13,6 @@ const MAX_DOCUMENT_BYTES = 200 * 1024; // 200KB hard input cap (§B.4)
 
 export function usePlaygroundDocument(onDocumentChange?: () => void) {
   const searchParams = useSearchParams();
-  const patternParam = searchParams.get("pattern");
   const sharedParam = searchParams.get("s");
   const toast = useToast();
 
@@ -23,16 +22,10 @@ export function usePlaygroundDocument(onDocumentChange?: () => void) {
         const decoded = decodeSnippet(sharedParam);
         if (decoded) return decoded.html;
       }
-      if (patternParam) {
-        const foundTemplate = STARTER_TEMPLATES.find(
-          (t) => t.id === patternParam
-        );
-        if (foundTemplate) return foundTemplate.html;
-      }
       const saved = storage.get(STORAGE_KEYS.html);
       if (saved) return saved;
     }
-    return STARTER_TEMPLATES[0]?.html ?? "";
+    return DEFAULT_DOCUMENT.html;
   });
 
   const [rawCss, setRawCss] = React.useState<string>(() => {
@@ -41,16 +34,10 @@ export function usePlaygroundDocument(onDocumentChange?: () => void) {
         const decoded = decodeSnippet(sharedParam);
         if (decoded) return decoded.css;
       }
-      if (patternParam) {
-        const foundTemplate = STARTER_TEMPLATES.find(
-          (t) => t.id === patternParam
-        );
-        if (foundTemplate?.css) return foundTemplate.css;
-      }
       const saved = storage.get(STORAGE_KEYS.css);
       if (saved) return saved;
     }
-    return STARTER_TEMPLATES[0]?.css ?? "";
+    return DEFAULT_DOCUMENT.css;
   });
 
   const debouncedHtml = useDebounce(rawHtml, 400);
@@ -95,7 +82,7 @@ export function usePlaygroundDocument(onDocumentChange?: () => void) {
   React.useEffect(() => {
     if (hasShownRestoreToast.current) return;
     hasShownRestoreToast.current = true;
-    if (typeof window !== "undefined" && !sharedParam && !patternParam) {
+    if (typeof window !== "undefined" && !sharedParam) {
       if (storage.get(STORAGE_KEYS.html)) {
         toast.push({
           title: "Session restored",
@@ -104,44 +91,28 @@ export function usePlaygroundDocument(onDocumentChange?: () => void) {
         });
       }
     }
-  }, [sharedParam, patternParam, toast]);
-
-  const handleSelectTemplate = React.useCallback(
-    (template: StarterTemplate) => {
-      setRawHtml(template.html);
-      setRawCss(template.css ?? "");
-      pushExternalEdit("replace", template.html);
-      onDocumentChange?.();
-    },
-    [onDocumentChange, pushExternalEdit]
-  );
+  }, [sharedParam, toast]);
 
   const handleStartFresh = React.useCallback(() => {
-    const freshHtml = STARTER_TEMPLATES[0]?.html ?? "";
+    const freshHtml = DEFAULT_DOCUMENT.html;
     storage.remove(STORAGE_KEYS.html);
     storage.remove(STORAGE_KEYS.css);
     setRawHtml(freshHtml);
-    setRawCss(STARTER_TEMPLATES[0]?.css ?? "");
+    setRawCss(DEFAULT_DOCUMENT.css);
     pushExternalEdit("replace", freshHtml);
     onDocumentChange?.();
     toast.push({
       title: "Started fresh",
-      description: "Reset code editor to starter template.",
+      description: "Reset code editor to the default example.",
       variant: "info",
     });
   }, [onDocumentChange, toast, pushExternalEdit]);
 
   const handleResetExample = React.useCallback(() => {
-    let targetHtml = STARTER_TEMPLATES[0]?.html ?? "";
-    let targetCss = STARTER_TEMPLATES[0]?.css ?? "";
+    let targetHtml: string = DEFAULT_DOCUMENT.html;
+    let targetCss: string = DEFAULT_DOCUMENT.css;
 
-    if (patternParam) {
-      const tmpl = STARTER_TEMPLATES.find((t) => t.id === patternParam);
-      if (tmpl) {
-        targetHtml = tmpl.html;
-        targetCss = tmpl.css ?? "";
-      }
-    } else if (sharedParam) {
+    if (sharedParam) {
       const decoded = decodeSnippet(sharedParam);
       if (decoded) {
         targetHtml = decoded.html;
@@ -158,7 +129,7 @@ export function usePlaygroundDocument(onDocumentChange?: () => void) {
       description: "Restored code to original starter state.",
       variant: "info",
     });
-  }, [patternParam, sharedParam, onDocumentChange, toast, pushExternalEdit]);
+  }, [sharedParam, onDocumentChange, toast, pushExternalEdit]);
 
   const updateHtml = React.useCallback(
     (valOrUpdater: string | ((prev: string) => string)) => {
@@ -187,7 +158,6 @@ export function usePlaygroundDocument(onDocumentChange?: () => void) {
     setRawHtml: updateHtml,
     setRawCss: updateCss,
     setUseTailwind,
-    handleSelectTemplate,
     handleStartFresh,
     handleResetExample,
     isOverSizeLimit,

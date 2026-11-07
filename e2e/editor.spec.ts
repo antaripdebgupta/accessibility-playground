@@ -1,29 +1,7 @@
 import { test, expect } from "@playwright/test";
 
-test.describe("Editor stability and external sync (FIX-1)", () => {
-  test("typing rapidly does not echo or drop characters", async ({ page }) => {
-    await page.goto("/playground");
-    await page.waitForLoadState("networkidle");
-
-    const editor = page.locator(".cm-content");
-    await expect(editor).toBeVisible();
-
-    // Focus editor and select all text
-    await editor.click();
-    await page.keyboard.press(
-      process.platform === "darwin" ? "Meta+a" : "Control+a"
-    );
-    await page.keyboard.press("Backspace");
-
-    // Type rapid 300-char string at 0ms delay
-    const testString = "A".repeat(300);
-    await page.keyboard.type(testString, { delay: 0 });
-
-    // Verify exact content without character drop or echo corruption
-    await expect(editor).toContainText(testString);
-  });
-
-  test("loading a template sets caret to 0 and Ctrl+Z restores previous document", async ({
+test.describe("Editor Typing and Replacement Robustness (§B.6, §A.5)", () => {
+  test("typing rapidly does not drop characters or introduce corruption", async ({
     page,
   }) => {
     await page.goto("/playground");
@@ -32,7 +10,39 @@ test.describe("Editor stability and external sync (FIX-1)", () => {
     const editor = page.locator(".cm-content");
     await expect(editor).toBeVisible();
 
-    // Type distinct content first
+    // Focus editor and select all existing text
+    await editor.click();
+    await page.keyboard.press(
+      process.platform === "darwin" ? "Meta+a" : "Control+a"
+    );
+    await page.keyboard.press("Backspace");
+
+    // Rapidly type a 50-character string with diverse symbols
+    const testString = '<div id="test-rapid" class="a11y-box">Hello 123!</div>';
+    await page.keyboard.type(testString, { delay: 0 });
+
+    // Verify exact content without character drop or echo corruption
+    await expect(editor).toContainText(testString);
+  });
+
+  test("first load shows the default document", async ({ page }) => {
+    await page.goto("/playground");
+    await page.waitForLoadState("networkidle");
+    const editor = page.locator(".cm-content");
+    await expect(editor).toBeVisible();
+    await expect(editor).toContainText("WCAG 2.2 Overview");
+  });
+
+  test("Start Fresh and Reset Example restore default document", async ({
+    page,
+  }) => {
+    await page.goto("/playground");
+    await page.waitForLoadState("networkidle");
+
+    const editor = page.locator(".cm-content");
+    await expect(editor).toBeVisible();
+
+    // Type custom content first
     await editor.click();
     await page.keyboard.press(
       process.platform === "darwin" ? "Meta+a" : "Control+a"
@@ -41,27 +51,61 @@ test.describe("Editor stability and external sync (FIX-1)", () => {
     await page.keyboard.type("Custom Text Content 12345");
     await expect(editor).toContainText("Custom Text Content 12345");
 
-    // Open Templates dropdown and select a built-in template
-    const templatesBtn = page.getByRole("button", { name: /Templates/i });
-    await templatesBtn.click();
+    // Click Start Fresh
+    const startFreshBtn = page.getByRole("button", { name: /Start Fresh/i });
+    if (await startFreshBtn.isVisible()) {
+      await startFreshBtn.click();
+      await expect(editor).toContainText("WCAG 2.2 Overview");
+    }
 
-    // Click the first template in the dropdown
-    const templateItem = page.locator('[role="menuitem"]').first();
-    await expect(templateItem).toBeVisible();
-    await templateItem.click();
-
-    // Verify template loaded
-    await expect(editor).not.toContainText("Custom Text Content 12345");
-
-    // Focus editor and press Undo (Ctrl+Z / Meta+Z)
-    await editor.focus();
+    // Edit again
     await editor.click();
     await page.keyboard.press(
-      process.platform === "darwin" ? "Meta+z" : "Control+z"
+      process.platform === "darwin" ? "Meta+a" : "Control+a"
     );
+    await page.keyboard.press("Backspace");
+    await page.keyboard.type("Second Custom Text");
+    await expect(editor).toContainText("Second Custom Text");
 
-    // Verify custom text content is restored
-    await expect(editor).toContainText("Custom Text Content 12345");
+    // Click Reset Example
+    const resetBtn = page.getByRole("button", { name: /Reset Example/i });
+    if (await resetBtn.isVisible()) {
+      await resetBtn.click();
+      await expect(editor).toContainText("WCAG 2.2 Overview");
+    }
+  });
+
+  test("/playground?pattern=anything opens the default document without errors", async ({
+    page,
+  }) => {
+    const consoleErrors: string[] = [];
+    page.on("pageerror", (err) => consoleErrors.push(err.message));
+    await page.goto("/playground?pattern=anything-unknown");
+    await page.waitForLoadState("networkidle");
+    const editor = page.locator(".cm-content");
+    await expect(editor).toBeVisible();
+    await expect(editor).toContainText("WCAG 2.2 Overview");
+    expect(consoleErrors).toHaveLength(0);
+  });
+
+  test("no element named Templates exists and Cmd/Ctrl+K does not open any menu", async ({
+    page,
+  }) => {
+    await page.goto("/playground");
+    await page.waitForLoadState("networkidle");
+
+    // (d) No element named "Templates" exists
+    const templatesEl = page.getByRole("button", { name: /Templates/i });
+    await expect(templatesEl).toHaveCount(0);
+
+    // (e) Cmd/Ctrl+K inside the editor does not open any menu
+    const editor = page.locator(".cm-content");
+    await editor.click();
+    await page.keyboard.press(
+      process.platform === "darwin" ? "Meta+k" : "Control+k"
+    );
+    const menuItems = page.locator('[role="menuitem"]');
+    await expect(menuItems).toHaveCount(0);
   });
 
   test("applying an ARIA edit from ARIA Explorer preserves caret position", async ({

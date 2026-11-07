@@ -20,11 +20,8 @@ export default function HomePage() {
               <Link className="btn btn-primary" href="/playground">
                 Open the Playground
               </Link>
-              <Link
-                className="btn btn-ghost"
-                href="/playground?pattern=button-vs-div"
-              >
-                Browse the pattern library
+              <Link className="btn btn-ghost" href="/challenges">
+                Try the challenges
               </Link>
             </div>
             <p className="hero-micro">

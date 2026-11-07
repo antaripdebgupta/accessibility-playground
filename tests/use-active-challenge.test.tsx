@@ -4,7 +4,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { useActiveChallenge } from "@/features/playground/hooks/useActiveChallenge";
 import * as reportErrorModule from "@/lib/report-error";
-import { STARTER_TEMPLATES } from "@/data/templates";
+import { DEFAULT_DOCUMENT } from "@/data/default-document";
 import type { Challenge } from "@/data/challenges";
 
 declare global {
@@ -109,9 +109,7 @@ describe("Item 3: useActiveChallenge error handling and race guard", () => {
       expect.any(Error),
       expect.objectContaining({ challengeId: "failing-challenge" })
     );
-    expect(harness.setRawHtml).toHaveBeenCalledWith(
-      STARTER_TEMPLATES[0]?.html ?? ""
-    );
+    expect(harness.setRawHtml).toHaveBeenCalledWith(DEFAULT_DOCUMENT.html);
 
     harness.unmount();
   });
@@ -140,9 +138,7 @@ describe("Item 3: useActiveChallenge error handling and race guard", () => {
       })
     );
     expect(reportErrorSpy).toHaveBeenCalledTimes(1);
-    expect(harness.setRawHtml).toHaveBeenCalledWith(
-      STARTER_TEMPLATES[0]?.html ?? ""
-    );
+    expect(harness.setRawHtml).toHaveBeenCalledWith(DEFAULT_DOCUMENT.html);
 
     harness.unmount();
   });

@@ -13,7 +13,7 @@ const COMMITMENTS = [
     index: "01",
     title: "Full keyboard operability",
     description:
-      "Every interactive element — tree navigation, template selectors, split panes, copy actions — is fully operable using keyboard alone.",
+      "Every interactive element — tree navigation, split panes, copy actions — is fully operable using keyboard alone.",
     sc: "SC 2.1.1 · 2.1.2",
   },
   {

@@ -114,7 +114,7 @@ export function WorkbenchToolbar({
           size="sm"
           onClick={onStartFresh}
           className="hidden h-7 gap-1 px-2 text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] md:inline-flex"
-          aria-label="Start Fresh — with default template"
+          aria-label="Start Fresh — with default example"
         >
           <FileX className="h-3.5 w-3.5" aria-hidden="true" />
           <span>Start Fresh</span>

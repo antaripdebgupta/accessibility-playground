@@ -61,7 +61,7 @@ src/features/playground/
 
 ### A5: Minimal Diff External Value Updates
 
-- When external changes occur (template loads, snippets, auto-fix), `applyExternalValue` computes the common prefix and suffix.
+- When external changes occur (snippet loads, challenges, auto-fix), `applyExternalValue` computes the common prefix and suffix.
 - It dispatches a single minimal change transaction annotated with `isExternalChange`, mapping existing caret position smoothly without resetting scroll or selection.
 
 ---

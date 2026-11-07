@@ -5,7 +5,7 @@ import { useLatest } from "@/hooks/useLatest";
 import type { ExternalEdit } from "@/features/playground/CodeEditor";
 import { useToast } from "@accessly-ui/react";
 import { reportError } from "@/lib/report-error";
-import { STARTER_TEMPLATES } from "@/data/templates";
+import { DEFAULT_DOCUMENT } from "@/data/default-document";
 
 type ChallengeLoadingStatus = "idle" | "loading" | "ready" | "error";
 
@@ -75,15 +75,9 @@ export function useActiveChallenge(
           "Couldn't load this challenge. Showing the default example.",
         variant: "danger",
       });
-      const defaultTemplate = STARTER_TEMPLATES[0];
-      if (defaultTemplate) {
-        callbacksRef.current.setRawHtml(defaultTemplate.html);
-        callbacksRef.current.setRawCss(defaultTemplate.css ?? "");
-        callbacksRef.current.pushExternalEdit?.(
-          "replace",
-          defaultTemplate.html
-        );
-      }
+      callbacksRef.current.setRawHtml(DEFAULT_DOCUMENT.html);
+      callbacksRef.current.setRawCss(DEFAULT_DOCUMENT.css);
+      callbacksRef.current.pushExternalEdit?.("replace", DEFAULT_DOCUMENT.html);
     };
 
     loadChallenge(challengeParam)
