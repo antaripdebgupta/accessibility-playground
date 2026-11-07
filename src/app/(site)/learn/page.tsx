@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { LEARN_TOPICS } from "@/data/learn-topics";
 import { WcagBadge } from "@/components/WcagBadge";
-import { BookOpen, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Accessibility Knowledge Centre — Accessibility Playground",
@@ -13,12 +13,7 @@ export const metadata: Metadata = {
 export default function LearnIndexPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 sm:py-12">
-      {/* Header */}
       <header className="mb-10 flex flex-col gap-3 border-b border-[var(--color-border)] pb-8">
-        <div className="flex items-center gap-2 text-sm font-semibold text-[var(--color-accent)]">
-          <BookOpen className="h-4 w-4" aria-hidden="true" />
-          <span>Knowledge Centre</span>
-        </div>
         <h1 className="text-3xl font-bold tracking-tight text-[var(--color-text-primary)] sm:text-4xl">
           Core Accessibility Topics
         </h1>
@@ -54,7 +49,7 @@ export default function LearnIndexPage() {
                   {topic.title}
                 </Link>
               </h2>
-              <p className="mb-4 text-xs leading-relaxed text-[var(--color-text-secondary)]">
+              <p className="text-md mb-4 leading-relaxed text-[var(--color-text-secondary)]">
                 {topic.summary}
               </p>
             </div>

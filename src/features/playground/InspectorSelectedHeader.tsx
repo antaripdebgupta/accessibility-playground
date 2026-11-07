@@ -1,9 +1,7 @@
 "use client";
 
-import * as React from "react";
 import type { A11yNode } from "@/types/a11y";
 import { Badge } from "@/components/ui/Badge";
-import { Tag } from "lucide-react";
 
 export interface InspectorSelectedHeaderProps {
   selectedNode: A11yNode | null;
@@ -21,10 +19,6 @@ export function InspectorSelectedHeader({
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--color-border)] bg-[var(--color-surface-raised)]/60 px-4 py-2.5 text-xs">
       <div className="flex items-center gap-2">
-        <Tag
-          className="h-3.5 w-3.5 text-[var(--color-focus-ring)]"
-          aria-hidden="true"
-        />
         <span className="font-semibold text-[var(--color-text-primary)]">
           Selected:
         </span>

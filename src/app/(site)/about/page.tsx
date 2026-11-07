@@ -77,7 +77,6 @@ export default function AboutPage() {
       {/* Page Intro */}
       <section className="page-intro">
         <div className="wrap">
-          <span className="eyebrow">About &amp; security model</span>
           <h1>An accessibility tool that is itself accessible.</h1>
           <p className="lede">
             Accessibility Playground is a precision developer tool for teaching,
@@ -235,24 +234,6 @@ export default function AboutPage() {
                 screen and interaction is held to these standards.
               </p>
             </div>
-            <span className="verified-chip">
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="none"
-                aria-hidden="true"
-              >
-                <path
-                  d="M8 12l2.5 2.5L16 9"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              WCAG 2.2 AA verified
-            </span>
           </div>
 
           <div className="commitments-list">

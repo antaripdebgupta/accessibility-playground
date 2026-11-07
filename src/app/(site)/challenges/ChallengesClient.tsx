@@ -150,12 +150,6 @@ export function ChallengesClient() {
             );
           }
         )}
-
-        {/* Footer note */}
-        <p className="challenges-footer-note">
-          Progress is stored locally in your browser. No accounts or server
-          storage.
-        </p>
       </div>
 
       <style>{`

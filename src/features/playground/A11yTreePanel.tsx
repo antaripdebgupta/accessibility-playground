@@ -6,7 +6,6 @@ import {
   InspectorSelectedHeader,
   InspectorEmptyState,
 } from "./InspectorSelectedHeader";
-import { Info } from "lucide-react";
 import { A11yTreeNodeRow, type FlattenedNode } from "./tree/A11yTreeNodeRow";
 import { A11yTreeSelectedCard } from "./tree/A11yTreeSelectedCard";
 
@@ -166,10 +165,6 @@ export function A11yTreePanel({
       <InspectorSelectedHeader selectedNode={selectedNode ?? null} />
 
       <div className="flex items-start gap-1.5 border-b border-[var(--color-border)] bg-[var(--color-surface-sunken)]/60 px-4 py-2 text-[11px] text-[var(--color-text-secondary)]">
-        <Info
-          className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--color-focus-ring)]"
-          aria-hidden="true"
-        />
         <p>
           This is the playground&apos;s interpretation of the DOM, not the
           browser&apos;s real accessibility tree.

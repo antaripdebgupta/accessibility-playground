@@ -7,8 +7,6 @@ import type {
   ManualTestStatus,
 } from "@/data/manual-tests";
 import {
-  CheckCircle2,
-  XCircle,
   MinusCircle,
   HelpCircle,
   ExternalLink,
@@ -156,7 +154,6 @@ export function ManualTestItem({
               className="accent-[var(--color-success-default)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
             />
             <span className="flex items-center gap-0.5 font-medium">
-              <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
               Passed
             </span>
           </label>
@@ -171,7 +168,6 @@ export function ManualTestItem({
               className="accent-[var(--color-danger-default)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
             />
             <span className="flex items-center gap-0.5 font-medium">
-              <XCircle className="h-3 w-3" aria-hidden="true" />
               Failed
             </span>
           </label>

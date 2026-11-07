@@ -223,9 +223,13 @@ export function createEditorBaseExtensions(
 
     // Throttled status bar updater
     createStatusListener((status) => {
-      options.bus?.dispatchEvent(
-        new CustomEvent("statusChange", { detail: status })
-      );
+      try {
+        options.bus?.dispatchEvent(
+          new CustomEvent("statusChange", { detail: status })
+        );
+      } catch {
+        // Ignore errors if test environment tore down the window/EventTarget
+      }
     }, 100),
 
     // Document and caret change listener

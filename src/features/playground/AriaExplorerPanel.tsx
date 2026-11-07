@@ -7,7 +7,7 @@ import {
   InspectorSelectedHeader,
   InspectorEmptyState,
 } from "./InspectorSelectedHeader";
-import { Crosshair, AlertOctagon, Tag } from "lucide-react";
+import { Crosshair, AlertOctagon } from "lucide-react";
 import { AriaAttributeItem } from "./aria/AriaAttributeItem";
 import { AriaAddAttributeForm } from "./aria/AriaAddAttributeForm";
 
@@ -131,10 +131,6 @@ export function AriaExplorerPanel({
         {/* Related Name Info (§C2) */}
         <div className="flex flex-col gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-3 text-xs">
           <div className="flex items-center gap-1.5 font-semibold text-[var(--color-text-primary)]">
-            <Tag
-              className="h-3.5 w-3.5 text-[var(--color-focus-ring)]"
-              aria-hidden="true"
-            />
             <span>Related Name Information</span>
           </div>
           <div className="flex flex-col gap-1 text-[var(--color-text-secondary)]">

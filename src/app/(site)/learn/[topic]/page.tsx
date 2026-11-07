@@ -7,15 +7,14 @@ import {
   getPlaygroundUrlForExample,
 } from "@/data/learn-topics";
 import { WcagBadge } from "@/components/WcagBadge";
+import { CodeBlock } from "@/components/ui/CodeBlock";
 import {
   ArrowLeft,
   BookOpen,
   ExternalLink,
   Play,
-  AlertTriangle,
   CheckCircle2,
   XCircle,
-  HelpCircle,
   Trophy,
 } from "lucide-react";
 
@@ -72,9 +71,6 @@ export default async function TopicDetailPage({ params }: TopicPageProps) {
       {/* Header */}
       <header className="mb-8 border-b border-[var(--color-border)] pb-8">
         <div className="mb-2 flex items-center gap-2">
-          <span className="rounded bg-[var(--color-accent)]/10 px-2 py-0.5 font-mono text-xs font-semibold text-[var(--color-accent)]">
-            GUIDE
-          </span>
           <div className="flex flex-wrap gap-1.5">
             {topic.wcagCriteria.map((sc) => (
               <WcagBadge key={sc} criterionId={sc} />
@@ -151,7 +147,7 @@ export default async function TopicDetailPage({ params }: TopicPageProps) {
           >
             Why it matters
           </h2>
-          <div className="rounded-lg border border-l-4 border-[var(--color-border)] border-l-[var(--color-accent)] bg-[var(--color-surface)] p-5">
+          <div className="bg-[var(--color-surface)] p-5">
             <p className="text-sm leading-relaxed text-[var(--color-text-secondary)]">
               {topic.whyItMatters}
             </p>
@@ -183,17 +179,13 @@ export default async function TopicDetailPage({ params }: TopicPageProps) {
                 <p className="mb-3 text-xs text-[var(--color-text-secondary)]">
                   {topic.badExample.description}
                 </p>
-                <div className="overflow-x-auto rounded-md bg-[#1e1e1e] p-3 font-mono text-xs text-white">
-                  <pre>
-                    <code>{topic.badExample.html}</code>
-                  </pre>
-                </div>
+                <CodeBlock code={topic.badExample.html} language="html" />
                 {topic.badExample.css && (
-                  <div className="mt-2 overflow-x-auto rounded-md bg-[#1e1e1e] p-3 font-mono text-xs text-zinc-300">
-                    <pre>
-                      <code>{topic.badExample.css}</code>
-                    </pre>
-                  </div>
+                  <CodeBlock
+                    code={topic.badExample.css}
+                    language="css"
+                    className="mt-2"
+                  />
                 )}
               </div>
 
@@ -223,17 +215,13 @@ export default async function TopicDetailPage({ params }: TopicPageProps) {
                 <p className="mb-3 text-xs text-[var(--color-text-secondary)]">
                   {topic.goodExample.description}
                 </p>
-                <div className="overflow-x-auto rounded-md bg-[#1e1e1e] p-3 font-mono text-xs text-white">
-                  <pre>
-                    <code>{topic.goodExample.html}</code>
-                  </pre>
-                </div>
+                <CodeBlock code={topic.goodExample.html} language="html" />
                 {topic.goodExample.css && (
-                  <div className="mt-2 overflow-x-auto rounded-md bg-[#1e1e1e] p-3 font-mono text-xs text-zinc-300">
-                    <pre>
-                      <code>{topic.goodExample.css}</code>
-                    </pre>
-                  </div>
+                  <CodeBlock
+                    code={topic.goodExample.css}
+                    language="css"
+                    className="mt-2"
+                  />
                 )}
               </div>
 
@@ -256,10 +244,6 @@ export default async function TopicDetailPage({ params }: TopicPageProps) {
           className="flex flex-col gap-3"
         >
           <div className="flex items-center gap-2">
-            <AlertTriangle
-              className="h-5 w-5 text-[var(--amber)]"
-              aria-hidden="true"
-            />
             <h2
               id="section-mistakes"
               className="text-xl font-bold text-[var(--color-text-primary)]"
@@ -267,7 +251,7 @@ export default async function TopicDetailPage({ params }: TopicPageProps) {
               Common Mistakes
             </h2>
           </div>
-          <ul className="list-disc space-y-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-5 pl-9 text-sm text-[var(--color-text-secondary)]">
+          <ul className="list-disc space-y-2 bg-[var(--color-surface)] p-5 pl-9 text-sm text-[var(--color-text-secondary)]">
             {topic.commonMistakes.map((mistake, idx) => (
               <li key={idx} className="leading-relaxed">
                 {mistake}
@@ -282,10 +266,6 @@ export default async function TopicDetailPage({ params }: TopicPageProps) {
           className="flex flex-col gap-3"
         >
           <div className="flex items-center gap-2">
-            <HelpCircle
-              className="h-5 w-5 text-[var(--color-accent)]"
-              aria-hidden="true"
-            />
             <h2
               id="section-browser"
               className="text-xl font-bold text-[var(--color-text-primary)]"
@@ -293,7 +273,7 @@ export default async function TopicDetailPage({ params }: TopicPageProps) {
               Browser & Accessibility API Behaviour
             </h2>
           </div>
-          <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-5 text-sm leading-relaxed text-[var(--color-text-secondary)]">
+          <div className="bg-[var(--color-surface)] p-5 text-sm leading-relaxed text-[var(--color-text-secondary)]">
             <p>{topic.browserBehaviour}</p>
           </div>
         </section>
@@ -309,7 +289,7 @@ export default async function TopicDetailPage({ params }: TopicPageProps) {
           >
             How to verify manually
           </h2>
-          <ol className="list-decimal space-y-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-5 pl-9 text-sm text-[var(--color-text-secondary)]">
+          <ol className="list-decimal space-y-2 bg-[var(--color-surface)] p-5 pl-9 text-sm text-[var(--color-text-secondary)]">
             {topic.manualTest.map((step, idx) => (
               <li key={idx} className="leading-relaxed">
                 {step}

@@ -7,7 +7,7 @@ import {
   InspectorSelectedHeader,
   InspectorEmptyState,
 } from "./InspectorSelectedHeader";
-import { CheckCircle2, Circle, AlertCircle, Tag } from "lucide-react";
+import { CheckCircle2, Circle } from "lucide-react";
 
 export interface AccessibleNamePanelProps {
   selectedNode: A11yNode | null;
@@ -107,7 +107,6 @@ export function AccessibleNamePanel({
         <div className="rounded-lg border border-[var(--color-focus-ring)]/30 bg-[var(--color-accent-subtle)]/40 p-4">
           <div className="mb-1.5 flex items-center justify-between">
             <span className="flex items-center gap-1.5 font-mono text-sm font-semibold text-[var(--color-accent)]">
-              <Tag className="h-4 w-4" aria-hidden="true" />
               <span>COMPUTED ACCESSIBLE NAME</span>
             </span>
             <Badge
@@ -124,7 +123,6 @@ export function AccessibleNamePanel({
               </p>
             ) : (
               <div className="text-md flex items-center gap-1.5 font-semibold text-[var(--color-danger-default)]">
-                <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
                 <span>
                   Genuinely no accessible name — assistive technology will
                   announce only the tag or role!

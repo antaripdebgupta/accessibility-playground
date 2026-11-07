@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import { Badge } from "@/components/ui/Badge";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@accessly-ui/react";
 import { WCAG_CRITERIA_BY_ID } from "@/data/wcag";
@@ -53,14 +52,14 @@ export function WcagBadge({
       <TooltipContent className="max-w-xs p-3">
         <div className="flex flex-col gap-1">
           <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-1">
-            <span className="font-mono text-[11px] font-bold text-[var(--color-focus-ring)]">
+            <span className="font-mono text-[11px] font-bold text-blue-400">
               WCAG {criterion.id}: {criterion.name}
             </span>
-            <span className="text-[10px] text-[var(--color-text-secondary)]">
+            <span className="text-[10px] text-gray-300">
               Level {criterion.level}
             </span>
           </div>
-          <p className="text-md leading-relaxed text-[var(--color-text-secondary)]">
+          <p className="text-md leading-relaxed text-gray-300">
             {criterion.summary}
           </p>
         </div>
