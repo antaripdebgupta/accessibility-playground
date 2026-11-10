@@ -33,7 +33,7 @@ export function EditorStatusBar({
   return (
     <footer
       aria-label="Editor status"
-      className="flex items-center justify-between border-t border-[var(--color-border)] bg-[var(--color-surface-sunken)]/60 px-3 py-1 font-mono text-[11px] text-[var(--color-text-secondary)] select-none"
+      className="flex flex-wrap items-center justify-between border-t border-[var(--color-border)] bg-[var(--color-surface-sunken)]/60 px-3 py-1 font-mono text-[11px] text-[var(--color-text-secondary)] select-none"
     >
       {/* Left side: cursor, selection, hints */}
       <div className="flex items-center gap-3">
@@ -62,7 +62,7 @@ export function EditorStatusBar({
       {/* Right side: language, encoding, tab size, wrap, help */}
       <div className="flex items-center gap-3">
         {lineCount !== undefined && byteLength !== undefined && (
-          <span className="hidden opacity-70 lg:inline">
+          <span>
             {lineCount} lines, {byteLength} B
           </span>
         )}

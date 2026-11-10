@@ -78,10 +78,10 @@ export function SplitPane({
 
   const onKeyDown = (e: React.KeyboardEvent) => {
     const step = e.shiftKey ? 10 : 2;
-    const dec = isRow ? "ArrowLeft" : "ArrowUp";
-    const inc = isRow ? "ArrowRight" : "ArrowDown";
-    if (e.key === dec) setSize(currentSize - step);
-    else if (e.key === inc) setSize(currentSize + step);
+    if (e.key === "ArrowLeft" || e.key === "ArrowUp")
+      setSize(currentSize - step);
+    else if (e.key === "ArrowRight" || e.key === "ArrowDown")
+      setSize(currentSize + step);
     else if (e.key === "Home") setSize(min);
     else if (e.key === "End") setSize(max);
     else if (e.key === "Enter" && collapsible)

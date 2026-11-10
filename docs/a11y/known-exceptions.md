@@ -43,3 +43,31 @@ This document records accessibility scanner warnings and findings that were inve
   Certain linters flag custom roving tabindex implementations or list containers when tree item rows contain composite status badges, tags, or disclosure toggles.
 - **Rationale:**
   The playground's tree inspection panel uses explicit accessible names, roving tabindex on interactive item rows, and clear expansion states (`aria-expanded`) to represent parsed DOM and virtual a11y trees without locking screen reader users into rigid, legacy tree widget constraints. All nodes are operable via keyboard and announce their role, name, and hierarchical depth.
+
+---
+
+## F4. Code Editor Horizontal Scrolling (WCAG 1.4.10 Reflow Exception)
+
+- **Rule:** `reflow` (WCAG 2.1 / 2.2 SC 1.4.10)
+- **Status:** **Accepted Standard Exception**
+- **Affected Elements:** CodeMirror code editor surface (`.cm-editor`, `.cm-scroller`).
+- **Review Date:** 2026-11-08
+- **Evidence:** Tested at 320px viewport and 400% zoom emulation in `e2e/responsive.spec.ts`.
+- **Details:**
+  At 320px viewport width or under 400% zoom, code lines may require horizontal scrolling when word wrap is disabled or for long unbroken tokens.
+- **Rationale:**
+  WCAG 2.2 SC 1.4.10 explicitly exempts parts of the content which require two-dimensional layout for usage or meaning, specifically noting: "Examples of content requiring two-dimensional layout are images, maps, diagrams, video, games, electronic presentations, data tables, and interfaces where it is necessary to keep toolbars in view while manipulating content, and code editor windows where line formatting is essential to code comprehension." Line wrap toggle is also provided in the editor options menu for user preference.
+
+---
+
+## F5. Preview Frame Sandboxed Viewport Simulation (WCAG 1.4.10 Reflow Exception)
+
+- **Rule:** `reflow` (WCAG 2.1 / 2.2 SC 1.4.10)
+- **Status:** **Accepted Standard Exception**
+- **Affected Elements:** Sandboxed preview iframe and viewport emulation container (`PreviewFrame`).
+- **Review Date:** 2026-11-08
+- **Evidence:** Tested at narrow pane widths (<320px) and fixed device emulation modes (768px, 1280px) in `e2e/responsive.spec.ts`.
+- **Details:**
+  When users simulate specific device widths (e.g. 768px tablet, 1280px desktop, or 320px mobile inside a pane narrower than 320px), the preview container allows horizontal scrolling (`overflow-auto`) with a status notification.
+- **Rationale:**
+  Viewport simulation tools intentionally render simulated fixed canvas viewports inside flexible developer panes to inspect reflow and responsiveness of author content. Under WCAG SC 1.4.10, two-dimensional layout is permitted when essential to the testing and evaluation of fixed canvas renderings.

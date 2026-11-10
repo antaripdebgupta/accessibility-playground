@@ -167,3 +167,56 @@ h3 {
 .challenge-strip-btn--danger:hover {
   background: #fde8e8;
 }
+.analysis-tabs-scroll[data-overflow-start="true"][data-overflow-end="true"] {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 16px,
+    black calc(100% - 16px),
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 16px,
+    black calc(100% - 16px),
+    transparent
+  );
+}
+.analysis-tabs-scroll[data-overflow-start="true"][data-overflow-end="false"] {
+  mask-image: linear-gradient(to right, transparent, black 16px, black 100%);
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 16px,
+    black 100%
+  );
+}
+.analysis-tabs-scroll[data-overflow-start="false"][data-overflow-end="true"] {
+  mask-image: linear-gradient(
+    to right,
+    black 0%,
+    black calc(100% - 16px),
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    black 0%,
+    black calc(100% - 16px),
+    transparent
+  );
+}
+
+.max-h-\[50dvh\] .challenge-strip {
+  width: 100% !important;
+  border-left: none !important;
+}
+
+code:not(pre code) {
+  overflow-wrap: anywhere;
+}
+
+pre {
+  max-width: 100%;
+  overflow-x: auto;
+}

@@ -18,7 +18,7 @@ export function WorkbenchStatusBar({
   onOpenIssues,
 }: WorkbenchStatusBarProps) {
   return (
-    <div className="flex h-7 flex-none items-center justify-between border-t border-[var(--color-border)] bg-[var(--color-surface-sunken)]/50 px-3 text-[11px] text-[var(--color-text-secondary)]">
+    <div className="flex min-h-7 flex-none flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-[var(--color-border)] bg-[var(--color-surface-sunken)]/50 px-3 py-1 text-[11px] text-[var(--color-text-secondary)]">
       {/* Only scan state is polite live region (SC 4.1.3: No live-region spam) */}
       <div role="status" aria-live="polite" className="flex items-center gap-2">
         <span>{isScanning ? "Scanning…" : "Ready"}</span>

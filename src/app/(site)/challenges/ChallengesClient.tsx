@@ -108,7 +108,6 @@ export function ChallengesClient() {
                         <Link
                           href={`/playground?challenge=${challenge.id}`}
                           className="challenge-card"
-                          aria-label={`${challenge.title}${progress?.completed ? " (completed)" : ""}`}
                         >
                           <div className="challenge-card-icon">
                             <Icon className="h-5 w-5" aria-hidden="true" />
@@ -117,6 +116,9 @@ export function ChallengesClient() {
                             <div className="challenge-card-header">
                               <h3 className="challenge-card-title">
                                 {challenge.title}
+                                {progress?.completed && (
+                                  <span className="sr-only"> (completed)</span>
+                                )}
                               </h3>
                               {progress?.completed && (
                                 <Trophy
@@ -203,7 +205,7 @@ export function ChallengesClient() {
         }
         .challenges-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+          grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
           gap: 12px;
           list-style: none;
           margin: 0;
@@ -287,7 +289,7 @@ export function ChallengesClient() {
           color: var(--ink-faint);
           text-align: center;
         }
-        @media (max-width: 480px) {
+        @media (max-width: 640px) {
           .challenges-grid {
             grid-template-columns: 1fr;
           }

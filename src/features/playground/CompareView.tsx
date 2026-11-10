@@ -38,9 +38,9 @@ export function CompareView({
         <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-surface-sunken)] text-[var(--color-text-secondary)]">
           <BookmarkCheck className="h-6 w-6" aria-hidden="true" />
         </div>
-        <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">
+        <h2 className="text-sm font-semibold text-[var(--color-text-primary)]">
           No baseline set
-        </h3>
+        </h2>
         <p className="mt-1 max-w-sm text-xs text-[var(--color-text-secondary)]">
           Snapshot your current findings as a baseline to track resolved,
           remaining, and introduced issues as you make fixes.
@@ -95,7 +95,7 @@ export function CompareView({
       </div>
 
       {/* Summary counters */}
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-1 gap-2 @[20rem]:grid-cols-3">
         <div className="rounded-md border border-[var(--color-success-border,var(--color-border))] bg-[var(--color-success-subtle)]/40 p-2.5 text-center">
           <span className="block text-lg font-bold text-[var(--color-success-default)]">
             {resolved.length}

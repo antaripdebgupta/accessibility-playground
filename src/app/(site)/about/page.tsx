@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Footer } from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "About — Accessibility Playground",
@@ -263,9 +262,6 @@ export default function AboutPage() {
           </Link>
         </div>
       </section>
-
-      {/* Footer */}
-      <Footer tagline="Accessibility Playground — a WCAG 2.2 learning tool. Built with Next.js." />
     </div>
   );
 }

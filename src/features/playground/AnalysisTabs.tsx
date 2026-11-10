@@ -89,6 +89,17 @@ export interface AnalysisTabsProps {
   documentId?: string;
 }
 
+const TAB_META = [
+  { value: "tree", full: "A11y Tree", short: "Tree" },
+  { value: "aria", full: "ARIA Explorer", short: "ARIA" },
+  { value: "accname", full: "Accessible Name", short: "Name" },
+  { value: "focus", full: "Focus Order", short: "Focus" },
+  { value: "announce", full: "Announcement", short: "Speech" },
+  { value: "issues", full: "Issues", short: "Issues" },
+  { value: "compare", full: "Compare", short: "Diff" },
+  { value: "manual", full: "Manual Tests", short: "Manual" },
+] as const;
+
 export const AnalysisTabs = React.memo(function AnalysisTabs({
   analysisTab,
   onTabChange,
@@ -120,65 +131,133 @@ export const AnalysisTabs = React.memo(function AnalysisTabs({
     return normalizeFindings([], mergedViolations, axeIncomplete);
   }, [mergedViolations, axeIncomplete]);
 
+  const scrollerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const el = scrollerRef.current?.querySelector<HTMLElement>(
+      '[role="tab"][aria-selected="true"]'
+    );
+    if (!el || !scrollerRef.current) return;
+
+    const prefersReduced =
+      typeof window !== "undefined" &&
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    el.scrollIntoView({
+      inline: "nearest",
+      block: "nearest",
+      behavior: prefersReduced ? "auto" : "smooth",
+    });
+  }, [analysisTab]);
+
+  React.useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+
+    const updateOverflow = () => {
+      const hasOverflowStart = el.scrollLeft > 2;
+      const hasOverflowEnd =
+        el.scrollLeft < el.scrollWidth - el.clientWidth - 2;
+      el.setAttribute(
+        "data-overflow-start",
+        hasOverflowStart ? "true" : "false"
+      );
+      el.setAttribute("data-overflow-end", hasOverflowEnd ? "true" : "false");
+    };
+
+    updateOverflow();
+
+    let rafId: number | null = null;
+    const onScroll = () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(updateOverflow);
+    };
+
+    el.addEventListener("scroll", onScroll, { passive: true });
+    const resizeObserver = new ResizeObserver(updateOverflow);
+    resizeObserver.observe(el);
+
+    return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      el.removeEventListener("scroll", onScroll);
+      resizeObserver.disconnect();
+    };
+  }, []);
+
   return (
     <Tabs
       value={analysisTab}
       onValueChange={onTabChange}
       className="flex h-full flex-col"
     >
-      <div className="flex items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface-raised)]/60 px-3 pt-2">
-        <TabsList className="flex-wrap gap-1">
-          <TabsTrigger value="tree">A11y Tree</TabsTrigger>
-          <TabsTrigger value="aria">ARIA Explorer</TabsTrigger>
-          <TabsTrigger value="accname">Accessible Name</TabsTrigger>
-          <TabsTrigger value="focus">Focus Order</TabsTrigger>
-          <TabsTrigger value="announce">Announcement</TabsTrigger>
-          <TabsTrigger
-            value="issues"
-            badge={
-              mergedViolations.length > 0 || axeIncomplete.length > 0 ? (
-                <Badge
-                  variant={mergedViolations.length > 0 ? "warning" : "default"}
-                  className="ml-1 px-1 py-0 text-[10px]"
+      <div className="@container flex flex-none items-stretch border-b border-[var(--color-border)] bg-[var(--color-surface-raised)]/60">
+        <div
+          ref={scrollerRef}
+          className="analysis-tabs-scroll min-w-0 flex-1 [scrollbar-width:none] overflow-x-auto overscroll-x-contain px-2 pt-2 [&::-webkit-scrollbar]:hidden"
+        >
+          <TabsList className="inline-flex w-max flex-nowrap gap-1">
+            {TAB_META.map((meta) => {
+              let badgeNode: React.ReactNode = undefined;
+              if (meta.value === "issues") {
+                if (mergedViolations.length > 0 || axeIncomplete.length > 0) {
+                  badgeNode = (
+                    <Badge
+                      variant={
+                        mergedViolations.length > 0 ? "warning" : "default"
+                      }
+                      className="ml-1 shrink-0 px-1 py-0 text-[10px]"
+                    >
+                      {mergedViolations.length > 0 && axeIncomplete.length > 0
+                        ? `${mergedViolations.length} · ${axeIncomplete.length}`
+                        : mergedViolations.length > 0
+                          ? `${mergedViolations.length}`
+                          : `${axeIncomplete.length} to review`}
+                    </Badge>
+                  );
+                }
+              } else if (meta.value === "compare") {
+                if (
+                  comparison &&
+                  (comparison.resolved.length > 0 ||
+                    comparison.introduced.length > 0)
+                ) {
+                  badgeNode = (
+                    <Badge
+                      variant={
+                        comparison.introduced.length > 0 ? "warning" : "default"
+                      }
+                      className="ml-1 shrink-0 px-1 py-0 text-[10px]"
+                    >
+                      {comparison.resolved.length > 0 &&
+                        `-${comparison.resolved.length}`}
+                      {comparison.resolved.length > 0 &&
+                        comparison.introduced.length > 0 &&
+                        " "}
+                      {comparison.introduced.length > 0 &&
+                        `+${comparison.introduced.length}`}
+                    </Badge>
+                  );
+                }
+              }
+
+              return (
+                <TabsTrigger
+                  key={meta.value}
+                  value={meta.value}
+                  badge={badgeNode}
+                  className="min-h-[2rem] shrink-0 whitespace-nowrap pointer-coarse:min-h-[2.5rem]"
                 >
-                  {mergedViolations.length > 0 && axeIncomplete.length > 0
-                    ? `${mergedViolations.length} · ${axeIncomplete.length}`
-                    : mergedViolations.length > 0
-                      ? `${mergedViolations.length}`
-                      : `${axeIncomplete.length} to review`}
-                </Badge>
-              ) : undefined
-            }
-          >
-            Issues
-          </TabsTrigger>
-          <TabsTrigger
-            value="compare"
-            badge={
-              comparison &&
-              (comparison.resolved.length > 0 ||
-                comparison.introduced.length > 0) ? (
-                <Badge
-                  variant={
-                    comparison.introduced.length > 0 ? "warning" : "default"
-                  }
-                  className="ml-1 px-1 py-0 text-[10px]"
-                >
-                  {comparison.resolved.length > 0 &&
-                    `-${comparison.resolved.length}`}
-                  {comparison.resolved.length > 0 &&
-                    comparison.introduced.length > 0 &&
-                    " "}
-                  {comparison.introduced.length > 0 &&
-                    `+${comparison.introduced.length}`}
-                </Badge>
-              ) : undefined
-            }
-          >
-            Compare
-          </TabsTrigger>
-          <TabsTrigger value="manual">Manual Tests</TabsTrigger>
-        </TabsList>
+                  <span className="@[30rem]:hidden" aria-hidden="true">
+                    {meta.short}
+                  </span>
+                  <span className="sr-only @[30rem]:hidden">{meta.full}</span>
+                  <span className="hidden @[30rem]:inline">{meta.full}</span>
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
+        </div>
 
         <button
           type="button"
@@ -189,7 +268,7 @@ export const AnalysisTabs = React.memo(function AnalysisTabs({
               : "Maximize analysis"
           }
           aria-pressed={maximizedPane === "analysis"}
-          className="inline-flex h-6 w-6 items-center justify-center rounded text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
+          className="m-1.5 inline-flex h-7 w-7 shrink-0 items-center justify-center self-center rounded text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)] pointer-coarse:h-9 pointer-coarse:w-9"
         >
           {maximizedPane === "analysis" ? (
             <Minimize2 className="h-3.5 w-3.5" aria-hidden="true" />
@@ -212,7 +291,7 @@ export const AnalysisTabs = React.memo(function AnalysisTabs({
         </div>
       )}
 
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      <div className="@container min-h-0 flex-1 overflow-y-auto">
         <TabsContent value="tree" className="m-0 h-full">
           <PanelBoundary name="A11y Tree">
             <A11yTreePanel

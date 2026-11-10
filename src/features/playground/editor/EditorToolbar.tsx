@@ -1,8 +1,21 @@
 "use client";
 
 import * as React from "react";
-import { Button } from "@accessly-ui/react";
-import { Link2, Check, Maximize2, Minimize2, Sparkles } from "lucide-react";
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@accessly-ui/react";
+import {
+  Link2,
+  Check,
+  Maximize2,
+  Minimize2,
+  Sparkles,
+  MoreHorizontal,
+} from "lucide-react";
 import { SnippetsMenu } from "./SnippetsMenu";
 import { EditorTabs } from "./EditorTabs";
 
@@ -95,7 +108,6 @@ export function EditorToolbar({
           </Button>
         )}
 
-        {/* Tab Indent Toggle */}
         <label className="hidden cursor-pointer items-center gap-1.5 text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] sm:flex">
           <input
             type="checkbox"
@@ -106,7 +118,6 @@ export function EditorToolbar({
           <span>Tab indents</span>
         </label>
 
-        {/* Tailwind CSS Toggle */}
         {onToggleTailwind && (
           <label className="hidden cursor-pointer items-center gap-1.5 text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] md:flex">
             <input
@@ -119,7 +130,55 @@ export function EditorToolbar({
           </label>
         )}
 
-        {/* Snippets Menu Component */}
+        <div className="sm:hidden">
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <Button
+                variant="secondary"
+                size="sm"
+                className="h-7 w-7 p-0"
+                aria-label="Editor settings"
+              >
+                <MoreHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem
+                onClick={() => onToggleIndentWithTab(!indentWithTab)}
+                className="text-xs"
+              >
+                <span className="flex items-center gap-1.5">
+                  <input
+                    type="checkbox"
+                    checked={indentWithTab}
+                    readOnly
+                    tabIndex={-1}
+                    className="pointer-events-none h-3.5 w-3.5 rounded border-[var(--color-border)] accent-[var(--color-accent)]"
+                  />
+                  Tab indents
+                </span>
+              </DropdownMenuItem>
+              {onToggleTailwind && (
+                <DropdownMenuItem
+                  onClick={() => onToggleTailwind(!useTailwind)}
+                  className="text-xs"
+                >
+                  <span className="flex items-center gap-1.5">
+                    <input
+                      type="checkbox"
+                      checked={useTailwind}
+                      readOnly
+                      tabIndex={-1}
+                      className="pointer-events-none h-3.5 w-3.5 rounded border-[var(--color-border)] accent-[var(--color-accent)]"
+                    />
+                    Tailwind CSS
+                  </span>
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
         <SnippetsMenu
           html={html}
           css={css}

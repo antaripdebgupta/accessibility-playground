@@ -44,6 +44,8 @@ export function WorkbenchWorkspace({
   onLoadSolution,
   onResetStarter,
 }: WorkbenchWorkspaceProps) {
+  const [mobileChallengeOpen, setMobileChallengeOpen] = React.useState(false);
+
   if (isDesktop) {
     return (
       <div className="flex min-h-0 flex-1">
@@ -98,8 +100,48 @@ export function WorkbenchWorkspace({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
+      {activeChallenge && (
+        <div className="flex-none border-b border-[var(--color-border)]">
+          <button
+            type="button"
+            onClick={() => setMobileChallengeOpen((v) => !v)}
+            aria-expanded={mobileChallengeOpen}
+            className="flex w-full items-center justify-between gap-2 bg-[var(--color-surface-raised)]/60 px-3 py-2 text-xs font-semibold text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
+          >
+            <span>Challenge: {activeChallenge.title}</span>
+            <svg
+              className={`h-4 w-4 shrink-0 transition-transform ${mobileChallengeOpen ? "rotate-180" : ""}`}
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                fillRule="evenodd"
+                d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </button>
+          {mobileChallengeOpen && (
+            <div className="max-h-[50dvh] overflow-y-auto">
+              <ChallengeStrip
+                challengeMode={challengeMode}
+                currentViolationRuleIds={currentViolationRuleIds}
+                onLoadSolution={onLoadSolution}
+                onResetStarter={onResetStarter}
+              />
+            </div>
+          )}
+        </div>
+      )}
       <MobilePaneTabs activePane={mobilePane} onChangePane={setMobilePane} />
-      <div className="min-h-0 flex-1 overflow-auto p-2">
+      <div
+        id={`mobile-pane-${mobilePane}`}
+        role="tabpanel"
+        aria-labelledby={`mobile-tab-${mobilePane}`}
+        tabIndex={0}
+        className="min-h-0 flex-1 overflow-auto p-2 focus-visible:outline-none"
+      >
         {mobilePane === "editor" && editorPane}
         {mobilePane === "preview" && previewPane}
         {mobilePane === "analysis" && analysisPane}

@@ -60,6 +60,61 @@ describe("MobilePaneTabs", () => {
     expect(html).toContain("preview");
     expect(html).toContain("analysis");
   });
+
+  it("supports roving tabindex and arrow-key navigation", () => {
+    const onChangePane = vi.fn();
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    const root = createRoot(container);
+
+    act(() => {
+      root.render(
+        <MobilePaneTabs activePane="editor" onChangePane={onChangePane} />
+      );
+    });
+
+    const tabs = Array.from(
+      container.querySelectorAll<HTMLButtonElement>('[role="tab"]')
+    );
+    expect(tabs).toHaveLength(3);
+    const [editorTab, previewTab, analysisTab] = tabs;
+    expect(editorTab).toBeDefined();
+    expect(previewTab).toBeDefined();
+    expect(analysisTab).toBeDefined();
+    if (!editorTab || !previewTab || !analysisTab) return;
+
+    expect(editorTab.getAttribute("tabindex")).toBe("0");
+    expect(previewTab.getAttribute("tabindex")).toBe("-1");
+    expect(analysisTab.getAttribute("tabindex")).toBe("-1");
+    expect(editorTab.getAttribute("aria-controls")).toBe("mobile-pane-editor");
+
+    act(() => {
+      editorTab.dispatchEvent(
+        new KeyboardEvent("keydown", {
+          key: "ArrowRight",
+          bubbles: true,
+          cancelable: true,
+        })
+      );
+    });
+    expect(onChangePane).toHaveBeenCalledWith("preview");
+
+    act(() => {
+      editorTab.dispatchEvent(
+        new KeyboardEvent("keydown", {
+          key: "End",
+          bubbles: true,
+          cancelable: true,
+        })
+      );
+    });
+    expect(onChangePane).toHaveBeenCalledWith("analysis");
+
+    act(() => {
+      root.unmount();
+    });
+    document.body.removeChild(container);
+  });
 });
 
 describe("WorkbenchToolbar - Item 2: Rescan focus and aria-disabled", () => {

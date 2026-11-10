@@ -32,9 +32,9 @@ export function ManualTestsPanel({ documentId }: ManualTestsPanelProps) {
       <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">
+            <h2 className="text-sm font-semibold text-[var(--color-text-primary)]">
               Manual Testing Checklists
-            </h3>
+            </h2>
             <p className="text-xs text-[var(--color-text-secondary)]">
               Automated scans miss ~60% of WCAG criteria. Verify essential human
               interactions below.
@@ -52,7 +52,7 @@ export function ManualTestsPanel({ documentId }: ManualTestsPanelProps) {
         </div>
 
         {/* Counter cards */}
-        <div className="mt-3 grid grid-cols-4 gap-2">
+        <div className="mt-3 grid grid-cols-2 gap-2 @[24rem]:grid-cols-4">
           <div className="rounded border border-[var(--color-border)] bg-[var(--color-surface)] p-2 text-center">
             <span className="block text-base font-bold text-[var(--color-success-default)]">
               {stats.passed}

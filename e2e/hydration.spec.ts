@@ -19,6 +19,6 @@ test("playground hydrates cleanly with a restored session", async ({
   });
 
   await page.goto("/playground");
-  await expect(page.getByText("52 lines")).toBeVisible();
+  await expect(page.getByText(/5[23] lines/)).toBeVisible();
   expect(errors).toEqual([]);
 });

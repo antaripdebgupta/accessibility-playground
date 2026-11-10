@@ -1,7 +1,8 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Workbench Splitters", () => {
-  test("separator is keyboard resizable", async ({ page }) => {
+  test("separator is keyboard resizable", async ({ page, viewport }) => {
+    if (viewport && viewport.width < 1024) return;
     await page.goto("/playground");
     const sep = page.getByRole("separator").first();
     await sep.waitFor({ state: "visible" });

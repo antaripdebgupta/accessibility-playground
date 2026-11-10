@@ -63,9 +63,9 @@ export function ManualTestItem({
       {/* Title & WCAG Header */}
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h4 className="text-xs font-semibold text-[var(--color-text-primary)]">
+          <h3 className="text-xs font-semibold text-[var(--color-text-primary)]">
             {test.title}
-          </h4>
+          </h3>
           <span className="font-mono text-[10px] text-[var(--color-text-secondary)] uppercase">
             {test.category}
           </span>

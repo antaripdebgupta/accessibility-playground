@@ -152,6 +152,7 @@ export function PlaygroundView() {
     <div className="flex min-h-0 flex-1 flex-col">
       <h1 className="sr-only">Accessibility Playground — Live Workbench</h1>
       <WorkbenchToolbar
+        isDesktop={isDesktop}
         onForceScan={scan.triggerScan}
         isScanning={scan.isScanning}
         onStartFresh={() => {

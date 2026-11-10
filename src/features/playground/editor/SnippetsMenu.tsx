@@ -81,7 +81,7 @@ export function SnippetsMenu({
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="max-h-96 w-80 overflow-y-auto p-1"
+        className="max-h-96 w-[min(20rem,calc(100vw-1.5rem))] overflow-y-auto p-1"
       >
         {/* Save current as... section */}
         <div className="border-b border-[var(--color-border)] p-2">

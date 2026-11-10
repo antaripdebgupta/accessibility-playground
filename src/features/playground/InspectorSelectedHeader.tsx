@@ -35,7 +35,7 @@ export function InspectorSelectedHeader({
         </Badge>
         {selectedNode.accessibleName && (
           <span
-            className="max-w-[200px] truncate text-[11px] text-[var(--color-text-secondary)]"
+            className="max-w-[min(200px,40vw)] truncate text-[11px] text-[var(--color-text-secondary)]"
             title={selectedNode.accessibleName}
           >
             &quot;{selectedNode.accessibleName}&quot;

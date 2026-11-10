@@ -10,11 +10,25 @@ import { useSyncExternalStore } from "react";
 export function useMediaQuery(query: string): boolean {
   return useSyncExternalStore(
     (cb) => {
+      if (
+        typeof window === "undefined" ||
+        typeof window.matchMedia !== "function"
+      ) {
+        return () => {};
+      }
       const mql = window.matchMedia(query);
       mql.addEventListener("change", cb);
       return () => mql.removeEventListener("change", cb);
     },
-    () => window.matchMedia(query).matches,
+    () => {
+      if (
+        typeof window === "undefined" ||
+        typeof window.matchMedia !== "function"
+      ) {
+        return false;
+      }
+      return window.matchMedia(query).matches;
+    },
     () => false // server snapshot — mobile layout is SSR default
   );
 }
