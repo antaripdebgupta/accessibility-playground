@@ -19,7 +19,7 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 
 const variantStyles: Record<BadgeVariant, string> = {
   default:
-    "bg-[var(--color-accent-subtle)] text-[var(--color-accent)] border-[var(--color-border)]",
+    "bg-[var(--color-accent-subtle)] text-[var(--color-accent-hover,#1e40af)] border-[var(--color-border)]",
   secondary:
     "bg-[var(--color-surface-raised)] text-[var(--color-text-secondary)] border-[var(--color-border)]",
   success:

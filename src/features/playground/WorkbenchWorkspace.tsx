@@ -136,15 +136,34 @@ export function WorkbenchWorkspace({
       )}
       <MobilePaneTabs activePane={mobilePane} onChangePane={setMobilePane} />
       <div
-        id={`mobile-pane-${mobilePane}`}
+        id="mobile-pane-editor"
         role="tabpanel"
-        aria-labelledby={`mobile-tab-${mobilePane}`}
+        aria-labelledby="mobile-tab-editor"
         tabIndex={0}
-        className="min-h-0 flex-1 overflow-auto p-2 focus-visible:outline-none"
+        hidden={mobilePane !== "editor"}
+        className={`min-h-0 flex-1 overflow-auto p-2 focus-visible:outline-none ${mobilePane === "editor" ? "" : "hidden"}`}
       >
-        {mobilePane === "editor" && editorPane}
-        {mobilePane === "preview" && previewPane}
-        {mobilePane === "analysis" && analysisPane}
+        {editorPane}
+      </div>
+      <div
+        id="mobile-pane-preview"
+        role="tabpanel"
+        aria-labelledby="mobile-tab-preview"
+        tabIndex={0}
+        hidden={mobilePane !== "preview"}
+        className={`min-h-0 flex-1 overflow-auto p-2 focus-visible:outline-none ${mobilePane === "preview" ? "" : "hidden"}`}
+      >
+        {previewPane}
+      </div>
+      <div
+        id="mobile-pane-analysis"
+        role="tabpanel"
+        aria-labelledby="mobile-tab-analysis"
+        tabIndex={0}
+        hidden={mobilePane !== "analysis"}
+        className={`min-h-0 flex-1 overflow-auto p-2 focus-visible:outline-none ${mobilePane === "analysis" ? "" : "hidden"}`}
+      >
+        {analysisPane}
       </div>
     </div>
   );

@@ -125,10 +125,10 @@ export function IssuesList({
         <div className="space-y-4">
           {violations.length > 0 && (
             <section className="flex flex-col gap-2">
-              <h4 className="flex items-center gap-1.5 text-xs font-bold tracking-wider text-[var(--color-danger-default)] uppercase">
+              <h2 className="flex items-center gap-1.5 text-xs font-bold tracking-wider text-[var(--color-danger-default)] uppercase">
                 <AlertOctagon className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>Violations ({violations.length})</span>
-              </h4>
+              </h2>
               <div className="space-y-1.5">
                 {violations.map((f) => (
                   <FindingRow
@@ -144,10 +144,10 @@ export function IssuesList({
 
           {needsReview.length > 0 && (
             <section className="flex flex-col gap-2">
-              <h4 className="flex items-center gap-1.5 text-xs font-bold tracking-wider text-[var(--color-warning-default)] uppercase">
+              <h2 className="flex items-center gap-1.5 text-xs font-bold tracking-wider text-[var(--color-warning-default)] uppercase">
                 <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>Needs Review ({needsReview.length})</span>
-              </h4>
+              </h2>
               <div className="space-y-1.5">
                 {needsReview.map((f) => (
                   <FindingRow
@@ -163,10 +163,10 @@ export function IssuesList({
 
           {manualCheck.length > 0 && (
             <section className="flex flex-col gap-2">
-              <h4 className="flex items-center gap-1.5 text-xs font-bold tracking-wider text-[var(--color-info-default)] uppercase">
+              <h2 className="flex items-center gap-1.5 text-xs font-bold tracking-wider text-[var(--color-info-default)] uppercase">
                 <HelpCircle className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>Manual Check ({manualCheck.length})</span>
-              </h4>
+              </h2>
               <div className="space-y-1.5">
                 {manualCheck.map((f) => (
                   <FindingRow

@@ -2,9 +2,14 @@ import type { Metadata } from "next";
 import { ContrastChecker } from "@/features/contrast/ContrastChecker";
 
 export const metadata: Metadata = {
-  title: "Color-Contrast Checker — Accessibility Playground",
+  title: "Color-Contrast Checker",
   description:
     "Enter a text color and background color to check the contrast ratio against WCAG 2.2 thresholds for normal text, large text, and non-text UI components.",
+  openGraph: {
+    title: "Color-Contrast Checker — Accessibility Playground",
+    description:
+      "Check color contrast ratios against WCAG 2.2 thresholds for text and UI components.",
+  },
 };
 
 export default function ContrastPage() {

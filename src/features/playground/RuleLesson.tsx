@@ -41,9 +41,9 @@ export default function RuleLesson({
     <>
       {/* What's happening */}
       <section className="flex flex-col gap-1.5">
-        <h4 className="font-semibold text-[var(--color-text-primary)]">
+        <h3 className="font-semibold text-[var(--color-text-primary)]">
           What is happening
-        </h4>
+        </h3>
         <p className="leading-relaxed text-[var(--color-text-secondary)]">
           {knowledge ? knowledge.whatIsHappening : finding.description}
         </p>
@@ -51,9 +51,9 @@ export default function RuleLesson({
 
       {/* Why it matters */}
       <section className="flex flex-col gap-1.5">
-        <h4 className="font-semibold text-[var(--color-text-primary)]">
+        <h3 className="font-semibold text-[var(--color-text-primary)]">
           Why it matters
-        </h4>
+        </h3>
         <p className="leading-relaxed text-[var(--color-text-secondary)]">
           {knowledge ? knowledge.whyItMatters : finding.help}
         </p>
@@ -64,7 +64,7 @@ export default function RuleLesson({
         <section className="flex flex-col gap-2">
           <div className="flex items-center gap-1.5 font-semibold text-[var(--color-text-primary)]">
             <Users className="h-3.5 w-3.5" aria-hidden="true" />
-            <h4>Who is affected</h4>
+            <h3>Who is affected</h3>
           </div>
           <div className="flex flex-wrap gap-1.5">
             {knowledge.whoIsAffected.map((group) => (
@@ -84,9 +84,9 @@ export default function RuleLesson({
         </section>
       ) : (
         <section className="flex flex-col gap-1 text-[var(--color-text-secondary)]">
-          <h4 className="font-semibold text-[var(--color-text-primary)]">
+          <h3 className="font-semibold text-[var(--color-text-primary)]">
             Who is affected
-          </h4>
+          </h3>
           <p>No detailed lesson yet. See external documentation below.</p>
         </section>
       )}
@@ -98,9 +98,9 @@ export default function RuleLesson({
           : finding.fix || "";
         return goodExample ? (
           <section className="flex flex-col gap-2">
-            <h4 className="font-semibold text-[var(--color-text-primary)]">
+            <h3 className="font-semibold text-[var(--color-text-primary)]">
               Suggested fix
-            </h4>
+            </h3>
             <CodeSnippet code={goodExample} />
           </section>
         ) : null;
@@ -109,9 +109,9 @@ export default function RuleLesson({
       {/* Why the fix works */}
       {knowledge && (
         <section className="flex flex-col gap-1.5">
-          <h4 className="font-semibold text-[var(--color-text-primary)]">
+          <h3 className="font-semibold text-[var(--color-text-primary)]">
             Why the fix works
-          </h4>
+          </h3>
           <p className="leading-relaxed text-[var(--color-text-secondary)]">
             {knowledge.whyFixWorks}
           </p>
@@ -127,7 +127,7 @@ export default function RuleLesson({
                 className="h-3.5 w-3.5 text-[var(--color-success-default)]"
                 aria-hidden="true"
               />
-              <h4>How to verify</h4>
+              <h3>How to verify</h3>
             </div>
             {onOpenInspector && (
               <button
@@ -157,7 +157,7 @@ export default function RuleLesson({
       <section className="flex flex-col gap-2 border-t border-[var(--color-border)] pt-4">
         <div className="flex items-center gap-1.5 font-semibold text-[var(--color-text-primary)]">
           <BookOpen className="h-3.5 w-3.5" aria-hidden="true" />
-          <h4>Official References</h4>
+          <h3>Official References</h3>
         </div>
         <ul className="space-y-1">
           {knowledge ? (

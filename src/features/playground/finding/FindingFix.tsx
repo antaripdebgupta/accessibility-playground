@@ -53,7 +53,7 @@ export function FindingFix({
             className="h-3.5 w-3.5 text-[var(--color-accent)]"
             aria-hidden="true"
           />
-          <h4>Automated Fix Available</h4>
+          <h3>Automated Fix Available</h3>
         </div>
         <button
           type="button"

@@ -115,13 +115,15 @@ export function createIndentWithTabExtension(enabled: boolean): Extension {
       run: (view) => {
         if (isEscapeArmed()) {
           resetEscapeArmed();
-          return false; // let tab leave editor
+          view.contentDOM.blur();
+          return false;
         }
         return indentMore(view);
       },
       shift: (view) => {
         if (isEscapeArmed()) {
           resetEscapeArmed();
+          view.contentDOM.blur();
           return false;
         }
         return indentLess(view);

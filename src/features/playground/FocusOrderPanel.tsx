@@ -81,10 +81,10 @@ export function FocusOrderPanel({
         {/* Controls & Summary Bar */}
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--color-border)] pb-3">
           <div>
-            <h4 className="text-md font-semibold text-[var(--color-text-primary)]">
+            <h2 className="text-md font-semibold text-[var(--color-text-primary)]">
               Sequential Tab Order ({sequence.length}{" "}
               {sequence.length === 1 ? "element" : "elements"})
-            </h4>
+            </h2>
             <p className="text-[11px] text-[var(--color-text-secondary)]">
               Computed from DOM hierarchy and tabindex values
             </p>
@@ -115,9 +115,9 @@ export function FocusOrderPanel({
         {/* Focus Findings / Anti-patterns */}
         {focusFindings.length > 0 && (
           <div className="flex flex-col gap-2">
-            <h5 className="text-md font-mono font-semibold text-[var(--color-text-primary)]">
+            <h3 className="text-md font-mono font-semibold text-[var(--color-text-primary)]">
               Focus Order Findings ({focusFindings.length})
-            </h5>
+            </h3>
             <div className="space-y-2">
               {focusFindings.map((f) => (
                 <div
@@ -168,9 +168,9 @@ export function FocusOrderPanel({
 
         {/* Tab Sequence Table (§C2: DOM order vs tab order, positive tabindex warnings, missing focus styles) */}
         <div className="flex flex-col gap-2">
-          <h5 className="text-md font-mono font-semibold text-[var(--color-text-primary)]">
+          <h3 className="text-md font-mono font-semibold text-[var(--color-text-primary)]">
             Ordered Navigation Sequence
-          </h5>
+          </h3>
           <div className="overflow-x-auto rounded-lg border border-[var(--color-border)]">
             <table className="text-md w-full text-left">
               <thead className="border-b border-[var(--color-border)] bg-[var(--color-surface-raised)] font-mono text-[11px] text-[var(--color-text-secondary)]">

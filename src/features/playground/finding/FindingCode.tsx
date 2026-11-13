@@ -17,9 +17,9 @@ export function FindingCode({ primaryNode, onSelectNode }: FindingCodeProps) {
   return (
     <section className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <h4 className="font-semibold text-[var(--color-text-primary)]">
+        <h3 className="font-semibold text-[var(--color-text-primary)]">
           Inspected Element
-        </h4>
+        </h3>
         {targetId && onSelectNode && (
           <button
             type="button"

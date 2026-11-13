@@ -51,6 +51,27 @@ export function PreviewFrame({
   const [reducedMotion, setReducedMotion] = React.useState(false);
   const [forcedColors, setForcedColors] = React.useState(false);
 
+  const axeUrl = React.useMemo(() => {
+    if (typeof window !== "undefined") {
+      return `${window.location.origin}/axe.min.js`;
+    }
+    return "/axe.min.js";
+  }, []);
+
+  const simulations = React.useMemo(() => {
+    return { reducedMotion, forcedColors };
+  }, [reducedMotion, forcedColors]);
+
+  const srcDoc = React.useMemo(() => {
+    return generatePreviewSrcDoc(
+      instrumentedHtml,
+      css,
+      axeUrl,
+      useTailwind,
+      simulations
+    );
+  }, [instrumentedHtml, css, axeUrl, useTailwind, simulations]);
+
   const {
     iframeRef,
     runtimeErrors,
@@ -58,6 +79,7 @@ export function PreviewFrame({
     setIsConsoleOpen,
     clearRuntimeErrors,
   } = usePreviewBridge({
+    srcDoc,
     selectedNodeId,
     scanId,
     focusedElementId,
@@ -89,28 +111,6 @@ export function PreviewFrame({
     ro.observe(el);
     return () => ro.disconnect();
   }, [viewportWidth]);
-
-  const axeUrl = React.useMemo(() => {
-    if (typeof window !== "undefined") {
-      return `${window.location.origin}/axe.min.js`;
-    }
-    return "/axe.min.js";
-  }, []);
-
-  const simulations = React.useMemo(() => {
-    return { reducedMotion, forcedColors };
-  }, [reducedMotion, forcedColors]);
-
-  // srcDoc depends on HTML, CSS, axeUrl, useTailwind, and active simulations
-  const srcDoc = React.useMemo(() => {
-    return generatePreviewSrcDoc(
-      instrumentedHtml,
-      css,
-      axeUrl,
-      useTailwind,
-      simulations
-    );
-  }, [instrumentedHtml, css, axeUrl, useTailwind, simulations]);
 
   return (
     <div
@@ -193,7 +193,7 @@ export function PreviewFrame({
               <iframe
                 key={iframeKey}
                 ref={iframeRef}
-                srcDoc={srcDoc}
+                src="/preview-frame"
                 title="Safe sandboxed HTML preview"
                 sandbox="allow-scripts"
                 className="h-full w-full border-0"

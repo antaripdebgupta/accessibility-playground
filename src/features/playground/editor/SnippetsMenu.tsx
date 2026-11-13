@@ -122,6 +122,7 @@ export function SnippetsMenu({
           ) : (
             <button
               type="button"
+              role="menuitem"
               onClick={() => setIsNamingSnippet(true)}
               className="flex w-full items-center gap-1.5 rounded px-2 py-1 text-xs font-medium text-[var(--color-accent)] transition-colors hover:bg-[var(--color-accent-subtle)]/40 focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
             >
@@ -131,13 +132,12 @@ export function SnippetsMenu({
           )}
         </div>
 
-        {/* Header indicating "Yours" */}
         <div className="flex items-center justify-between px-2 pt-2 pb-1 text-[11px] font-semibold text-[var(--color-text-secondary)]">
           <div className="flex items-center gap-1.5">
             <span>Saved Snippets</span>
             <Badge
               variant="default"
-              className="px-1 py-0 text-[9px] font-normal"
+              className="px-1 py-0 text-[10px] font-semibold text-[var(--color-accent-hover,#1e40af)]"
             >
               Yours
             </Badge>
@@ -147,7 +147,6 @@ export function SnippetsMenu({
           </span>
         </div>
 
-        {/* List of saved snippets */}
         {snippets.length === 0 ? (
           <div className="p-3 text-center text-xs text-[var(--color-text-secondary)] italic">
             No personal snippets saved yet.
@@ -207,7 +206,10 @@ export function SnippetsMenu({
                       <span className="truncate text-xs font-semibold text-[var(--color-text-primary)]">
                         {snip.name}
                       </span>
-                      <Badge variant="default" className="px-1 py-0 text-[8px]">
+                      <Badge
+                        variant="default"
+                        className="px-1 py-0 text-[10px] font-semibold text-[var(--color-accent-hover,#1e40af)]"
+                      >
                         Yours
                       </Badge>
                     </div>
@@ -216,10 +218,10 @@ export function SnippetsMenu({
                     </span>
                   </DropdownMenuItem>
 
-                  {/* Actions: Rename, Duplicate, Delete */}
                   <div className="ml-1 flex shrink-0 items-center gap-0.5">
                     <button
                       type="button"
+                      role="menuitem"
                       onClick={(e) => handleStartRename(e, snip)}
                       className="rounded p-1 text-[var(--color-text-secondary)] hover:bg-[var(--color-surface)] hover:text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
                       title={`Rename ${snip.name}`}
@@ -229,6 +231,7 @@ export function SnippetsMenu({
                     </button>
                     <button
                       type="button"
+                      role="menuitem"
                       onClick={(e) => handleDuplicateSnippet(e, snip.id)}
                       className="rounded p-1 text-[var(--color-text-secondary)] hover:bg-[var(--color-surface)] hover:text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
                       title={`Duplicate ${snip.name}`}
@@ -238,6 +241,7 @@ export function SnippetsMenu({
                     </button>
                     <button
                       type="button"
+                      role="menuitem"
                       onClick={(e) =>
                         handleDeleteSnippet(e, snip.id, snip.name)
                       }
@@ -254,7 +258,6 @@ export function SnippetsMenu({
           ))
         )}
 
-        {/* Footer: Export / Import */}
         <div className="mt-2 flex items-center justify-between border-t border-[var(--color-border)] px-2 pt-2">
           <input
             ref={fileInputRef}
@@ -266,6 +269,7 @@ export function SnippetsMenu({
           />
           <button
             type="button"
+            role="menuitem"
             onClick={() => fileInputRef.current?.click()}
             className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
           >
@@ -275,6 +279,7 @@ export function SnippetsMenu({
 
           <button
             type="button"
+            role="menuitem"
             disabled={snippets.length === 0}
             onClick={handleExportAll}
             className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)] disabled:opacity-40"

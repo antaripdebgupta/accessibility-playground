@@ -1,16 +1,33 @@
 import type { NextConfig } from "next";
 import withBundleAnalyzer from "@next/bundle-analyzer";
 
-const cspHeader = `
+const siteCspHeader = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline' https://cdn.tailwindcss.com;
-  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-  font-src 'self' https://fonts.gstatic.com data:;
-  img-src 'self' data: blob: https:;
-  frame-src 'self' blob:;
+  script-src 'self' 'unsafe-inline';
+  style-src 'self' 'unsafe-inline';
+  img-src 'self' data: blob:;
+  font-src 'self';
+  connect-src 'self';
+  frame-src 'self';
+  worker-src 'self' blob:;
   object-src 'none';
   base-uri 'self';
+  form-action 'self';
   frame-ancestors 'none';
+  upgrade-insecure-requests;
+`
+  .replace(/\s{2,}/g, " ")
+  .trim();
+
+const previewCspHeader = `
+  default-src 'self';
+  script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com;
+  style-src 'self' 'unsafe-inline';
+  img-src 'self' data: blob: https:;
+  font-src 'self' data:;
+  connect-src 'none';
+  form-action 'none';
+  frame-ancestors 'self';
 `
   .replace(/\s{2,}/g, " ")
   .trim();
@@ -32,8 +49,50 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: "/:path*",
+        source: "/axe.min.js",
         headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+          {
+            key: "Cross-Origin-Resource-Policy",
+            value: "same-origin",
+          },
+        ],
+      },
+      {
+        source: "/preview-frame",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: previewCspHeader,
+          },
+          {
+            key: "X-Frame-Options",
+            value: "SAMEORIGIN",
+          },
+          {
+            key: "X-Content-Type-Options",
+            value: "nosniff",
+          },
+          {
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
+          },
+        ],
+      },
+      {
+        source: "/((?!preview-frame).*)",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: siteCspHeader,
+          },
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains",
+          },
           {
             key: "X-Content-Type-Options",
             value: "nosniff",
@@ -49,11 +108,15 @@ const nextConfig: NextConfig = {
           {
             key: "Permissions-Policy",
             value:
-              "camera=(), microphone=(), geolocation=(), browsing-topics=()",
+              "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()",
           },
           {
-            key: "Content-Security-Policy",
-            value: cspHeader,
+            key: "Cross-Origin-Opener-Policy",
+            value: "same-origin",
+          },
+          {
+            key: "Cross-Origin-Resource-Policy",
+            value: "same-origin",
           },
         ],
       },

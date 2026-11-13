@@ -255,6 +255,7 @@ function CodeEditor({
         onChange={handleStableCodeMirrorChange}
         extensions={extensions}
         basicSetup={false}
+        indentWithTab={false}
         height="100%"
         className="h-full"
         aria-label={ariaLabel}

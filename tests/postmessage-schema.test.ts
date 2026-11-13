@@ -115,6 +115,12 @@ describe("PostMessage Schema Validation (Task 5d)", () => {
     expect(safeParseIframeMessage({ type: "element-clicked" })).toBeNull(); // missing id
   });
 
+  it("parses valid 'preview-frame-ready' message", () => {
+    const msg = safeParseIframeMessage({ type: "preview-frame-ready" });
+    expect(msg).not.toBeNull();
+    expect(msg!.type).toBe("preview-frame-ready");
+  });
+
   it("validates host to iframe message schemas", () => {
     const selectMsg = HostSelectNodeMessageSchema.safeParse({
       type: "select-node",
@@ -133,6 +139,12 @@ describe("PostMessage Schema Validation (Task 5d)", () => {
       id: "a11y-5",
     });
     expect(focusMsg.success).toBe(true);
+
+    const renderMsg = HostMessageSchema.safeParse({
+      type: "render-document",
+      html: "<p>Hello</p>",
+    });
+    expect(renderMsg.success).toBe(true);
 
     const unionMsg = HostMessageSchema.safeParse({
       type: "run-scan",

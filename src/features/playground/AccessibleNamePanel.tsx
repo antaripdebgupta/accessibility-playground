@@ -147,9 +147,9 @@ export function AccessibleNamePanel({
         {/* Algorithm Step-by-Step Trace */}
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-2">
-            <h4 className="text-md font-semibold text-[var(--color-text-primary)]">
+            <h2 className="text-md font-semibold text-[var(--color-text-primary)]">
               W3C Accessible Name and Description Computation 1.2
-            </h4>
+            </h2>
             <span className="text-[11px] text-[var(--color-text-secondary)]">
               Evaluated in precedence order
             </span>

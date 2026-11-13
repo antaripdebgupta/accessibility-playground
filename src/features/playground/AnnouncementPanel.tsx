@@ -70,7 +70,7 @@ export function AnnouncementPanel({ selectedNode }: AnnouncementPanelProps) {
           <div className="flex flex-col gap-2 border-t border-[var(--color-border)] p-4 text-xs">
             <div className="flex items-center gap-1.5 font-semibold text-[var(--color-text-primary)]">
               <History className="h-3.5 w-3.5" aria-hidden="true" />
-              <h4>Recent Announcements History</h4>
+              <h2>Recent Announcements History</h2>
             </div>
             <div className="space-y-1.5">
               {history.map((item) => (
@@ -146,13 +146,13 @@ export function AnnouncementPanel({ selectedNode }: AnnouncementPanelProps) {
         {/* Breakdown List */}
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-2">
-            <h4 className="text-md flex items-center gap-1.5 font-semibold text-[var(--color-text-primary)]">
+            <h2 className="text-md flex items-center gap-1.5 font-semibold text-[var(--color-text-primary)]">
               <Layers
                 className="h-4 w-4 text-[var(--color-accent)]"
                 aria-hidden="true"
               />
               <span>Announcement Breakdown</span>
-            </h4>
+            </h2>
             <span className="text-[11px] text-[var(--color-text-secondary)]">
               Speech token sequence
             </span>
@@ -192,12 +192,11 @@ export function AnnouncementPanel({ selectedNode }: AnnouncementPanelProps) {
           </div>
         </div>
 
-        {/* History of last 10 simulated announcements (§C2) */}
         {history.length > 0 && (
           <div className="flex flex-col gap-2.5 border-t border-[var(--color-border)] pt-4 text-xs">
             <div className="flex items-center gap-1.5 font-semibold text-[var(--color-text-primary)]">
               <History className="h-3.5 w-3.5" aria-hidden="true" />
-              <h4>Announcement History (Last {history.length})</h4>
+              <h2>Announcement History (Last {history.length})</h2>
             </div>
             <div className="space-y-1.5">
               {history.map((item) => (

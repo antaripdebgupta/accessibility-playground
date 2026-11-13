@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+z.config({ jitless: true });
+
 const AxeFindingNodeSchema = z.object({
   html: z.string(),
   target: z.array(z.string()),
@@ -68,8 +70,13 @@ const IframeRuntimeErrorMessageSchema = z.object({
   timestamp: z.string(),
 });
 
+const IframePreviewFrameReadyMessageSchema = z.object({
+  type: z.literal("preview-frame-ready"),
+});
+
 const IframeMessageSchema = z.discriminatedUnion("type", [
   IframeReadyMessageSchema,
+  IframePreviewFrameReadyMessageSchema,
   IframeElementClickedMessageSchema,
   IframeScanResultsMessageSchema,
   IframeScanErrorMessageSchema,
@@ -95,7 +102,6 @@ export function safeParseIframeMessage(data: unknown): IframeMessage | null {
   return result.success ? result.data : null;
 }
 
-// Host -> Iframe message schemas
 export const HostSelectNodeMessageSchema = z.object({
   type: z.literal("select-node"),
   id: z.string().nullable().optional(),
@@ -111,10 +117,16 @@ export const HostFocusElementMessageSchema = z.object({
   id: z.string(),
 });
 
+const HostRenderDocumentMessageSchema = z.object({
+  type: z.literal("render-document"),
+  html: z.string(),
+});
+
 export const HostMessageSchema = z.discriminatedUnion("type", [
   HostSelectNodeMessageSchema,
   HostRunScanMessageSchema,
   HostFocusElementMessageSchema,
+  HostRenderDocumentMessageSchema,
 ]);
 
 export type HostMessage = z.infer<typeof HostMessageSchema>;

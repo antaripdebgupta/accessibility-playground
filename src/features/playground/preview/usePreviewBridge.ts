@@ -15,6 +15,7 @@ export interface RuntimeErrorItem {
 }
 
 export interface UsePreviewBridgeParams {
+  srcDoc?: string;
   selectedNodeId: string | null;
   scanId?: string;
   focusedElementId?: string | null;
@@ -28,6 +29,7 @@ export interface UsePreviewBridgeParams {
 }
 
 export function usePreviewBridge({
+  srcDoc,
   selectedNodeId,
   scanId,
   focusedElementId,
@@ -38,6 +40,8 @@ export function usePreviewBridge({
 }: UsePreviewBridgeParams) {
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
   const currentScanIdRef = React.useRef(scanId);
+  const isFrameReadyRef = React.useRef(false);
+  const latestSrcDocRef = React.useRef(srcDoc);
   const [runtimeErrors, setRuntimeErrors] = React.useState<
     readonly RuntimeErrorItem[]
   >([]);
@@ -47,36 +51,46 @@ export function usePreviewBridge({
     currentScanIdRef.current = scanId;
   }, [scanId]);
 
-  // Typed host-to-iframe postMessage helper
+  React.useEffect(() => {
+    latestSrcDocRef.current = srcDoc;
+  }, [srcDoc]);
+
   const postToIframe = React.useCallback((msg: HostMessage) => {
     if (iframeRef.current?.contentWindow) {
       iframeRef.current.contentWindow.postMessage(msg, "*");
     }
   }, []);
 
-  // Synchronize selection without reloading the iframe
+  const sendDocument = React.useCallback(() => {
+    if (latestSrcDocRef.current && iframeRef.current?.contentWindow) {
+      postToIframe({ type: "render-document", html: latestSrcDocRef.current });
+    }
+  }, [postToIframe]);
+
+  React.useEffect(() => {
+    if (srcDoc && isFrameReadyRef.current) {
+      sendDocument();
+    }
+  }, [srcDoc, sendDocument]);
+
   React.useEffect(() => {
     postToIframe({ type: "select-node", id: selectedNodeId });
   }, [selectedNodeId, postToIframe]);
 
-  // Trigger rescan when scanId changes
   React.useEffect(() => {
     if (scanId) {
       postToIframe({ type: "run-scan", scanId });
     }
   }, [scanId, postToIframe]);
 
-  // Focus simulation
   React.useEffect(() => {
     if (focusedElementId) {
       postToIframe({ type: "focus-element", id: focusedElementId });
     }
   }, [focusedElementId, postToIframe]);
 
-  // Handle messages with source verification and stale scanId filtering
   React.useEffect(() => {
     function handleMessage(event: MessageEvent) {
-      // Security check: only accept messages from our own iframe
       if (
         !iframeRef.current ||
         event.source !== iframeRef.current.contentWindow
@@ -87,10 +101,12 @@ export function usePreviewBridge({
       const parsed = safeParseIframeMessage(event.data);
       if (!parsed) return;
 
-      if (parsed.type === "element-clicked") {
+      if (parsed.type === "preview-frame-ready") {
+        isFrameReadyRef.current = true;
+        sendDocument();
+      } else if (parsed.type === "element-clicked") {
         onSelectNodeId(parsed.id);
       } else if (parsed.type === "scan-results") {
-        // Ignore stale scans
         if (
           parsed.scanId &&
           currentScanIdRef.current &&
@@ -133,7 +149,13 @@ export function usePreviewBridge({
     return () => {
       window.removeEventListener("message", handleMessage);
     };
-  }, [onSelectNodeId, onScanResults, onScanError, onFocusPositionsChange]);
+  }, [
+    onSelectNodeId,
+    onScanResults,
+    onScanError,
+    onFocusPositionsChange,
+    sendDocument,
+  ]);
 
   const clearRuntimeErrors = React.useCallback(() => {
     setRuntimeErrors([]);
@@ -145,5 +167,6 @@ export function usePreviewBridge({
     isConsoleOpen,
     setIsConsoleOpen,
     clearRuntimeErrors,
+    postToIframe,
   };
 }

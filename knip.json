@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
-  "ignore": ["public/axe.min.js"],
+  "ignore": ["public/axe.min.js", "scripts/check-security-headers.mjs"],
   "ignoreDependencies": [
     "@accessly-ui/primitives",
     "@accessly-ui/utils",

@@ -65,9 +65,9 @@ export function CompareView({
       <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-3">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-[var(--color-text-primary)]">
+            <h2 className="text-xs font-semibold text-[var(--color-text-primary)]">
               Baseline Active
-            </span>
+            </h2>
             <Badge variant="default" className="text-[10px]">
               {baseline.findings.length} initial findings
             </Badge>
@@ -124,13 +124,13 @@ export function CompareView({
 
       {/* 1. Resolved issues */}
       <section className="space-y-2">
-        <h4 className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-text-primary)]">
+        <h3 className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-text-primary)]">
           <CheckCircle2
             className="h-4 w-4 text-[var(--color-success-default)]"
             aria-hidden="true"
           />
           <span>Resolved Issues ({resolved.length})</span>
-        </h4>
+        </h3>
         {resolved.length === 0 ? (
           <p className="text-xs text-[var(--color-text-secondary)] italic">
             No issues resolved yet. Apply fixes in the code editor to resolve
@@ -151,13 +151,13 @@ export function CompareView({
 
       {/* 2. Remaining issues */}
       <section className="space-y-2">
-        <h4 className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-text-primary)]">
+        <h3 className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-text-primary)]">
           <AlertTriangle
             className="h-4 w-4 text-[var(--color-warning-default)]"
             aria-hidden="true"
           />
           <span>Remaining Baseline Issues ({remaining.length})</span>
-        </h4>
+        </h3>
         {remaining.length === 0 ? (
           <p className="text-xs text-[var(--color-text-secondary)] italic">
             All baseline issues have been addressed!
@@ -177,13 +177,13 @@ export function CompareView({
 
       {/* 3. Introduced issues */}
       <section className="space-y-2">
-        <h4 className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-text-primary)]">
+        <h3 className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-text-primary)]">
           <PlusCircle
             className="h-4 w-4 text-[var(--color-danger-default)]"
             aria-hidden="true"
           />
           <span>Introduced Issues ({introduced.length})</span>
-        </h4>
+        </h3>
         {introduced.length === 0 ? (
           <p className="text-xs text-[var(--color-text-secondary)] italic">
             No new accessibility issues introduced.

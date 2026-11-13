@@ -2,9 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "About — Accessibility Playground",
+  title: "About",
   description:
     "Why Accessibility Playground runs user-provided HTML inside a sandboxed iframe, and the WCAG 2.2 AA commitments the tool holds itself to.",
+  openGraph: {
+    title: "About — Accessibility Playground",
+    description:
+      "Why Accessibility Playground runs user-provided HTML inside a sandboxed iframe, and the WCAG 2.2 AA commitments the tool holds itself to.",
+  },
 };
 
 const COMMITMENTS = [

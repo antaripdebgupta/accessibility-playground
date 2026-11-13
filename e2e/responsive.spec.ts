@@ -26,6 +26,15 @@ const VIEWPORTS = [
 ];
 
 test.describe("Responsive Audit & Measurement", () => {
+  test.beforeEach(async ({ context }) => {
+    await context.route("**/*picsum.photos/**", (route) => {
+      route.fulfill({
+        status: 200,
+        contentType: "image/svg+xml",
+        body: '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"></svg>',
+      });
+    });
+  });
   for (const route of ROUTES) {
     for (const vp of VIEWPORTS) {
       test(`${route} @ ${vp.width}px has no horizontal overflow`, async ({

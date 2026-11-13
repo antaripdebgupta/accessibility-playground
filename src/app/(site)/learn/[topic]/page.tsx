@@ -35,12 +35,16 @@ export async function generateMetadata({
   const topic = getLearnTopicBySlug(slug);
   if (!topic) {
     return {
-      title: "Topic Not Found — Accessibility Playground",
+      title: "Topic Not Found",
     };
   }
   return {
-    title: `${topic.title} — Accessibility Knowledge Centre`,
+    title: topic.title,
     description: topic.summary,
+    openGraph: {
+      title: `${topic.title} — Accessibility Playground`,
+      description: topic.summary,
+    },
   };
 }
 
@@ -55,8 +59,33 @@ export default async function TopicDetailPage({ params }: TopicPageProps) {
   const badPlaygroundUrl = getPlaygroundUrlForExample(topic.badExample);
   const goodPlaygroundUrl = getPlaygroundUrlForExample(topic.goodExample);
 
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    "https://accessibility-playground.example.com";
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "LearningResource",
+    name: topic.title,
+    description: topic.summary,
+    url: `${siteUrl}/learn/${slug}`,
+    educationalLevel: "Intermediate",
+    learningResourceType: "Guide",
+    inLanguage: "en",
+    isAccessibleForFree: true,
+    isPartOf: {
+      "@type": "WebSite",
+      name: "Accessibility Playground",
+      url: siteUrl,
+    },
+  };
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Navigation Breadcrumb */}
       <nav aria-label="Breadcrumb" className="mb-6">
         <Link
@@ -179,11 +208,16 @@ export default async function TopicDetailPage({ params }: TopicPageProps) {
                 <p className="mb-3 text-xs text-[var(--color-text-secondary)]">
                   {topic.badExample.description}
                 </p>
-                <CodeBlock code={topic.badExample.html} language="html" />
+                <CodeBlock
+                  code={topic.badExample.html}
+                  language="html"
+                  label="Inaccessible HTML code example"
+                />
                 {topic.badExample.css && (
                   <CodeBlock
                     code={topic.badExample.css}
                     language="css"
+                    label="Inaccessible CSS code example"
                     className="mt-2"
                   />
                 )}
@@ -215,11 +249,16 @@ export default async function TopicDetailPage({ params }: TopicPageProps) {
                 <p className="mb-3 text-xs text-[var(--color-text-secondary)]">
                   {topic.goodExample.description}
                 </p>
-                <CodeBlock code={topic.goodExample.html} language="html" />
+                <CodeBlock
+                  code={topic.goodExample.html}
+                  language="html"
+                  label="Accessible HTML code example"
+                />
                 {topic.goodExample.css && (
                   <CodeBlock
                     code={topic.goodExample.css}
                     language="css"
+                    label="Accessible CSS code example"
                     className="mt-2"
                   />
                 )}

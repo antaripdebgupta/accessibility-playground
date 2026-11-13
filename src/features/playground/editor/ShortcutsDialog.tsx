@@ -201,7 +201,12 @@ export function ShortcutsDialog({ open, onClose }: ShortcutsDialogProps) {
         </div>
 
         {/* Content */}
-        <div className="space-y-6 overflow-y-auto p-4 text-xs">
+        <div
+          tabIndex={0}
+          role="region"
+          aria-labelledby="shortcuts-dialog-title"
+          className="space-y-6 overflow-y-auto p-4 text-xs focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
+        >
           {SHORTCUT_CATEGORIES.map((cat) => (
             <div key={cat.title}>
               <h3 className="mb-2.5 font-semibold text-[var(--color-text-primary)]">

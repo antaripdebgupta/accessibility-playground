@@ -5,9 +5,14 @@ import { WcagBadge } from "@/components/WcagBadge";
 import { ArrowRight } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Accessibility Knowledge Centre — Accessibility Playground",
+  title: "Accessibility Knowledge Centre",
   description:
     "Comprehensive, practical guides to web accessibility topics: semantic HTML, ARIA, keyboard navigation, focus management, color contrast, and more.",
+  openGraph: {
+    title: "Accessibility Knowledge Centre — Accessibility Playground",
+    description:
+      "Practical guides to web accessibility: semantic HTML, ARIA, keyboard navigation, focus management, and more.",
+  },
 };
 
 export default function LearnIndexPage() {

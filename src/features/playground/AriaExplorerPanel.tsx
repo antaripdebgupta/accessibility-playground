@@ -88,12 +88,12 @@ export function AriaExplorerPanel({
       <div className="flex flex-col gap-4 p-4">
         {/* Role Summary Card */}
         <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-3">
-          <h4 className="text-md mb-2 flex items-center justify-between font-mono font-semibold text-[var(--color-text-primary)]">
+          <h2 className="text-md mb-2 flex items-center justify-between font-mono font-semibold text-[var(--color-text-primary)]">
             <span>&lt;{selectedNode.tagName}&gt; Role Mapping</span>
             <span className="text-[11px] font-normal text-[var(--color-text-secondary)]">
               ID: {selectedNode.id}
             </span>
-          </h4>
+          </h2>
 
           <div className="text-md grid grid-cols-1 gap-2 font-mono sm:grid-cols-3">
             <div className="flex flex-col gap-0.5 rounded border border-[var(--color-border)] bg-[var(--color-surface)] p-2">
@@ -191,9 +191,9 @@ export function AriaExplorerPanel({
         {/* ARIA Attributes Table */}
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <h4 className="text-md font-semibold text-[var(--color-text-primary)]">
+            <h2 className="text-md font-semibold text-[var(--color-text-primary)]">
               Applied ARIA Attributes ({ariaAttrEntries.length})
-            </h4>
+            </h2>
             <span className="text-[11px] text-[var(--color-text-secondary)]">
               WAI-ARIA 1.2 Validity · Click value to edit
             </span>

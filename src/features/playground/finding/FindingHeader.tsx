@@ -32,9 +32,9 @@ export function FindingHeader({ finding }: FindingHeaderProps) {
             {finding.ruleId}
           </span>
         </div>
-        <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">
+        <h2 className="text-sm font-semibold text-[var(--color-text-primary)]">
           {finding.help}
-        </h3>
+        </h2>
       </div>
 
       {/* Matching Knowledge Centre Topic */}
@@ -67,9 +67,9 @@ export function FindingHeader({ finding }: FindingHeaderProps) {
       {/* WCAG Success Criteria */}
       {finding.wcag.length > 0 && (
         <section className="flex flex-col gap-2">
-          <h4 className="font-semibold text-[var(--color-text-primary)]">
+          <h3 className="font-semibold text-[var(--color-text-primary)]">
             WCAG Success Criteria
-          </h4>
+          </h3>
           <div className="flex flex-wrap gap-2">
             {finding.wcag.map((ref) => (
               <div key={ref.id} className="flex items-center gap-1.5">

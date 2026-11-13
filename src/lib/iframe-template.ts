@@ -285,9 +285,15 @@ export function generatePreviewSrcDoc(
         sendParent({ type: "focus-order", elements: positions });
       }
 
-      // 4. Host message listener
       window.addEventListener("message", function(e) {
         if (!e.data || typeof e.data !== "object") return;
+
+        if (e.data.type === "render-document" && typeof e.data.html === "string") {
+          document.open();
+          document.write(e.data.html);
+          document.close();
+          return;
+        }
 
         if (e.data.type === "select-node") {
           var prev = document.querySelectorAll(".a11y-inspect-selected");

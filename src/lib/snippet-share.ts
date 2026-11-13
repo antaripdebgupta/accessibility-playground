@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+z.config({ jitless: true });
+
 const SnippetPayloadSchema = z.object({
   h: z.string().max(200_000),
   c: z.string().max(200_000).optional().default(""),
