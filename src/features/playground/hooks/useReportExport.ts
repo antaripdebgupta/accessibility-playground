@@ -10,6 +10,7 @@ export interface UseReportExportParams {
   activeDocumentId: string;
   findings: Finding[];
   comparison?: CompareResult | null;
+  engineStatus?: { playground: string; axe: string };
 }
 
 export interface UseReportExportResult {
@@ -23,6 +24,7 @@ export function useReportExport({
   activeDocumentId,
   findings,
   comparison,
+  engineStatus,
 }: UseReportExportParams): UseReportExportResult {
   const toast = useToast();
 
@@ -32,7 +34,8 @@ export function useReportExport({
       findings,
       comparison ?? undefined,
       undefined,
-      manualTests
+      manualTests,
+      engineStatus
     );
     downloadBlob(
       jsonString,
@@ -44,11 +47,16 @@ export function useReportExport({
       description: "Downloaded JSON report.",
       variant: "success",
     });
-  }, [findings, comparison, activeDocumentId, toast]);
+  }, [findings, comparison, activeDocumentId, engineStatus, toast]);
 
   const handleExportCsv = React.useCallback(() => {
     const manualTests = loadManualTestResults(activeDocumentId);
-    const csvString = toCsv(findings, comparison ?? undefined, manualTests);
+    const csvString = toCsv(
+      findings,
+      comparison ?? undefined,
+      manualTests,
+      engineStatus
+    );
     downloadBlob(
       csvString,
       `a11y-report-${Date.now()}.csv`,
@@ -59,7 +67,7 @@ export function useReportExport({
       description: "Downloaded CSV spreadsheet.",
       variant: "success",
     });
-  }, [findings, comparison, activeDocumentId, toast]);
+  }, [findings, comparison, activeDocumentId, engineStatus, toast]);
 
   const handleExportMarkdown = React.useCallback(() => {
     const manualTests = loadManualTestResults(activeDocumentId);
@@ -67,7 +75,8 @@ export function useReportExport({
       findings,
       comparison ?? undefined,
       undefined,
-      manualTests
+      manualTests,
+      engineStatus
     );
     downloadBlob(
       mdString,
@@ -79,7 +88,7 @@ export function useReportExport({
       description: "Downloaded Markdown report.",
       variant: "success",
     });
-  }, [findings, comparison, activeDocumentId, toast]);
+  }, [findings, comparison, activeDocumentId, engineStatus, toast]);
 
   const handleCopyReport = React.useCallback(() => {
     const manualTests = loadManualTestResults(activeDocumentId);
@@ -87,7 +96,8 @@ export function useReportExport({
       findings,
       comparison ?? undefined,
       undefined,
-      manualTests
+      manualTests,
+      engineStatus
     );
     if (typeof navigator !== "undefined" && navigator.clipboard) {
       navigator.clipboard.writeText(mdString).then(() => {
@@ -98,7 +108,7 @@ export function useReportExport({
         });
       });
     }
-  }, [findings, comparison, activeDocumentId, toast]);
+  }, [findings, comparison, activeDocumentId, engineStatus, toast]);
 
   return {
     handleExportJson,

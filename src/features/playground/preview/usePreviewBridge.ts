@@ -124,6 +124,11 @@ export function usePreviewBridge({
         ) {
           return;
         }
+        if (process.env.NODE_ENV !== "production") {
+          console.warn("[PreviewBridge] Scan error:", parsed.message, {
+            hint: "Check Cross-Origin-Resource-Policy and CSP headers for axe script and preview-frame.",
+          });
+        }
         onScanError(parsed.message);
       } else if (parsed.type === "focus-order") {
         onFocusPositionsChange?.(parsed.elements);

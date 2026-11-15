@@ -53,4 +53,14 @@ describe("generatePreviewSrcDoc template", () => {
     const emptyMatches = scriptCode.match(emptyCatchRegex);
     expect(emptyMatches).toBeNull();
   });
+
+  it("contains exactly one axe script tag whose src equals AXE_SCRIPT_PATH and onerror wiring", () => {
+    const srcDoc = generatePreviewSrcDoc("<p>Test</p>");
+    const axeMatches = srcDoc.match(/<script[^>]*id="axe-core-script"[^>]*>/g);
+    expect(axeMatches).not.toBeNull();
+    expect(axeMatches?.length).toBe(1);
+
+    expect(axeMatches![0]).toContain('src="/axe.min.js"');
+    expect(axeMatches![0]).toContain('onerror="window.__axeScriptError=true;"');
+  });
 });

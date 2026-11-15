@@ -34,7 +34,7 @@ export interface EditorToolbarProps {
   css: string;
   onHtmlChange: (value: string) => void;
   onCssChange: (value: string) => void;
-  triggerLocalLoad: (text: string) => void;
+  triggerLocalLoad: (text: string, kind?: "replace" | "patch") => void;
   isMaximized?: boolean;
   onToggleMaximize?: () => void;
 }
@@ -183,10 +183,13 @@ export function EditorToolbar({
           html={html}
           css={css}
           onHtmlChange={(val) => {
-            triggerLocalLoad(val);
+            triggerLocalLoad(val, "replace");
             onHtmlChange(val);
           }}
-          onCssChange={onCssChange}
+          onCssChange={(val) => {
+            triggerLocalLoad(val, "replace");
+            onCssChange(val);
+          }}
         />
 
         {onToggleMaximize && (

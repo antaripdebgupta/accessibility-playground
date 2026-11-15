@@ -158,6 +158,9 @@ export function useWorkbenchPanes({
       rawHtml={doc.rawHtml}
       onSetBaseline={baselineState.setBaseline}
       onClearBaseline={baselineState.clearBaseline}
+      findings={analysis.findings}
+      onForceScan={scan.triggerScan}
+      engineStatus={analysis.engineStatus}
       documentId={activeDocumentId}
     />
   );

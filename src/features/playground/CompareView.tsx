@@ -27,6 +27,7 @@ interface CompareViewProps {
 export function CompareView({
   baseline,
   comparison,
+  currentFindings = [],
   currentHtml,
   onSetBaseline,
   onClearBaseline,
@@ -58,6 +59,11 @@ export function CompareView({
   }
 
   const { resolved, remaining, introduced } = comparison;
+
+  const baselineHadAxe = baseline.findings.some((f) => f.engine === "axe-core");
+  const currentHasAxe = currentFindings.some((f) => f.engine === "axe-core");
+  const axeMismatched =
+    (baselineHadAxe && !currentHasAxe) || (!baselineHadAxe && currentHasAxe);
 
   return (
     <div className="flex h-full flex-col space-y-6 overflow-y-auto p-4">
@@ -93,6 +99,29 @@ export function CompareView({
           </button>
         </div>
       </div>
+
+      {/* Engine mismatch warning */}
+      {axeMismatched && (
+        <div
+          role="status"
+          className="flex items-start gap-2.5 rounded-lg border border-[var(--color-warning-border,var(--color-border))] bg-[var(--color-warning-subtle)] p-3 text-xs text-[var(--color-warning-text)]"
+        >
+          <AlertTriangle
+            className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-warning-default)]"
+            aria-hidden="true"
+          />
+          <div>
+            <p className="leading-tight font-semibold">
+              Engine mismatch between baseline and current scan
+            </p>
+            <p className="mt-1 text-[11px] leading-normal opacity-90">
+              {baselineHadAxe && !currentHasAxe
+                ? "The baseline includes automated axe-core issues, but the current scan was run without axe-core (axe unavailable). Issues may falsely appear as resolved."
+                : "The current scan includes automated axe-core issues, but the baseline did not. Issues may appear as newly introduced."}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Summary counters */}
       <div className="grid grid-cols-1 gap-2 @[20rem]:grid-cols-3">

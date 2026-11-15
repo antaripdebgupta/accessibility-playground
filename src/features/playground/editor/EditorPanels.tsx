@@ -74,7 +74,7 @@ export function EditorPanels({
           value={html}
           onChange={onHtmlChange}
           language="html"
-          externalEdit={activeExternalEdit}
+          externalEdit={activeTab === "html" ? activeExternalEdit : null}
           revealRequest={activeTab === "html" ? revealRequest : null}
           onCaretChange={onCaretChange}
           onForceScan={onForceScan}
@@ -106,7 +106,7 @@ export function EditorPanels({
             value={css}
             onChange={onCssChange}
             language="css"
-            externalEdit={activeExternalEdit}
+            externalEdit={activeTab === "css" ? activeExternalEdit : null}
             onForceScan={onForceScan}
             indentWithTab={indentWithTab}
             ariaLabel="CSS code editor"

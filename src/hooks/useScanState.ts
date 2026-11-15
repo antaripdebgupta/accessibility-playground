@@ -16,6 +16,7 @@ export function useScanState() {
 
   const triggerScan = React.useCallback(() => {
     setIsScanning(true);
+    setScanError(null);
     setScanId(`scan-${Date.now()}`);
   }, []);
 
@@ -31,6 +32,8 @@ export function useScanState() {
 
   const handleScanError = React.useCallback((error: string) => {
     setScanError(error);
+    setAxeViolations([]);
+    setAxeIncomplete([]);
     setIsScanning(false);
   }, []);
 

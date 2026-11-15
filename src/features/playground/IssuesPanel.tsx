@@ -28,6 +28,11 @@ export interface IssuesPanelProps {
     finding: AxeFinding,
     options?: import("@/lib/auto-fix").ApplyAutoFixOptions
   ) => void;
+  onForceScan?: () => void;
+  engineStatus?: {
+    playground: "ok" | "disabled";
+    axe: "ok" | "failed" | "running" | "idle";
+  };
 }
 
 function isNormalizedFinding(f: AxeFinding | Finding): f is Finding {
@@ -44,6 +49,8 @@ export function IssuesPanel({
   onSelectNode,
   onOpenInspector,
   onApplyFix,
+  onForceScan,
+  engineStatus,
 }: IssuesPanelProps) {
   const [selectedFingerprint, setSelectedFingerprint] = React.useState<
     string | null
@@ -79,18 +86,51 @@ export function IssuesPanel({
     );
   }
 
-  if (scanError) {
-    return (
-      <div className="flex h-48 flex-col items-center justify-center p-6 text-center text-[var(--color-danger-default)]">
-        <AlertOctagon className="mb-2 h-6 w-6" aria-hidden="true" />
-        <p className="text-xs font-semibold">Audit Scan Failed</p>
-        <p className="max-w-md text-[11px] text-[var(--color-text-secondary)]">
-          {scanError} Check that axe.min.js is accessible and iframe permissions
-          are active.
-        </p>
+  const scanBanner = scanError ? (
+    <div
+      role="alert"
+      className="m-3 flex flex-col gap-2 rounded-md border border-[var(--color-warning-border,var(--color-border))] bg-[var(--color-warning-subtle)] p-3 text-xs text-[var(--color-warning-text)]"
+    >
+      <div className="flex items-start gap-2">
+        <AlertOctagon
+          className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-warning-default)]"
+          aria-hidden="true"
+        />
+        <div className="flex-1 space-y-1">
+          <p className="leading-tight font-semibold">
+            Automated axe-core scan unavailable: {scanError}.
+          </p>
+          <p className="text-[11px] leading-normal opacity-90">
+            Showing playground checks only — some issue types (e.g. colour
+            contrast, many ARIA checks) may be missing.
+          </p>
+        </div>
       </div>
-    );
-  }
+      <div className="flex flex-wrap items-center gap-3 pt-1">
+        {onForceScan && (
+          <button
+            type="button"
+            onClick={() => {
+              if (!isScanning) onForceScan();
+            }}
+            aria-disabled={isScanning}
+            aria-label={isScanning ? "Retrying scan…" : "Retry scan"}
+            className="inline-flex min-h-[24px] items-center justify-center rounded border border-[var(--color-border)] bg-[var(--color-surface)] px-2.5 py-1 text-xs font-medium text-[var(--color-text-primary)] transition-opacity hover:bg-[var(--color-surface-sunken)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)] aria-disabled:cursor-not-allowed aria-disabled:opacity-50"
+          >
+            {isScanning ? "Retrying scan…" : "Retry scan"}
+          </button>
+        )}
+        <a
+          href="/docs/troubleshooting-axe.md"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex min-h-[24px] items-center text-[11px] underline underline-offset-2 hover:opacity-80 focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
+        >
+          Troubleshooting
+        </a>
+      </div>
+    </div>
+  ) : null;
 
   if (isScanning && findings.length === 0) {
     return (
@@ -114,6 +154,27 @@ export function IssuesPanel({
   ).length;
 
   if (findings.length === 0) {
+    if (scanError) {
+      return (
+        <div className="flex flex-col">
+          {scanBanner}
+          <div className="flex flex-col items-center justify-center p-6 text-center text-[var(--color-text-secondary)]">
+            <AlertOctagon
+              className="mb-2 h-7 w-7 text-[var(--color-warning-default)]"
+              aria-hidden="true"
+            />
+            <p className="text-xs font-semibold text-[var(--color-text-primary)]">
+              Automated scan could not complete
+            </p>
+            <p className="mt-1 max-w-sm text-[11px] text-[var(--color-text-secondary)]">
+              {scanError} Axe-core checks could not run and no playground rule
+              violations were detected.
+            </p>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="flex flex-col gap-4 p-6">
         <div className="flex flex-col items-center justify-center text-center">
@@ -150,6 +211,7 @@ export function IssuesPanel({
   if (selectedFinding) {
     return (
       <div className="flex flex-col">
+        {scanBanner}
         <div className="border-b border-[var(--color-border)] bg-[var(--color-surface-raised)]/60 px-3 py-2">
           <button
             type="button"
@@ -177,9 +239,12 @@ export function IssuesPanel({
   const minorCount = findings.filter((f) => f.impact === "minor").length;
 
   const engines = Array.from(new Set(findings.map((f) => f.engine)));
+  const isAxeFailed = Boolean(scanError || engineStatus?.axe === "failed");
 
   return (
     <div className="flex flex-col">
+      {scanBanner}
+
       {/* Honest Summary Header (§B.3) */}
       <header className="flex flex-col gap-2.5 border-b border-[var(--color-border)] bg-[var(--color-surface-raised)]/40 p-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -209,6 +274,11 @@ export function IssuesPanel({
                 {e}
               </span>
             ))}
+            {isAxeFailed && !engines.includes("axe-core") && (
+              <span className="rounded bg-[var(--color-danger-subtle)] px-1.5 py-0.5 font-mono text-[var(--color-danger-text)]">
+                axe: unavailable
+              </span>
+            )}
           </div>
         </div>
 

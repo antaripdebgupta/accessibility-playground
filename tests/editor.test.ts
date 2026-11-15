@@ -6,6 +6,7 @@ import {
   applyExternalValue,
   isExternalChange,
 } from "@/features/playground/editor/extensions/external-value";
+import { formatDocument } from "@/features/playground/editor/extensions/format";
 import {
   revealRange,
   revealStateField,
@@ -587,6 +588,75 @@ describe("Part A & B: CodeMirror Editor Enhancements", () => {
       expect(view.state.doc.toString()).toBe(fullTemplate);
       expect(view.state.selection.main.head).toBe(0);
       expect(docChangeCalls).toEqual([]);
+
+      view.destroy();
+    });
+  });
+
+  describe("formatDocument extension", () => {
+    it("formats HTML document and updates view content while emitting docChange", async () => {
+      const bus = new EventTarget();
+      const docChangeCalls: string[] = [];
+      bus.addEventListener("docChange", (e) => {
+        docChangeCalls.push((e as CustomEvent<string>).detail);
+      });
+
+      const container = document.createElement("div");
+      const extensions = createEditorBaseExtensions({
+        language: "html",
+        settings: {
+          autocomplete: false,
+          fontSize: 13,
+          tabSize: 2,
+          lineWrapping: true,
+          lineNumbers: true,
+        },
+        ariaLabel: "Test Editor",
+        bus,
+      });
+
+      const unformatted = "<div>   <p>Hello  world</p>   </div>";
+      const view = new EditorView({
+        state: EditorState.create({
+          doc: unformatted,
+          selection: { anchor: 10 },
+          extensions,
+        }),
+        parent: container,
+      });
+
+      const successFn = vi.fn();
+      const formatted = await formatDocument(view, {
+        language: "html",
+        tabSize: 2,
+        onSuccess: successFn,
+      });
+
+      expect(formatted).toBe(true);
+      expect(successFn).toHaveBeenCalled();
+      expect(view.state.doc.toString()).toBe("<div><p>Hello world</p></div>\n");
+      expect(docChangeCalls.length).toBeGreaterThan(0);
+
+      view.destroy();
+    });
+
+    it("returns false without updating if document is already formatted", async () => {
+      const container = document.createElement("div");
+      const alreadyFormatted = "<div><p>Hello world</p></div>\n";
+      const view = new EditorView({
+        state: EditorState.create({
+          doc: alreadyFormatted,
+        }),
+        parent: container,
+      });
+
+      const formatted = await formatDocument(view, {
+        language: "html",
+        tabSize: 2,
+      });
+
+      expect(formatted).toBe(false);
+      expect(view.state.doc.toString()).toBe(alreadyFormatted);
 
       view.destroy();
     });

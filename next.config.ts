@@ -1,9 +1,11 @@
 import type { NextConfig } from "next";
 import withBundleAnalyzer from "@next/bundle-analyzer";
 
+const isDev = process.env.NODE_ENV !== "production";
+
 const siteCspHeader = `
   default-src 'self';
-  script-src 'self' 'unsafe-inline';
+  script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""};
   style-src 'self' 'unsafe-inline';
   img-src 'self' data: blob:;
   font-src 'self';
@@ -21,7 +23,7 @@ const siteCspHeader = `
 
 const previewCspHeader = `
   default-src 'self';
-  script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com;
+  script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com${isDev ? " 'unsafe-eval'" : ""};
   style-src 'self' 'unsafe-inline';
   img-src 'self' data: blob: https:;
   font-src 'self' data:;
@@ -48,19 +50,6 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
-      {
-        source: "/axe.min.js",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
-          },
-          {
-            key: "Cross-Origin-Resource-Policy",
-            value: "same-origin",
-          },
-        ],
-      },
       {
         source: "/preview-frame",
         headers: [
@@ -117,6 +106,19 @@ const nextConfig: NextConfig = {
           {
             key: "Cross-Origin-Resource-Policy",
             value: "same-origin",
+          },
+        ],
+      },
+      {
+        source: "/axe.min.js",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+          {
+            key: "Cross-Origin-Resource-Policy",
+            value: "cross-origin",
           },
         ],
       },

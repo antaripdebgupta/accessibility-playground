@@ -8,7 +8,7 @@ import { Maximize2, Minimize2, AlertCircle } from "lucide-react";
 import { PanelBoundary } from "@/components/PanelBoundary";
 import { A11yTreePanel } from "./A11yTreePanel";
 import { IssuesPanel } from "./IssuesPanel";
-import type { A11yNode, AxeFinding } from "@/types/a11y";
+import type { A11yNode, AxeFinding, Finding } from "@/types/a11y";
 import type { ComputedFocusOrder } from "@/lib/focus-order";
 import { normalizeFindings } from "@/lib/findings/normalize";
 import { CompareView } from "./CompareView";
@@ -85,6 +85,12 @@ export interface AnalysisTabsProps {
   rawHtml?: string;
   onSetBaseline?: () => void;
   onClearBaseline?: () => void;
+  findings?: readonly Finding[];
+  onForceScan?: () => void;
+  engineStatus?: {
+    playground: "ok" | "disabled";
+    axe: "ok" | "failed" | "running" | "idle";
+  };
   /** Active document ID ("default", challenge ID, or share ID) */
   documentId?: string;
 }
@@ -125,11 +131,15 @@ export const AnalysisTabs = React.memo(function AnalysisTabs({
   rawHtml = "",
   onSetBaseline,
   onClearBaseline,
+  findings: propFindings,
+  onForceScan,
+  engineStatus,
   documentId = "default",
 }: AnalysisTabsProps) {
   const normalizedFindings = React.useMemo(() => {
+    if (propFindings) return propFindings;
     return normalizeFindings([], mergedViolations, axeIncomplete);
-  }, [mergedViolations, axeIncomplete]);
+  }, [propFindings, mergedViolations, axeIncomplete]);
 
   const scrollerRef = React.useRef<HTMLDivElement>(null);
 
@@ -144,11 +154,13 @@ export const AnalysisTabs = React.memo(function AnalysisTabs({
       typeof window.matchMedia === "function" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    el.scrollIntoView({
-      inline: "nearest",
-      block: "nearest",
-      behavior: prefersReduced ? "auto" : "smooth",
-    });
+    if (typeof el.scrollIntoView === "function") {
+      el.scrollIntoView({
+        inline: "nearest",
+        block: "nearest",
+        behavior: prefersReduced ? "auto" : "smooth",
+      });
+    }
   }, [analysisTab]);
 
   React.useEffect(() => {
@@ -175,13 +187,16 @@ export const AnalysisTabs = React.memo(function AnalysisTabs({
     };
 
     el.addEventListener("scroll", onScroll, { passive: true });
-    const resizeObserver = new ResizeObserver(updateOverflow);
-    resizeObserver.observe(el);
+    const resizeObserver =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(updateOverflow)
+        : null;
+    resizeObserver?.observe(el);
 
     return () => {
       if (rafId !== null) cancelAnimationFrame(rafId);
       el.removeEventListener("scroll", onScroll);
-      resizeObserver.disconnect();
+      resizeObserver?.disconnect();
     };
   }, []);
 
@@ -200,19 +215,23 @@ export const AnalysisTabs = React.memo(function AnalysisTabs({
             {TAB_META.map((meta) => {
               let badgeNode: React.ReactNode = undefined;
               if (meta.value === "issues") {
-                if (mergedViolations.length > 0 || axeIncomplete.length > 0) {
+                const vCount = normalizedFindings.filter(
+                  (f) => f.status === "violation"
+                ).length;
+                const rCount = normalizedFindings.filter(
+                  (f) => f.status === "needs-review"
+                ).length;
+                if (vCount > 0 || rCount > 0) {
                   badgeNode = (
                     <Badge
-                      variant={
-                        mergedViolations.length > 0 ? "warning" : "default"
-                      }
+                      variant={vCount > 0 ? "warning" : "default"}
                       className="ml-1 shrink-0 px-1 py-0 text-[10px]"
                     >
-                      {mergedViolations.length > 0 && axeIncomplete.length > 0
-                        ? `${mergedViolations.length} · ${axeIncomplete.length}`
-                        : mergedViolations.length > 0
-                          ? `${mergedViolations.length}`
-                          : `${axeIncomplete.length} to review`}
+                      {vCount > 0 && rCount > 0
+                        ? `${vCount} · ${rCount}`
+                        : vCount > 0
+                          ? `${vCount}`
+                          : `${rCount} to review`}
                     </Badge>
                   );
                 }
@@ -361,6 +380,8 @@ export const AnalysisTabs = React.memo(function AnalysisTabs({
                 if (nodeId) onSelectNode(nodeId);
               }}
               onApplyFix={onApplyFix}
+              onForceScan={onForceScan}
+              engineStatus={engineStatus}
             />
           </PanelBoundary>
         </TabsContent>

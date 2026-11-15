@@ -10,17 +10,25 @@ interface ReportMetadata {
   readonly generatedAt: string; // ISO 8601
   readonly engines: readonly string[];
   readonly axeVersion?: string;
+  readonly axeStatus?: string;
   readonly disclaimer: string;
 }
 
 const DISCLAIMER =
   "Automated checks find only a subset of WCAG issues. Passing them does not mean the page is accessible. Manual testing with assistive technologies is always required.";
 
-function buildMetadata(axeVersion?: string): ReportMetadata {
+function buildMetadata(
+  axeVersion?: string,
+  engineStatus?: { playground: string; axe: string }
+): ReportMetadata {
+  const isAxeUnavailable = engineStatus?.axe === "failed";
   return {
     generatedAt: new Date().toISOString(),
-    engines: ["axe-core", "playground"],
+    engines: isAxeUnavailable
+      ? ["playground (axe-core unavailable)"]
+      : ["axe-core", "playground"],
     axeVersion,
+    axeStatus: isAxeUnavailable ? "unavailable" : "ok",
     disclaimer: DISCLAIMER,
   };
 }
@@ -91,7 +99,8 @@ export function toJson(
   findings: readonly Finding[],
   comparison?: CompareResult,
   axeVersion?: string,
-  manualTests?: Record<string, ManualTestRecord>
+  manualTests?: Record<string, ManualTestRecord>,
+  engineStatus?: { playground: string; axe: string }
 ): string {
   const manualRecords = manualTests
     ? Object.values(manualTests).map((r) => {
@@ -108,7 +117,7 @@ export function toJson(
     : undefined;
 
   const report: JsonReport & { manualTests?: unknown } = {
-    meta: buildMetadata(axeVersion),
+    meta: buildMetadata(axeVersion, engineStatus),
     summary: {
       byStatus: countByStatus(findings),
       bySeverity: countBySeverity(findings),
@@ -194,9 +203,18 @@ function findingToCsvRow(f: Finding): string {
 export function toCsv(
   findings: readonly Finding[],
   comparison?: CompareResult,
-  manualTests?: Record<string, ManualTestRecord>
+  manualTests?: Record<string, ManualTestRecord>,
+  engineStatus?: { playground: string; axe: string }
 ): string {
-  const rows: string[] = [CSV_HEADERS.join(",")];
+  const meta = buildMetadata(undefined, engineStatus);
+  const rows: string[] = [];
+
+  if (meta.axeStatus === "unavailable") {
+    rows.push(
+      "# Note: axe-core scan unavailable; report reflects playground engine only"
+    );
+  }
+  rows.push(CSV_HEADERS.join(","));
 
   for (const f of findings) {
     rows.push(findingToCsvRow(f));
@@ -289,9 +307,10 @@ export function toMarkdown(
   findings: readonly Finding[],
   comparison?: CompareResult,
   axeVersion?: string,
-  manualTests?: Record<string, ManualTestRecord>
+  manualTests?: Record<string, ManualTestRecord>,
+  engineStatus?: { playground: string; axe: string }
 ): string {
-  const meta = buildMetadata(axeVersion);
+  const meta = buildMetadata(axeVersion, engineStatus);
   const byStatus = countByStatus(findings);
   const bySeverity = countBySeverity(findings);
 
@@ -303,6 +322,12 @@ export function toMarkdown(
   lines.push(
     `**Engines:** ${meta.engines.join(", ")}${meta.axeVersion ? ` (axe-core ${meta.axeVersion})` : ""}`
   );
+  if (meta.axeStatus === "unavailable") {
+    lines.push("");
+    lines.push(
+      "> ⚠️ **Notice: Automated axe-core scan was unavailable.** This report contains playground checks only. Certain accessibility checks (e.g. colour contrast, advanced ARIA) were not evaluated."
+    );
+  }
   lines.push("");
   lines.push(`> ⚠️ ${DISCLAIMER}`);
   lines.push("");

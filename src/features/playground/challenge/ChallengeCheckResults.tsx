@@ -6,16 +6,19 @@ import { Check, Trophy, AlertCircle } from "lucide-react";
 export interface CheckResultData {
   resolved: readonly string[];
   remaining: readonly string[];
+  unavailable?: boolean;
 }
 
 export interface ChallengeCheckResultsProps {
   checkResult: CheckResultData | null;
   onCheckFix: () => void;
+  onRetryScan?: () => void;
 }
 
 export function ChallengeCheckResults({
   checkResult,
   onCheckFix,
+  onRetryScan,
 }: ChallengeCheckResultsProps) {
   return (
     <div
@@ -42,7 +45,45 @@ export function ChallengeCheckResults({
 
       {checkResult && (
         <div role="status" aria-live="polite" style={{ marginTop: "10px" }}>
-          {checkResult.remaining.length === 0 ? (
+          {checkResult.unavailable ? (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: "6px",
+                padding: "10px 12px",
+                background: "var(--amber-bg, #fff7e8)",
+                borderRadius: "6px",
+                color: "var(--amber, #92400e)",
+                fontSize: "0.75rem",
+                fontWeight: 600,
+              }}
+            >
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "6px" }}
+              >
+                <AlertCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
+                <span>Can&apos;t verify: axe unavailable. Retry.</span>
+              </div>
+              {onRetryScan && (
+                <button
+                  type="button"
+                  onClick={onRetryScan}
+                  style={{
+                    padding: "2px 8px",
+                    borderRadius: "4px",
+                    border: "1px solid var(--color-border)",
+                    background: "var(--color-surface)",
+                    cursor: "pointer",
+                    fontSize: "0.75rem",
+                  }}
+                >
+                  Retry
+                </button>
+              )}
+            </div>
+          ) : checkResult.remaining.length === 0 ? (
             <div
               style={{
                 display: "flex",

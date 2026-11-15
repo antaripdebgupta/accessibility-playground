@@ -138,6 +138,8 @@ export function PreviewPaneSection({
   );
 }
 
+import type { EngineStatus } from "./hooks/usePlaygroundAnalysis";
+
 export interface AnalysisPaneProps {
   selectionLost: boolean;
   analysisTab: string;
@@ -167,6 +169,9 @@ export interface AnalysisPaneProps {
   rawHtml: string;
   onSetBaseline: (data?: BaselineData) => void;
   onClearBaseline: (reason?: string) => void;
+  findings?: readonly Finding[];
+  onForceScan?: () => void;
+  engineStatus?: EngineStatus;
   /** Active document ID ("default", challenge ID, or share ID) */
   documentId: string;
 }
@@ -197,6 +202,9 @@ export function AnalysisPaneSection({
   rawHtml,
   onSetBaseline,
   onClearBaseline,
+  findings,
+  onForceScan,
+  engineStatus,
   documentId,
 }: AnalysisPaneProps) {
   return (
@@ -242,6 +250,9 @@ export function AnalysisPaneSection({
         rawHtml={rawHtml}
         onSetBaseline={onSetBaseline}
         onClearBaseline={onClearBaseline}
+        findings={findings}
+        onForceScan={onForceScan}
+        engineStatus={engineStatus}
         documentId={documentId}
       />
     </section>

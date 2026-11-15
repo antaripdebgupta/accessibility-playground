@@ -77,6 +77,8 @@ export function PlaygroundView() {
     isOverSizeLimit: doc.isOverSizeLimit,
     axeViolations: scan.axeViolations,
     axeIncomplete: scan.axeIncomplete,
+    isScanning: scan.isScanning,
+    scanError: scan.scanError,
   });
 
   // Selection model, reveal requests, focus simulation, and auto-fix
@@ -113,6 +115,7 @@ export function PlaygroundView() {
     activeDocumentId,
     findings: analysis.findings,
     comparison: baselineState.comparison,
+    engineStatus: analysis.engineStatus,
   });
 
   useWorkbenchKeys({ maximizedPane, setMaximizedPane });
@@ -186,6 +189,10 @@ export function PlaygroundView() {
         currentViolationRuleIds={analysis.currentViolationRuleIds}
         onLoadSolution={handleLoadSolution}
         onResetStarter={handleResetStarter}
+        isAxeUnavailable={Boolean(
+          scan.scanError || analysis.engineStatus.axe === "failed"
+        )}
+        onRetryScan={scan.triggerScan}
       />
 
       <WorkbenchStatusBar

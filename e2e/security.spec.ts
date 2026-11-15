@@ -80,7 +80,7 @@ test.describe("Security Headers & Isolation (acc.md Part 2)", () => {
     expect(headers["cache-control"]).toContain("public");
     expect(headers["cache-control"]).toContain("max-age=31536000");
     expect(headers["cache-control"]).toContain("immutable");
-    expect(headers["cross-origin-resource-policy"]).toBe("same-origin");
+    expect(headers["cross-origin-resource-policy"]).toBe("cross-origin");
   });
 
   test("exercises playground workflows with zero CSP violations", async ({

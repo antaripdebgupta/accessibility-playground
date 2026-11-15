@@ -103,4 +103,36 @@ describe("useReportExport", () => {
     );
     unmount();
   });
+
+  it("includes axe status line in markdown and json export when axe failed", () => {
+    let exportedContent = "";
+    vi.spyOn(reportLib, "downloadBlob").mockImplementation((content) => {
+      exportedContent = content;
+    });
+
+    const { result, unmount } = mountHook(() =>
+      useReportExport({
+        activeDocumentId: "test-document",
+        findings: [],
+        comparison: null,
+        engineStatus: { playground: "ok", axe: "failed" },
+      })
+    );
+
+    act(() => {
+      result.current.handleExportMarkdown();
+    });
+
+    expect(exportedContent).toContain("axe-core scan was unavailable");
+    expect(exportedContent).toContain("axe-core unavailable");
+
+    act(() => {
+      result.current.handleExportJson();
+    });
+
+    const parsedJson = JSON.parse(exportedContent);
+    expect(parsedJson.meta.axeStatus).toBe("unavailable");
+
+    unmount();
+  });
 });

@@ -16,6 +16,8 @@ interface ChallengeStripProps {
   readonly currentViolationRuleIds: readonly string[];
   readonly onLoadSolution: (challenge: Challenge) => void;
   readonly onResetStarter: (challenge: Challenge) => void;
+  readonly isAxeUnavailable?: boolean;
+  readonly onRetryScan?: () => void;
 }
 
 /**
@@ -28,6 +30,8 @@ export function ChallengeStrip({
   currentViolationRuleIds,
   onLoadSolution,
   onResetStarter,
+  isAxeUnavailable,
+  onRetryScan,
 }: ChallengeStripProps) {
   const {
     challenge,
@@ -46,6 +50,10 @@ export function ChallengeStrip({
   if (!challenge) return null;
 
   const handleCheckFix = () => {
+    if (isAxeUnavailable) {
+      setCheckResult({ resolved: [], remaining: [], unavailable: true });
+      return;
+    }
     const mustBeAbsent = challenge.verify.ruleIdsMustBeAbsent;
     const remaining = mustBeAbsent.filter((ruleId) =>
       currentViolationRuleIds.includes(ruleId)
@@ -214,6 +222,7 @@ export function ChallengeStrip({
       <ChallengeCheckResults
         checkResult={checkResult}
         onCheckFix={handleCheckFix}
+        onRetryScan={onRetryScan}
       />
 
       {/* Show solution */}

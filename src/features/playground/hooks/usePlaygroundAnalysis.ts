@@ -9,6 +9,11 @@ import {
 import type { A11yNode, AxeFinding, Finding } from "@/types/a11y";
 import type { ComputedFocusOrder } from "@/lib/focus-order";
 
+export interface EngineStatus {
+  playground: "ok" | "disabled";
+  axe: "ok" | "failed" | "running" | "idle";
+}
+
 export interface UsePlaygroundAnalysisParams {
   debouncedHtml: string;
   rawHtml: string;
@@ -16,6 +21,8 @@ export interface UsePlaygroundAnalysisParams {
   isOverSizeLimit: boolean;
   axeViolations: readonly AxeFinding[];
   axeIncomplete: readonly AxeFinding[];
+  isScanning?: boolean;
+  scanError?: string | null;
 }
 
 export interface PlaygroundAnalysisResult {
@@ -28,6 +35,7 @@ export interface PlaygroundAnalysisResult {
   mergedViolations: AxeFinding[];
   violationCount: number;
   currentViolationRuleIds: string[];
+  engineStatus: EngineStatus;
 }
 
 /**
@@ -41,6 +49,8 @@ export function usePlaygroundAnalysis({
   isOverSizeLimit,
   axeViolations,
   axeIncomplete,
+  isScanning = false,
+  scanError = null,
 }: UsePlaygroundAnalysisParams): PlaygroundAnalysisResult {
   // Parse AST whenever debouncedHtml changes (skip if over size limit §B.4)
   const {
@@ -91,6 +101,33 @@ export function usePlaygroundAnalysis({
     return Array.from(ids);
   }, [findings]);
 
+  const engineStatus: EngineStatus = React.useMemo(() => {
+    let axe: "ok" | "failed" | "running" | "idle" = "idle";
+    if (isScanning) {
+      axe = "running";
+    } else if (scanError) {
+      axe = "failed";
+    } else if (axeViolations.length > 0 || axeIncomplete.length > 0) {
+      axe = "ok";
+    } else if (rawHtml.trim().length > 0) {
+      axe = "ok";
+    } else {
+      axe = "idle";
+    }
+
+    return {
+      playground: isOverSizeLimit ? "disabled" : "ok",
+      axe,
+    };
+  }, [
+    isScanning,
+    scanError,
+    axeViolations.length,
+    axeIncomplete.length,
+    rawHtml,
+    isOverSizeLimit,
+  ]);
+
   return {
     ast,
     instrumentedHtml,
@@ -101,5 +138,6 @@ export function usePlaygroundAnalysis({
     mergedViolations,
     violationCount: mergedViolations.length,
     currentViolationRuleIds,
+    engineStatus,
   };
 }

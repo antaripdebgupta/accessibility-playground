@@ -23,6 +23,8 @@ export interface WorkbenchWorkspaceProps {
   currentViolationRuleIds: string[];
   onLoadSolution: (challenge: Challenge) => void;
   onResetStarter: (challenge: Challenge) => void;
+  isAxeUnavailable?: boolean;
+  onRetryScan?: () => void;
 }
 
 export function WorkbenchWorkspace({
@@ -43,6 +45,8 @@ export function WorkbenchWorkspace({
   currentViolationRuleIds,
   onLoadSolution,
   onResetStarter,
+  isAxeUnavailable,
+  onRetryScan,
 }: WorkbenchWorkspaceProps) {
   const [mobileChallengeOpen, setMobileChallengeOpen] = React.useState(false);
 
@@ -92,6 +96,8 @@ export function WorkbenchWorkspace({
             currentViolationRuleIds={currentViolationRuleIds}
             onLoadSolution={onLoadSolution}
             onResetStarter={onResetStarter}
+            isAxeUnavailable={isAxeUnavailable}
+            onRetryScan={onRetryScan}
           />
         )}
       </div>
@@ -129,6 +135,8 @@ export function WorkbenchWorkspace({
                 currentViolationRuleIds={currentViolationRuleIds}
                 onLoadSolution={onLoadSolution}
                 onResetStarter={onResetStarter}
+                isAxeUnavailable={isAxeUnavailable}
+                onRetryScan={onRetryScan}
               />
             </div>
           )}

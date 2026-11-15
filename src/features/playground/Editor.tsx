@@ -57,20 +57,30 @@ export function Editor({
   const [liveAnnouncement, setLiveAnnouncement] = React.useState<string | null>(
     null
   );
+  const [prevExternalEdit, setPrevExternalEdit] = React.useState(externalEdit);
   const [localExternalEdit, setLocalExternalEdit] =
     React.useState<ExternalEdit | null>(null);
   const localEditSeqRef = React.useRef(0);
 
-  const triggerLocalLoad = React.useCallback((text: string) => {
-    localEditSeqRef.current += 1;
-    setLocalExternalEdit({
-      id: localEditSeqRef.current,
-      kind: "replace",
-      text,
-    });
-  }, []);
+  if (externalEdit !== prevExternalEdit) {
+    setPrevExternalEdit(externalEdit);
+    setLocalExternalEdit(null);
+  }
 
-  const activeExternalEdit = externalEdit ?? localExternalEdit;
+  const activeExternalEdit = localExternalEdit ?? externalEdit;
+
+  const triggerLocalLoad = React.useCallback(
+    (text: string, kind: ExternalEdit["kind"] = "replace") => {
+      localEditSeqRef.current =
+        Math.max(localEditSeqRef.current, externalEdit?.id ?? 0) + 1;
+      setLocalExternalEdit({
+        id: localEditSeqRef.current,
+        kind,
+        text,
+      });
+    },
+    [externalEdit?.id]
+  );
 
   const { settings } = useEditorSettings();
   const toast = useToast();
@@ -124,18 +134,29 @@ export function Editor({
         useTabs: false,
       });
 
+      if (formatted === activeText) {
+        toast.push({
+          title: "Already formatted",
+          description: `${activeTab.toUpperCase()} document is already well-formatted.`,
+          variant: "info",
+        });
+        return;
+      }
+
       if (activeTab === "html") {
         onHtmlChange(formatted);
       } else {
         onCssChange(formatted);
       }
+      triggerLocalLoad(formatted, "patch");
 
       toast.push({
         title: "Document formatted",
         description: `Formatted ${activeTab.toUpperCase()} with Prettier.`,
         variant: "success",
       });
-    } catch {
+    } catch (err) {
+      console.warn("[Editor] Format error:", err);
       toast.push({
         title: "Format error",
         description: "Could not format document due to a syntax issue.",
@@ -149,6 +170,7 @@ export function Editor({
     settings.tabSize,
     onHtmlChange,
     onCssChange,
+    triggerLocalLoad,
     toast,
   ]);
 

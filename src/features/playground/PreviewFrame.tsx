@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { generatePreviewSrcDoc } from "@/lib/iframe-template";
+import { AXE_SCRIPT_PATH } from "@/lib/constants";
 import type { AxeFinding, FocusOrderPosition } from "@/types/a11y";
 import { usePreviewBridge } from "./preview/usePreviewBridge";
 import { PreviewToolbar, type ViewportWidth } from "./preview/PreviewToolbar";
@@ -51,11 +52,14 @@ export function PreviewFrame({
   const [reducedMotion, setReducedMotion] = React.useState(false);
   const [forcedColors, setForcedColors] = React.useState(false);
 
+  // AXE_SCRIPT_PATH is used. The sandboxed iframe shell is hosted at /preview-frame,
+  // so an absolute URL with window.location.origin guarantees proper origin resolution
+  // across all browser environments.
   const axeUrl = React.useMemo(() => {
     if (typeof window !== "undefined") {
-      return `${window.location.origin}/axe.min.js`;
+      return `${window.location.origin}${AXE_SCRIPT_PATH}`;
     }
-    return "/axe.min.js";
+    return AXE_SCRIPT_PATH;
   }, []);
 
   const simulations = React.useMemo(() => {

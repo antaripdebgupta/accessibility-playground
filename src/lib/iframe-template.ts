@@ -1,3 +1,5 @@
+import { AXE_SCRIPT_PATH } from "./constants";
+
 export interface PreviewSimulations {
   readonly reducedMotion?: boolean;
   readonly forcedColors?: boolean;
@@ -6,7 +8,7 @@ export interface PreviewSimulations {
 export function generatePreviewSrcDoc(
   instrumentedHtml: string,
   css = "",
-  axeUrl = "/axe.min.js",
+  axeUrl = AXE_SCRIPT_PATH,
   useTailwind = false,
   simulations?: PreviewSimulations
 ): string {
@@ -87,7 +89,7 @@ export function generatePreviewSrcDoc(
 <body>
   <div id="sandbox-root">${instrumentedHtml}</div>
 
-  <script src="${axeUrl}"></script>
+  <script id="axe-core-script" src="${axeUrl}" onerror="window.__axeScriptError=true;"></script>
   <script>
     (function() {
       function sendParent(msg) {
@@ -149,10 +151,16 @@ export function generatePreviewSrcDoc(
       // 2. Run axe-core audit
       function runAxeScan(scanId) {
         if (typeof window.axe === "undefined") {
-          sendParent({
-            type: "scan-error",
-            scanId: scanId,
-            message: "axe-core is unavailable inside the sandboxed preview."
+          loadAxeScript(function(success) {
+            if (success && typeof window.axe !== "undefined") {
+              runAxeScan(scanId);
+            } else {
+              sendParent({
+                type: "scan-error",
+                scanId: scanId,
+                message: "axe-core could not be loaded from ${axeUrl}. Please verify axe.min.js is present and accessible."
+              });
+            }
           });
           return;
         }
@@ -334,24 +342,101 @@ export function generatePreviewSrcDoc(
         }
       });
 
-      // Initial scan
-      if (typeof window.axe !== "undefined") {
-        sendParent({ type: "ready" });
-        runAxeScan("initial");
-        measureFocusOrder();
-      } else {
-        window.addEventListener("load", function() {
+      // Initial scan with robust initialization and retry polling
+      var hasRetriedAxe = false;
+
+      function loadAxeScript(cb) {
+        if (typeof window.axe !== "undefined") {
+          if (cb) cb(true);
+          return;
+        }
+        var oldScript = document.getElementById("axe-core-script");
+        if (oldScript && oldScript.parentNode) {
+          oldScript.parentNode.removeChild(oldScript);
+        }
+        var newScript = document.createElement("script");
+        newScript.id = "axe-core-script";
+        var separator = "${axeUrl}".indexOf("?") === -1 ? "?" : "&";
+        newScript.src = "${axeUrl}" + separator + "_retry=" + Date.now();
+        newScript.onload = function() {
           if (typeof window.axe !== "undefined") {
-            sendParent({ type: "ready" });
-            runAxeScan("initial");
+            if (cb) cb(true);
           } else {
-            sendParent({
-              type: "scan-error",
-              message: "axe-core failed to initialize in sandbox. Please verify axe.min.js is present."
-            });
+            if (cb) cb(false);
           }
+        };
+        newScript.onerror = function() {
+          window.__axeScriptError = true;
+          if (cb) cb(false);
+        };
+        document.body.appendChild(newScript);
+      }
+
+      function tryInitAxe() {
+        if (typeof window.axe !== "undefined") {
+          sendParent({ type: "ready" });
+          runAxeScan("initial");
           measureFocusOrder();
+          return true;
+        }
+        return false;
+      }
+
+      function injectAxeRetry() {
+        if (hasRetriedAxe) return;
+        hasRetriedAxe = true;
+        window.__axeScriptError = false;
+        loadAxeScript(function(ok) {
+          if (ok && tryInitAxe()) {
+            clearInterval(axeTimer);
+          }
         });
+      }
+
+      if (!tryInitAxe()) {
+        var axeCheckCount = 0;
+        var maxAxeChecks = 80; // 80 * 50ms = 4000ms
+        var axeTimer = setInterval(function() {
+          axeCheckCount++;
+          if (tryInitAxe()) {
+            clearInterval(axeTimer);
+          } else if (window.__axeScriptError) {
+            if (!hasRetriedAxe) {
+              injectAxeRetry();
+            } else {
+              clearInterval(axeTimer);
+              sendParent({
+                type: "scan-error",
+                message: "axe-core could not be loaded from ${axeUrl}. Please verify axe.min.js is present and accessible."
+              });
+              measureFocusOrder();
+            }
+          } else if (axeCheckCount >= maxAxeChecks) {
+            if (!hasRetriedAxe) {
+              injectAxeRetry();
+              axeCheckCount = 40;
+            } else {
+              clearInterval(axeTimer);
+              sendParent({
+                type: "scan-error",
+                message: "axe-core failed to initialize in sandbox from ${axeUrl}. Please verify axe.min.js is present."
+              });
+              measureFocusOrder();
+            }
+          }
+        }, 50);
+
+        var axeScriptEl = document.getElementById("axe-core-script");
+        if (axeScriptEl) {
+          axeScriptEl.addEventListener("load", function() {
+            if (tryInitAxe()) {
+              clearInterval(axeTimer);
+            }
+          });
+          axeScriptEl.addEventListener("error", function() {
+            window.__axeScriptError = true;
+          });
+        }
       }
       window.addEventListener("resize", measureFocusOrder);
 
