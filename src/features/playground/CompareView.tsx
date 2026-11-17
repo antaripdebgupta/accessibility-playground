@@ -92,7 +92,7 @@ export function CompareView({
           </button>
           <button
             type="button"
-            onClick={onClearBaseline}
+            onClick={() => onClearBaseline()}
             className="rounded border border-[var(--color-border)] bg-[var(--color-surface)] px-2.5 py-1 text-xs font-medium text-[var(--color-danger-default)] hover:bg-[var(--color-danger-subtle)] focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)]"
           >
             Clear

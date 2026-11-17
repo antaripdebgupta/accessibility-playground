@@ -27,6 +27,12 @@ export interface PreviewFrameProps {
   useTailwind?: boolean;
   isMaximized?: boolean;
   onToggleMaximize?: () => void;
+  onShortcut?: (
+    key: string,
+    shiftKey: boolean,
+    ctrlKey: boolean,
+    metaKey: boolean
+  ) => void;
 }
 
 export function PreviewFrame({
@@ -45,6 +51,7 @@ export function PreviewFrame({
   useTailwind = false,
   isMaximized = false,
   onToggleMaximize,
+  onShortcut,
 }: PreviewFrameProps) {
   const [iframeKey, setIframeKey] = React.useState(0);
   const [viewportWidth, setViewportWidth] =
@@ -91,6 +98,7 @@ export function PreviewFrame({
     onScanResults,
     onScanError,
     onFocusPositionsChange,
+    onShortcut,
   });
 
   const containerRef = React.useRef<HTMLDivElement>(null);

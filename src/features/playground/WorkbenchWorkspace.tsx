@@ -149,7 +149,7 @@ export function WorkbenchWorkspace({
         aria-labelledby="mobile-tab-editor"
         tabIndex={0}
         hidden={mobilePane !== "editor"}
-        className={`min-h-0 flex-1 overflow-auto p-2 focus-visible:outline-none ${mobilePane === "editor" ? "" : "hidden"}`}
+        className={`relative min-h-0 flex-1 overflow-auto p-2 focus-visible:outline-none ${mobilePane === "editor" ? "" : "hidden"}`}
       >
         {editorPane}
       </div>
@@ -159,7 +159,7 @@ export function WorkbenchWorkspace({
         aria-labelledby="mobile-tab-preview"
         tabIndex={0}
         hidden={mobilePane !== "preview"}
-        className={`min-h-0 flex-1 overflow-auto p-2 focus-visible:outline-none ${mobilePane === "preview" ? "" : "hidden"}`}
+        className={`relative min-h-0 flex-1 overflow-auto p-2 focus-visible:outline-none ${mobilePane === "preview" ? "" : "hidden"}`}
       >
         {previewPane}
       </div>
@@ -169,7 +169,7 @@ export function WorkbenchWorkspace({
         aria-labelledby="mobile-tab-analysis"
         tabIndex={0}
         hidden={mobilePane !== "analysis"}
-        className={`min-h-0 flex-1 overflow-auto p-2 focus-visible:outline-none ${mobilePane === "analysis" ? "" : "hidden"}`}
+        className={`relative min-h-0 flex-1 overflow-auto p-2 focus-visible:outline-none ${mobilePane === "analysis" ? "" : "hidden"}`}
       >
         {analysisPane}
       </div>

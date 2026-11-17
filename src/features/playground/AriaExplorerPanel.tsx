@@ -7,7 +7,7 @@ import {
   InspectorSelectedHeader,
   InspectorEmptyState,
 } from "./InspectorSelectedHeader";
-import { Crosshair, AlertOctagon } from "lucide-react";
+import { Crosshair } from "lucide-react";
 import { AriaAttributeItem } from "./aria/AriaAttributeItem";
 import { AriaAddAttributeForm } from "./aria/AriaAddAttributeForm";
 
@@ -177,7 +177,6 @@ export function AriaExplorerPanel({
         {nodeFindings.length > 0 && (
           <div className="flex flex-col gap-1.5 rounded-lg border border-[var(--color-danger-border)] bg-[var(--color-danger-subtle)] p-3 text-xs">
             <div className="flex items-center gap-1.5 font-semibold text-[var(--color-danger-text)]">
-              <AlertOctagon className="h-3.5 w-3.5" aria-hidden="true" />
               <span>Related Issues ({nodeFindings.length})</span>
             </div>
             <ul className="list-disc space-y-0.5 pl-4 text-[11px] text-[var(--color-danger-text)]">

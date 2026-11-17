@@ -13,6 +13,7 @@ export function useScanState() {
   const [scanId, setScanId] = React.useState<string>("initial");
   const [isScanning, setIsScanning] = React.useState(false);
   const [scanError, setScanError] = React.useState<string | null>(null);
+  const [lastScanTime, setLastScanTime] = React.useState<Date | null>(null);
 
   const triggerScan = React.useCallback(() => {
     setIsScanning(true);
@@ -26,6 +27,7 @@ export function useScanState() {
       setAxeIncomplete(inc || []);
       setIsScanning(false);
       setScanError(null);
+      setLastScanTime(new Date());
     },
     []
   );
@@ -35,6 +37,7 @@ export function useScanState() {
     setAxeViolations([]);
     setAxeIncomplete([]);
     setIsScanning(false);
+    setLastScanTime(new Date());
   }, []);
 
   return {
@@ -44,6 +47,7 @@ export function useScanState() {
     scanError,
     axeViolations,
     axeIncomplete,
+    lastScanTime,
     triggerScan,
     handleScanResults,
     handleScanError,

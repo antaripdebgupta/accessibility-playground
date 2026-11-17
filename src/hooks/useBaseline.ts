@@ -110,9 +110,8 @@ export function useBaseline(
     (reason?: string) => {
       removeBaselineFromSession(activeId);
       setBaselineState(null);
-      if (reason && onBaselineCleared) {
-        onBaselineCleared(reason);
-      }
+      const msg = typeof reason === "string" ? reason : "Baseline cleared";
+      onBaselineCleared?.(msg);
     },
     [activeId, onBaselineCleared]
   );

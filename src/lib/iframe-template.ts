@@ -84,10 +84,11 @@ export function generatePreviewSrcDoc(
     ${forcedColorsCss}
   </style>
   ${tailwindScript}
-  <style id="user-css">${safeCss}</style>
+  ${!useTailwind ? `<style id="user-css">${safeCss}</style>` : ""}
 </head>
 <body>
   <div id="sandbox-root">${instrumentedHtml}</div>
+  ${useTailwind ? `<style id="user-css">${safeCss}</style>` : ""}
 
   <script id="axe-core-script" src="${axeUrl}" onerror="window.__axeScriptError=true;"></script>
   <script>
@@ -132,6 +133,23 @@ export function generatePreviewSrcDoc(
           message: "Unhandled Promise Rejection: " + reasonMsg,
           timestamp: new Date().toISOString()
         });
+      });
+
+      // 0. Forward keyboard shortcuts to parent (F6, Ctrl+Enter)
+      document.addEventListener("keydown", function(e) {
+        var isF6 = e.key === "F6";
+        var isCtrlEnter = (e.ctrlKey || e.metaKey) && e.key === "Enter" && !e.altKey && !e.shiftKey;
+        if (isF6 || isCtrlEnter) {
+          e.preventDefault();
+          sendParent({
+            type: "shortcut",
+            key: e.key,
+            shiftKey: e.shiftKey || false,
+            ctrlKey: e.ctrlKey || false,
+            metaKey: e.metaKey || false,
+            altKey: e.altKey || false
+          });
+        }
       });
 
       // 1. Click-to-inspect listener
@@ -445,8 +463,9 @@ export function generatePreviewSrcDoc(
           ? `setTimeout(function() {
         if (window.__tailwindFailed || typeof window.tailwind === "undefined") {
           sendParent({
-            type: "scan-error",
-            message: "Tailwind CSS failed to load from cdn.tailwindcss.com. Check network/CSP connection."
+            type: "runtime-error",
+            message: "Tailwind CSS failed to load from cdn.tailwindcss.com. Check network/CSP connection.",
+            timestamp: new Date().toISOString()
           });
         }
       }, 1500);`

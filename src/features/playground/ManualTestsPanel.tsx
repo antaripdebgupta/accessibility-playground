@@ -27,7 +27,7 @@ export function ManualTestsPanel({ documentId }: ManualTestsPanelProps) {
   }, [selectedCategory]);
 
   return (
-    <div className="flex h-full flex-col space-y-4 overflow-y-auto p-4">
+    <div className="min-w-0 space-y-4 p-4">
       {/* Overview and Stats */}
       <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-3">
         <div className="flex flex-wrap items-center justify-between gap-2">

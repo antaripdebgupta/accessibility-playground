@@ -53,6 +53,12 @@ export interface UseWorkbenchPanesParams {
   setAnalysisTab: (t: string) => void;
   /** Active document ID ("default", challenge ID, or share ID) */
   activeDocumentId: string;
+  onIframeShortcut?: (
+    key: string,
+    shiftKey: boolean,
+    ctrlKey: boolean,
+    metaKey: boolean
+  ) => void;
 }
 
 export function useWorkbenchPanes({
@@ -68,6 +74,7 @@ export function useWorkbenchPanes({
   analysisTab,
   setAnalysisTab,
   activeDocumentId,
+  onIframeShortcut,
 }: UseWorkbenchPanesParams) {
   const editorPane = (
     <EditorPaneSection
@@ -103,6 +110,7 @@ export function useWorkbenchPanes({
       focusedElementId={selection.simulatedFocusId}
       isMaximized={layout.maximizedPane === "preview"}
       onToggleMaximize={() => layout.toggleMaximize("preview")}
+      onShortcut={onIframeShortcut}
     />
   );
 

@@ -35,7 +35,7 @@ export function ManualTestFilters({
 }: ManualTestFiltersProps) {
   return (
     <div
-      role="tablist"
+      role="group"
       aria-label="Filter manual test categories"
       className="flex flex-wrap gap-1 rounded-md border border-[var(--color-border)] bg-[var(--color-surface-sunken)] p-1"
     >
@@ -47,8 +47,7 @@ export function ManualTestFilters({
           <button
             key={tab.id}
             type="button"
-            role="tab"
-            aria-selected={isSelected}
+            aria-pressed={isSelected}
             onClick={() => onSelectCategory(tab.id)}
             className={`flex items-center gap-1.5 rounded px-2.5 py-1 text-xs font-medium transition-colors focus-visible:outline-2 focus-visible:outline-[var(--color-focus-ring)] ${
               isSelected

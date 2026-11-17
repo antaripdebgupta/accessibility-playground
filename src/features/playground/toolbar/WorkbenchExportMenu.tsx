@@ -52,7 +52,7 @@ export function WorkbenchExportMenu({
           <ChevronDown className="h-3 w-3 opacity-60" aria-hidden="true" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-48">
+      <DropdownMenuContent align="start" className="z-50 w-48">
         <DropdownMenuLabel className="text-[11px] font-semibold text-[var(--color-text-secondary)]">
           Export Report
         </DropdownMenuLabel>

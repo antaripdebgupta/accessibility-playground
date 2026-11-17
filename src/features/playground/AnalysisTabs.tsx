@@ -144,20 +144,31 @@ export const AnalysisTabs = React.memo(function AnalysisTabs({
   const scrollerRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    const el = scrollerRef.current?.querySelector<HTMLElement>(
+    const scroller = scrollerRef.current;
+    const tab = scroller?.querySelector<HTMLElement>(
       '[role="tab"][aria-selected="true"]'
     );
-    if (!el || !scrollerRef.current) return;
+    if (!scroller || !tab) return;
 
     const prefersReduced =
       typeof window !== "undefined" &&
       typeof window.matchMedia === "function" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    if (typeof el.scrollIntoView === "function") {
-      el.scrollIntoView({
-        inline: "nearest",
-        block: "nearest",
+    // Scroll only the tab strip — never call scrollIntoView which walks all
+    // ancestors and shifts overflow-hidden panes sideways.
+    const pad = 8;
+    const s = scroller.getBoundingClientRect();
+    const t = tab.getBoundingClientRect();
+    const delta =
+      t.left < s.left + pad
+        ? t.left - s.left - pad
+        : t.right > s.right - pad
+          ? t.right - s.right + pad
+          : 0;
+    if (delta) {
+      scroller.scrollBy({
+        left: delta,
         behavior: prefersReduced ? "auto" : "smooth",
       });
     }
@@ -209,7 +220,7 @@ export const AnalysisTabs = React.memo(function AnalysisTabs({
       <div className="@container flex flex-none items-stretch border-b border-[var(--color-border)] bg-[var(--color-surface-raised)]/60">
         <div
           ref={scrollerRef}
-          className="analysis-tabs-scroll min-w-0 flex-1 [scrollbar-width:none] overflow-x-auto overscroll-x-contain px-2 pt-2 [&::-webkit-scrollbar]:hidden"
+          className="no-scrollbar analysis-tabs-scroll min-w-0 flex-1 overflow-x-auto overscroll-x-contain px-2 pt-2"
         >
           <TabsList className="inline-flex w-max flex-nowrap gap-1">
             {TAB_META.map((meta) => {
@@ -310,7 +321,7 @@ export const AnalysisTabs = React.memo(function AnalysisTabs({
         </div>
       )}
 
-      <div className="@container min-h-0 flex-1 overflow-y-auto">
+      <div className="@container relative min-h-0 flex-1 overflow-y-auto">
         <TabsContent value="tree" className="m-0 h-full">
           <PanelBoundary name="A11y Tree">
             <A11yTreePanel

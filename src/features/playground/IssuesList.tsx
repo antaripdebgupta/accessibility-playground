@@ -126,7 +126,6 @@ export function IssuesList({
           {violations.length > 0 && (
             <section className="flex flex-col gap-2">
               <h2 className="flex items-center gap-1.5 text-xs font-bold tracking-wider text-[var(--color-danger-default)] uppercase">
-                <AlertOctagon className="h-3.5 w-3.5" aria-hidden="true" />
                 <span>Violations ({violations.length})</span>
               </h2>
               <div className="space-y-1.5">

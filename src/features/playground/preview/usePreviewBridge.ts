@@ -26,6 +26,12 @@ export interface UsePreviewBridgeParams {
   ) => void;
   onScanError: (error: string) => void;
   onFocusPositionsChange?: (positions: readonly FocusOrderPosition[]) => void;
+  onShortcut?: (
+    key: string,
+    shiftKey: boolean,
+    ctrlKey: boolean,
+    metaKey: boolean
+  ) => void;
 }
 
 export function usePreviewBridge({
@@ -37,15 +43,39 @@ export function usePreviewBridge({
   onScanResults,
   onScanError,
   onFocusPositionsChange,
+  onShortcut,
 }: UsePreviewBridgeParams) {
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
   const currentScanIdRef = React.useRef(scanId);
   const isFrameReadyRef = React.useRef(false);
   const latestSrcDocRef = React.useRef(srcDoc);
+  const pendingScanRef = React.useRef<string | null>(null);
+  const scanTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null
+  );
   const [runtimeErrors, setRuntimeErrors] = React.useState<
     readonly RuntimeErrorItem[]
   >([]);
   const [isConsoleOpen, setIsConsoleOpen] = React.useState(false);
+
+  const onScanErrorRef = React.useRef(onScanError);
+  React.useEffect(() => {
+    onScanErrorRef.current = onScanError;
+  }, [onScanError]);
+
+  const clearScanTimeout = React.useCallback(() => {
+    if (scanTimeoutRef.current !== null) {
+      clearTimeout(scanTimeoutRef.current);
+      scanTimeoutRef.current = null;
+    }
+  }, []);
+
+  const armScanTimeout = React.useCallback(() => {
+    clearScanTimeout();
+    scanTimeoutRef.current = setTimeout(() => {
+      onScanErrorRef.current("Scan timed out after 12 seconds.");
+    }, 12000);
+  }, [clearScanTimeout]);
 
   React.useEffect(() => {
     currentScanIdRef.current = scanId;
@@ -79,15 +109,24 @@ export function usePreviewBridge({
 
   React.useEffect(() => {
     if (scanId) {
-      postToIframe({ type: "run-scan", scanId });
+      if (!isFrameReadyRef.current) {
+        // Queue the scan; it will be flushed on preview-frame-ready
+        pendingScanRef.current = scanId;
+      } else {
+        postToIframe({ type: "run-scan", scanId });
+        armScanTimeout();
+      }
     }
-  }, [scanId, postToIframe]);
+  }, [scanId, postToIframe, armScanTimeout]);
 
   React.useEffect(() => {
     if (focusedElementId) {
       postToIframe({ type: "focus-element", id: focusedElementId });
     }
   }, [focusedElementId, postToIframe]);
+
+  // Cleanup timeout on unmount
+  React.useEffect(() => () => clearScanTimeout(), [clearScanTimeout]);
 
   React.useEffect(() => {
     function handleMessage(event: MessageEvent) {
@@ -104,6 +143,13 @@ export function usePreviewBridge({
       if (parsed.type === "preview-frame-ready") {
         isFrameReadyRef.current = true;
         sendDocument();
+        // Flush any scan that was queued before the frame was ready
+        if (pendingScanRef.current) {
+          const queuedScanId = pendingScanRef.current;
+          pendingScanRef.current = null;
+          postToIframe({ type: "run-scan", scanId: queuedScanId });
+          armScanTimeout();
+        }
       } else if (parsed.type === "element-clicked") {
         onSelectNodeId(parsed.id);
       } else if (parsed.type === "scan-results") {
@@ -116,6 +162,7 @@ export function usePreviewBridge({
           return;
         }
         onScanResults(parsed.violations, parsed.incomplete);
+        clearScanTimeout();
       } else if (parsed.type === "scan-error") {
         if (
           parsed.scanId &&
@@ -130,6 +177,7 @@ export function usePreviewBridge({
           });
         }
         onScanError(parsed.message);
+        clearScanTimeout();
       } else if (parsed.type === "focus-order") {
         onFocusPositionsChange?.(parsed.elements);
       } else if (parsed.type === "runtime-error") {
@@ -147,6 +195,13 @@ export function usePreviewBridge({
           ].slice(0, 100)
         );
         setIsConsoleOpen(true);
+      } else if (parsed.type === "shortcut") {
+        onShortcut?.(
+          parsed.key,
+          parsed.shiftKey ?? false,
+          parsed.ctrlKey ?? false,
+          parsed.metaKey ?? false
+        );
       }
     }
 
@@ -159,7 +214,11 @@ export function usePreviewBridge({
     onScanResults,
     onScanError,
     onFocusPositionsChange,
+    onShortcut,
     sendDocument,
+    postToIframe,
+    armScanTimeout,
+    clearScanTimeout,
   ]);
 
   const clearRuntimeErrors = React.useCallback(() => {

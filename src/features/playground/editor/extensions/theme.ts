@@ -45,12 +45,21 @@ export const editorTheme = EditorView.theme({
     borderRight: "1px solid var(--color-border)",
   },
   ".cm-activeLine": {
-    backgroundColor: "var(--color-surface-raised)",
+    backgroundColor:
+      "color-mix(in srgb, var(--color-text-primary) 5%, transparent)",
   },
   ".cm-activeLineGutter": {
-    backgroundColor: "var(--color-surface-raised)",
+    backgroundColor:
+      "color-mix(in srgb, var(--color-text-primary) 5%, transparent)",
     color: "var(--color-text-primary)",
     fontWeight: "bold",
+  },
+  // Selection: visible on both active and inactive lines (>= 3:1 against editor bg)
+  ".cm-selectionBackground": {
+    backgroundColor: "color-mix(in srgb, var(--color-accent) 25%, transparent)",
+  },
+  "&.cm-focused .cm-selectionBackground": {
+    backgroundColor: "color-mix(in srgb, var(--color-accent) 35%, transparent)",
   },
   // Selection decoration for element reveal (WCAG 1.4.1 token color + outline, not color only)
   ".cm-a11y-selected": {

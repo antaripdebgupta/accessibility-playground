@@ -108,6 +108,33 @@ describe("PostMessage Schema Validation (Task 5d)", () => {
     }
   });
 
+  it("parses valid 'shortcut' message from iframe", () => {
+    const msg = safeParseIframeMessage({
+      type: "shortcut",
+      key: "F6",
+      shiftKey: false,
+      ctrlKey: false,
+      metaKey: false,
+      altKey: false,
+    });
+    expect(msg).not.toBeNull();
+    expect(msg!.type).toBe("shortcut");
+    if (msg?.type === "shortcut") {
+      expect(msg.key).toBe("F6");
+    }
+  });
+
+  it("parses 'shortcut' message with only required key field", () => {
+    const msg = safeParseIframeMessage({ type: "shortcut", key: "Enter" });
+    expect(msg).not.toBeNull();
+    expect(msg!.type).toBe("shortcut");
+  });
+
+  it("rejects 'shortcut' message missing key field", () => {
+    const msg = safeParseIframeMessage({ type: "shortcut" });
+    expect(msg).toBeNull();
+  });
+
   it("returns null for malformed or unknown message types", () => {
     expect(safeParseIframeMessage(null)).toBeNull();
     expect(safeParseIframeMessage({})).toBeNull();

@@ -118,7 +118,15 @@ export function PlaygroundView() {
     engineStatus: analysis.engineStatus,
   });
 
-  useWorkbenchKeys({ maximizedPane, setMaximizedPane });
+  const handleIframeShortcut = useWorkbenchKeys({
+    maximizedPane,
+    setMaximizedPane,
+    onForceScan: scan.triggerScan,
+    isScanning: scan.isScanning,
+    mobilePane,
+    setMobilePane,
+    isDesktop,
+  });
 
   const editorDiagnostics = React.useMemo(() => {
     return buildDiagnostics(rawHtml.length, {
@@ -149,6 +157,7 @@ export function PlaygroundView() {
     analysisTab,
     setAnalysisTab,
     activeDocumentId,
+    onIframeShortcut: handleIframeShortcut,
   });
 
   return (

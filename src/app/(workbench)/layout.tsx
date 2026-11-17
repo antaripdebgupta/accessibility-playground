@@ -1,3 +1,5 @@
+import { ScrollGuard } from "./ScrollGuard";
+
 export default function WorkbenchLayout({
   children,
 }: {
@@ -11,10 +13,11 @@ export default function WorkbenchLayout({
       >
         Skip to code editor
       </a>
+      <ScrollGuard />
       <main
         id="main-content"
         tabIndex={-1}
-        className="flex h-dvh min-h-0 flex-col overflow-hidden outline-none"
+        className="relative flex h-dvh min-h-0 flex-col overflow-clip outline-none"
       >
         {children}
       </main>

@@ -310,10 +310,6 @@ export function IssuesPanel({
 
         {/* Fixed honest disclaimer: no score, automated limits noted */}
         <div className="flex items-start gap-2 rounded border border-[var(--color-border)] bg-[var(--color-surface-sunken)]/80 p-2 text-[11px] text-[var(--color-text-secondary)]">
-          <ShieldAlert
-            className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--color-warning-default)]"
-            aria-hidden="true"
-          />
           <p>
             Automated checks find only a subset of WCAG issues. Passing them
             does not mean the page is accessible.

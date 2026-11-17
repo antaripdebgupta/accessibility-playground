@@ -51,7 +51,7 @@ export function EditorPaneSection({
     <section
       id="code-editor-pane"
       aria-label="Code editor"
-      className="flex h-full min-h-0 flex-col"
+      className="relative flex h-full min-h-0 flex-col"
     >
       <Editor
         html={rawHtml}
@@ -93,6 +93,12 @@ export interface PreviewPaneProps {
   focusedElementId: string | null;
   isMaximized: boolean;
   onToggleMaximize: () => void;
+  onShortcut?: (
+    key: string,
+    shiftKey: boolean,
+    ctrlKey: boolean,
+    metaKey: boolean
+  ) => void;
 }
 
 export function PreviewPaneSection({
@@ -110,12 +116,13 @@ export function PreviewPaneSection({
   focusedElementId,
   isMaximized,
   onToggleMaximize,
+  onShortcut,
 }: PreviewPaneProps) {
   return (
     <section
       id="live-preview-pane"
       aria-label="Live preview"
-      className="flex h-full min-h-0 flex-col"
+      className="relative flex h-full min-h-0 flex-col"
     >
       <PreviewFrame
         instrumentedHtml={instrumentedHtml}
@@ -133,6 +140,7 @@ export function PreviewPaneSection({
         showFocusBadges={true}
         isMaximized={isMaximized}
         onToggleMaximize={onToggleMaximize}
+        onShortcut={onShortcut}
       />
     </section>
   );
@@ -211,7 +219,7 @@ export function AnalysisPaneSection({
     <section
       id="analysis-pane"
       aria-label="Analysis"
-      className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xs"
+      className="relative flex h-full min-h-0 flex-col overflow-clip rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] shadow-xs"
     >
       {selectionLost && (
         <div

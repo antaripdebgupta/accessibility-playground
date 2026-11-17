@@ -1,9 +1,8 @@
 "use client";
 
-import * as React from "react";
 import type { A11yNode, Finding } from "@/types/a11y";
 import { Badge } from "@/components/ui/Badge";
-import { EyeOff, AlertOctagon } from "lucide-react";
+import { EyeOff } from "lucide-react";
 
 export interface A11yTreeSelectedCardProps {
   selectedNode: A11yNode;
@@ -92,7 +91,6 @@ export function A11yTreeSelectedCard({
       {nodeFindings.length > 0 && (
         <div className="flex flex-col gap-1 rounded border border-[var(--color-danger-border)] bg-[var(--color-danger-subtle)] p-2">
           <div className="flex items-center gap-1.5 font-semibold text-[var(--color-danger-text)]">
-            <AlertOctagon className="h-3.5 w-3.5" aria-hidden="true" />
             <span>Related issues ({nodeFindings.length})</span>
           </div>
           <ul className="flex list-disc flex-col gap-0.5 pl-5 text-[11px] text-[var(--color-text-secondary)]">

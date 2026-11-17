@@ -128,7 +128,7 @@ export function SplitPane({
     >
       <div
         id={primaryId}
-        className="min-h-0 min-w-0 overflow-hidden"
+        className="relative min-h-0 min-w-0 overflow-clip"
         style={{ flex: `0 0 ${currentSize}%` }}
         hidden={collapsed}
       >
@@ -168,7 +168,9 @@ export function SplitPane({
         data-active={dragging}
       />
 
-      <div className="min-h-0 min-w-0 flex-1 overflow-hidden">{secondary}</div>
+      <div className="relative min-h-0 min-w-0 flex-1 overflow-clip">
+        {secondary}
+      </div>
     </div>
   );
 }

@@ -119,7 +119,7 @@ export function EditorToolbar({
         </label>
 
         {onToggleTailwind && (
-          <label className="hidden cursor-pointer items-center gap-1.5 text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] md:flex">
+          <label className="hidden shrink-0 cursor-pointer items-center gap-1.5 text-xs whitespace-nowrap text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] md:flex">
             <input
               type="checkbox"
               checked={useTailwind}

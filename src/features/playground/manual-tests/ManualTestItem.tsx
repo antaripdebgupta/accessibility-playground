@@ -52,7 +52,7 @@ export function ManualTestItem({
 
   return (
     <article
-      className={`space-y-3 rounded-lg border p-3.5 transition-colors ${
+      className={`min-w-0 space-y-3 rounded-lg border p-3.5 transition-colors ${
         currentStatus === "passed"
           ? "border-[var(--color-success-border,var(--color-border))] bg-[var(--color-surface)]"
           : currentStatus === "failed"
@@ -85,12 +85,12 @@ export function ManualTestItem({
       </div>
 
       {/* Steps and expected result */}
-      <div className="space-y-2 rounded bg-[var(--color-surface-sunken)] p-2.5 text-xs">
+      <div className="min-w-0 space-y-2 rounded bg-[var(--color-surface-sunken)] p-2.5 text-xs">
         <div>
           <span className="text-[10px] font-semibold text-[var(--color-text-secondary)] uppercase">
             Testing Steps:
           </span>
-          <ol className="mt-1 list-inside list-decimal space-y-0.5 text-[11px] text-[var(--color-text-primary)]">
+          <ol className="mt-1 list-outside list-decimal space-y-0.5 pl-4 text-[11px] text-[var(--color-text-primary)]">
             {test.steps.map((step, idx) => (
               <li key={idx}>{step}</li>
             ))}
@@ -101,7 +101,7 @@ export function ManualTestItem({
           <span className="text-[10px] font-semibold text-[var(--color-text-secondary)] uppercase">
             Expected Result:
           </span>
-          <p className="mt-0.5 text-[11px] text-[var(--color-text-primary)]">
+          <p className="mt-0.5 text-[11px] break-words text-[var(--color-text-primary)]">
             {test.expectedResult}
           </p>
         </div>

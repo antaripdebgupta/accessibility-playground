@@ -66,7 +66,7 @@ export function WorkbenchToolbar({
   );
 
   return (
-    <header className="flex h-auto min-h-11 flex-none items-center gap-2 border-b border-[var(--color-border)] bg-[var(--color-surface-raised)]/90 px-3 py-1.5 backdrop-blur-sm sm:gap-3">
+    <header className="relative z-40 flex h-auto min-h-11 flex-none items-center gap-2 border-b border-[var(--color-border)] bg-[var(--color-surface-raised)]/90 px-3 py-1.5 backdrop-blur-sm sm:gap-3">
       {/* Home link — the only way out; first in tab order after skip link */}
       <Link
         href="/"

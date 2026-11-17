@@ -7,7 +7,7 @@ import {
   InspectorSelectedHeader,
   InspectorEmptyState,
 } from "./InspectorSelectedHeader";
-import { Volume2, AlertTriangle, Layers, History } from "lucide-react";
+import { Volume2, AlertTriangle, History } from "lucide-react";
 import { computeAnnouncementDetails } from "@/lib/announcement";
 
 export interface AnnouncementHistoryItem {
@@ -147,10 +147,6 @@ export function AnnouncementPanel({ selectedNode }: AnnouncementPanelProps) {
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-2">
             <h2 className="text-md flex items-center gap-1.5 font-semibold text-[var(--color-text-primary)]">
-              <Layers
-                className="h-4 w-4 text-[var(--color-accent)]"
-                aria-hidden="true"
-              />
               <span>Announcement Breakdown</span>
             </h2>
             <span className="text-[11px] text-[var(--color-text-secondary)]">
@@ -195,7 +191,6 @@ export function AnnouncementPanel({ selectedNode }: AnnouncementPanelProps) {
         {history.length > 0 && (
           <div className="flex flex-col gap-2.5 border-t border-[var(--color-border)] pt-4 text-xs">
             <div className="flex items-center gap-1.5 font-semibold text-[var(--color-text-primary)]">
-              <History className="h-3.5 w-3.5" aria-hidden="true" />
               <h2>Announcement History (Last {history.length})</h2>
             </div>
             <div className="space-y-1.5">

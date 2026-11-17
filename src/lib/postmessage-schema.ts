@@ -74,6 +74,15 @@ const IframePreviewFrameReadyMessageSchema = z.object({
   type: z.literal("preview-frame-ready"),
 });
 
+const IframeShortcutMessageSchema = z.object({
+  type: z.literal("shortcut"),
+  key: z.string(),
+  shiftKey: z.boolean().optional(),
+  ctrlKey: z.boolean().optional(),
+  metaKey: z.boolean().optional(),
+  altKey: z.boolean().optional(),
+});
+
 const IframeMessageSchema = z.discriminatedUnion("type", [
   IframeReadyMessageSchema,
   IframePreviewFrameReadyMessageSchema,
@@ -82,6 +91,7 @@ const IframeMessageSchema = z.discriminatedUnion("type", [
   IframeScanErrorMessageSchema,
   IframeFocusOrderMessageSchema,
   IframeRuntimeErrorMessageSchema,
+  IframeShortcutMessageSchema,
 ]);
 
 export type IframeMessage = z.infer<typeof IframeMessageSchema>;

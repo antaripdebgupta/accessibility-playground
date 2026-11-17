@@ -52,6 +52,11 @@
   --color-code-punct: #475569;
   --color-code-comment: #64748b;
   --color-code-num: #c2410c;
+
+  /* Scrollbar tokens — thumb must be >= 3:1 against surface (SC 1.4.11) */
+  /* #6b7280 on #ffffff = 5.74:1; on #eceae6 = 4.12:1 — both pass */
+  --color-scrollbar-thumb: #6b7280;
+  --color-scrollbar-thumb-hover: #374151;
 }
 
 @theme {
@@ -111,6 +116,78 @@
 :focus-visible {
   outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
+}
+
+/* Thin, themed scrollbars for fine-pointer devices only.
+   Touch devices keep native overlay scrollbars (SC 2.5.8 target size).
+   The preview iframe is intentionally excluded — it renders user content faithfully. */
+@media (pointer: fine) {
+  :root {
+    --scrollbar-size: 6px;
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+    transition: scrollbar-color 0.2s;
+  }
+  *:hover,
+  *:focus-within {
+    scrollbar-color: var(--color-scrollbar-thumb) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: var(--scrollbar-size);
+    height: var(--scrollbar-size);
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+    transition: background-color 0.2s;
+  }
+  *:hover::-webkit-scrollbar-thumb,
+  *:focus-within::-webkit-scrollbar-thumb {
+    background-color: var(--color-scrollbar-thumb);
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-scrollbar-thumb-hover);
+  }
+  *::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
+
+@media (pointer: fine) and (prefers-reduced-motion: reduce) {
+  * {
+    transition: none;
+  }
+  *::-webkit-scrollbar-thumb {
+    transition: none;
+  }
+}
+
+/* Utility: completely hide scrollbar (e.g. tab strips with keyboard/arrow affordance) */
+.no-scrollbar {
+  scrollbar-width: none !important;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* Restore native scrollbars in forced-colors mode */
+@media (forced-colors: active) {
+  * {
+    scrollbar-color: auto;
+    scrollbar-width: auto;
+  }
+}
+
+/* Prevent layout shift when scrollbar appears in analysis/issues panels */
+#analysis-pane .\@container {
+  scrollbar-gutter: stable;
 }
 
 h1,
