@@ -10,9 +10,13 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  NEXT_PUBLIC_SITE_URL: "https://accessibility-playground.example.com"
+
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -33,8 +37,36 @@ jobs:
 
       - name: Build Next.js application
         run: npm run build
-        env:
-          NEXT_PUBLIC_SITE_URL: "https://accessibility-playground.example.com"
+
+      - name: Dependency audit
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Circular dependencies check
+        run: npm run circular
+
+  e2e:
+    name: e2e (${{ matrix.project }} ${{ matrix.shard }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [desktop, mobile]
+        shard: ["1/2", "2/2"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Next.js application
+        run: npm run build
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
@@ -44,15 +76,23 @@ jobs:
           key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
       - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
 
+      - name: Install Playwright system dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
       - name: Playwright E2E tests
-        run: npm run test:e2e
-        env:
-          NEXT_PUBLIC_SITE_URL: "https://accessibility-playground.example.com"
+        run: npx playwright test --project=${{ matrix.project }} --shard=${{ matrix.shard }}
 
-      - name: Dependency audit
-        run: npm audit --omit=dev --audit-level=high
-
-      - name: Circular dependencies check
-        run: npm run circular
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.project }}-${{ strategy.job-index }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+          if-no-files-found: ignore

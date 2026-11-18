@@ -166,7 +166,7 @@ export const AnalysisTabs = React.memo(function AnalysisTabs({
         : t.right > s.right - pad
           ? t.right - s.right + pad
           : 0;
-    if (delta) {
+    if (delta && typeof scroller.scrollBy === "function") {
       scroller.scrollBy({
         left: delta,
         behavior: prefersReduced ? "auto" : "smooth",

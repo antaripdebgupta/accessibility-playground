@@ -42,7 +42,9 @@ test.describe("Responsive Audit & Measurement", () => {
       }) => {
         await page.setViewportSize(vp);
         await page.goto(route);
-        await page.waitForLoadState("networkidle");
+        await page.waitForLoadState(
+          route.startsWith("/playground") ? "load" : "networkidle"
+        );
 
         const overflow = await page.evaluate(() => {
           const doc = document.documentElement;
