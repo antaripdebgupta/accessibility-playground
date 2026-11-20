@@ -210,11 +210,13 @@ html {
 /* ---------- Hero ---------- */
 
 .hero {
-  padding: 76px 0 56px;
+  padding: 80px 0 40px;
+  text-align: center;
 }
 
 .hero-inner {
-  max-width: 640px;
+  max-width: 760px;
+  margin: 0 auto;
 }
 
 .hero h1 {
@@ -224,7 +226,8 @@ html {
   font-size: clamp(2.35rem, 1.9rem + 2vw, 3.6rem);
   line-height: 1.08;
   letter-spacing: -0.02em;
-  margin: 0 0 22px;
+  max-width: 16ch;
+  margin: 0 auto 22px;
   color: var(--ink);
 }
 
@@ -233,12 +236,13 @@ html {
   line-height: 1.6;
   color: var(--ink-soft);
   max-width: 54ch;
-  margin: 0 0 32px;
+  margin: 0 auto 32px;
 }
 
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 12px;
   margin-bottom: 18px;
 }
@@ -293,6 +297,7 @@ html {
   font-size: 0.78rem;
   color: var(--ink-faint);
   letter-spacing: 0.01em;
+  text-align: center;
 }
 
 .hero-micro kbd {
@@ -984,6 +989,13 @@ section.block + section.block {
   }
   .hero {
     padding: 40px 0 40px;
+  }
+  .hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .hero-actions .btn {
+    width: 100%;
   }
   .page-intro {
     padding: 36px 0 28px;

@@ -6,12 +6,7 @@ import type {
   ManualTestRecord,
   ManualTestStatus,
 } from "@/data/manual-tests";
-import {
-  MinusCircle,
-  HelpCircle,
-  ExternalLink,
-  AlertCircle,
-} from "lucide-react";
+import { MinusCircle, ExternalLink, AlertCircle } from "lucide-react";
 
 export interface ManualTestItemProps {
   test: ManualTestItemType;
@@ -109,10 +104,6 @@ export function ManualTestItem({
 
       {/* Why automation can't tell you */}
       <div className="flex items-start gap-1.5 rounded border border-[var(--color-border)] bg-[var(--color-surface-raised)]/50 p-2 text-[11px] text-[var(--color-text-secondary)]">
-        <HelpCircle
-          className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--color-accent)]"
-          aria-hidden="true"
-        />
         <span>
           <strong className="text-[var(--color-text-primary)]">
             Why manual:

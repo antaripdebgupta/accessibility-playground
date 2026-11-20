@@ -1,132 +1,86 @@
 # Accessibility Playground
 
-Accessibility Playground is an interactive developer tool designed for frontend engineers and QA professionals to learn, test, and master WCAG 2.2 accessibility patterns. By rendering user-provided HTML into an isolated sandbox, the tool translates invisible accessibility concepts—computed accessibility trees, WAI-ARIA role semantics, accessible name computation traces, and automated `axe-core` violations—into clear, inspectable diagnostics alongside a verified pattern library and color contrast engine.
+An interactive tool for frontend engineers and QA professionals to learn, test and practice **WCAG 2.2** accessibility. Paste HTML and CSS into a live editor and see what assistive technology sees: the computed accessibility tree, ARIA state, accessible-name computation, focus order, a screen-reader announcement, and automated findings from `axe-core` plus custom rules. A learning centre, guided challenges and a colour contrast checker sit alongside it.
+
+Everything runs in your browser. There are no accounts and no database, and your code never leaves the page.
 
 ---
 
-## Tech Stack
+## Features
 
-- **Framework**: Next.js 16 (App Router, Turbopack)
-- **UI Library**: React 19, Accessly UI (`@accessly-ui/react`, `@accessly-ui/tailwind-preset`, `@accessly-ui/primitives`, `@accessly-ui/utils`)
-- **Styling**: Tailwind CSS v4 with custom semantic tokens for high-contrast dark/light modes
-- **Accessibility Engine**: `axe-core` v4.14 (vendored locally in `public/axe.min.js`)
-- **Schema Validation**: Zod v4 (runtime iframe `postMessage` protocol validation)
-- **Icons**: `lucide-react`
-- **Language & Tooling**: TypeScript strict mode, ESLint 9 (flat config) with `eslint-plugin-jsx-a11y`, Prettier with `prettier-plugin-tailwindcss`, Husky, `lint-staged`
-
----
-
-## Prerequisites
-
-- Node.js 20.x or later (tested on Node.js 22.x)
-- npm 10.x or later
+| Feature                               | What it does                                                                                             |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| **Live editor and preview**           | CodeMirror 6 editor (HTML and CSS) with accessibility-aware completions and a sandboxed live preview     |
+| **Accessibility tree and inspectors** | Computed tree, ARIA explorer, accessible-name trace, focus order, announcement text                      |
+| **Automated findings**                | `axe-core` plus 16 custom rules, merged into one deduplicated list with WCAG references and fix guidance |
+| **Baseline and compare**              | Save a baseline and see which issues are new, resolved or persisting                                     |
+| **Manual tests**                      | Checklists for what automation cannot verify (keyboard, screen reader, visual)                           |
+| **Challenges**                        | Guided "find and fix" exercises with automatic verification                                              |
+| **Learning centre**                   | Topics with good and bad examples that open directly in the playground                                   |
+| **Colour contrast checker**           | Standalone WCAG contrast calculator with a passing-colour suggestion                                     |
+| **Export and share**                  | JSON, CSV and Markdown reports; shareable links                                                          |
 
 ---
 
-## Getting Started
+## Tech stack
 
-### 1. Clone & Install Dependencies
+Next.js 16 (App Router) · React 19 · TypeScript (strict) · Tailwind CSS v4 · Accessly UI · CodeMirror 6 · `axe-core` (vendored in `public/axe.min.js`) · Zod · Vitest · Playwright
 
-```bash
-git clone https://github.com/your-username/accessibility-playground.git
-cd accessibility-playground
-npm install
+---
+
+## How it works (high level)
+
+```mermaid
+flowchart LR
+    A["Editor<br/>HTML + CSS"] --> B["Parse to accessibility tree<br/>+ custom rules + focus order"]
+    A --> C["Sandboxed preview iframe<br/>runs axe-core"]
+    C -- "validated postMessage" --> D["Normalize + deduplicate findings"]
+    B --> D
+    D --> E["Inspector panels<br/>tree · ARIA · name · focus · announcement"]
+    D --> F["Issues, compare, reports"]
 ```
 
-### 2. Run the Development Server
+1. **Parse.** Your HTML is parsed in the browser into an accessibility tree, and each element gets a stable `data-a11y-id` so the editor, preview and panels all point at the same node.
+2. **Sandbox.** The preview runs in an iframe with `sandbox="allow-scripts"` and no `allow-same-origin`, so untrusted markup cannot touch cookies, storage or the app itself.
+3. **Scan.** `axe-core` runs inside the sandbox from a local file. Results return by `postMessage`, and the app checks the sender and validates every message with Zod before using it.
+4. **Combine.** Custom-rule findings and axe findings are merged into one list. If axe is unavailable, the app keeps showing the custom-rule findings and says clearly that the axe scan did not run.
+
+For the full design, see [ARCHITECTURE.md](./ARCHITECTURE.md).
+
+---
+
+## Quick start
 
 ```bash
+git clone https://github.com/antaripdebgupta/accessibility-playground.git
+cd accessibility-playground
+npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open <http://localhost:3000>.
 
-### 3. Production Build & Start
-
-```bash
-npm run build
-npm run start
-```
+Commands, environment variables, the production build and the testing guide are in **[SETUP.md](./SETUP.md)**.
 
 ---
 
-## Available Scripts
+## Accessibility commitments
 
-| Script                 | Command                                                     | Purpose                                        |
-| ---------------------- | ----------------------------------------------------------- | ---------------------------------------------- |
-| `npm run dev`          | `next dev`                                                  | Starts local development server with Turbopack |
-| `npm run build`        | `next build`                                                | Builds optimized production output             |
-| `npm run start`        | `next start`                                                | Runs the production build locally              |
-| `npm run lint`         | `eslint`                                                    | Runs ESLint 9 checks including jsx-a11y        |
-| `npm run lint:fix`     | `eslint --fix`                                              | Automatically fixes auto-fixable ESLint issues |
-| `npm run typecheck`    | `tsc --noEmit`                                              | Validates TypeScript strict mode types         |
-| `npm run format:check` | `prettier --check .`                                        | Verifies code and Tailwind class formatting    |
-| `npm run format`       | `prettier --write .`                                        | Formats all files and sorts Tailwind classes   |
-| `npm run check`        | `npm run lint && npm run typecheck && npm run format:check` | Single CI and pre-merge gate command           |
-| `npm run prepare`      | `husky`                                                     | Installs Git pre-commit hooks                  |
+This app aims to meet WCAG 2.2 AA on every route:
 
----
+- **Keyboard operable.** Every action is reachable by keyboard; F6 / Shift+F6 switch panes and Ctrl/Cmd+Enter rescans. The code editor documents how to leave it (Esc, then Tab).
+- **Visible focus.** All interactive controls show a clear `:focus-visible` indicator.
+- **Skip links.** A skip link is the first focusable element.
+- **Not colour alone.** Status, severity and pass/fail always pair colour with an icon and text.
+- **Target size.** Interactive controls meet the 24 × 24 CSS px minimum.
+- **Reduced motion.** Animations and smooth scrolling respect `prefers-reduced-motion`.
+- **Reflow.** Layouts work at 320 CSS px and at 400 % zoom, apart from the code editor and preview, which need two-dimensional scrolling.
 
-## Architecture & Folder Structure
-
-> **Rule:** Browser-only reads (e.g. `localStorage`, `window`) must go through `useSyncExternalStore` or live under an `ssr:false` boundary.
-
-```
-├── public/                # Static assets, including vendored axe.min.js
-├── src/
-│   ├── app/               # Next.js App Router routes, layouts, error, and loading states
-│   │   ├── (site)/        # Public routes: home (/), /about, /contrast
-│   │   └── (workbench)/   # Playground route with client-only ssr:false boundary
-│   ├── components/        # Shared application components (Header, Footer, ThemeToggle, PanelBoundary)
-│   │   ├── ui/            # Shared UI components (Badge, CodeSnippet)
-│   │   └── workbench/     # Workbench layout primitives (SplitPane)
-│   ├── data/              # Static typed content (WCAG criteria, default document, editor snippets)
-│   ├── features/          # Feature components (Playground, ContrastChecker)
-│   ├── hooks/             # Custom React hooks (useWorkbenchLayout, usePlaygroundDocument, useScanState)
-│   ├── lib/               # Pure business logic (AST parser, rules registry, AccName trace, storage, postmessage)
-│   └── types/             # Shared TypeScript declarations
-```
+Automated tools find only part of the WCAG issues. Passing a scan does not mean a page is accessible; please also test with a keyboard, a screen reader and zoom.
 
 ---
 
-## Sandboxed Preview Architecture
+## Documentation
 
-1. **Client-Side AST Parsing**: When HTML is modified in the editor, it is parsed via the browser's native `DOMParser` client-side. Stable `data-a11y-id` attributes are assigned to each element to create a shared identity between the code editor, the live preview, and the analysis panels.
-2. **Iframe Sandboxing**: The preview document is rendered inside an `<iframe>` configured strictly with `sandbox="allow-scripts"`. The dangerous `allow-same-origin` token is explicitly omitted, ensuring untrusted markup cannot access cookies, localStorage, session storage, or parent DOM nodes.
-3. **Local axe-core Execution**: `axe-core` is vendored directly into `public/axe.min.js`. The iframe loads this local script without external network requests and executes an audit restricted to WCAG 2.0, 2.1, and 2.2 rules.
-4. **Zod postMessage Protocol**: Results and click events generated inside the sandboxed iframe are dispatched to the parent window via `postMessage`. The parent validates all received messages against strict Zod schemas (`safeParseIframeMessage`) before trusting or rendering any data.
-
----
-
-## This Application's Accessibility Commitments
-
-Accessibility Playground adheres to WCAG 2.2 AA standards across every route:
-
-- **Complete Keyboard Operability**: All actions, tab panels, tree rows, and copy buttons are keyboard-navigable. The code editor includes explicit escape instructions.
-- **Visible Focus States**: Every interactive control renders a distinct, high-contrast focus ring with visible offset (`:focus-visible`).
-- **Skip Navigation**: A skip-to-content link is present as the first focusable element on every page.
-- **Non-Color Dependent Indicators**: Every status chip, violation level, and contrast pass/fail result pairs an SVG icon and descriptive text with color.
-- **Target Sizes**: Interactive controls satisfy the WCAG 2.2 SC 2.5.8 minimum target dimension of 24 × 24 CSS pixels.
-- **Reduced Motion**: Smooth scroll and animated transitions respect operating system `prefers-reduced-motion` settings.
-
----
-
-## Known Limitations
-
-- **Simulated Screen Reader Output**: The accessible-name trace simulates the W3C AccName 1.2 algorithm. Differences between specific browser and screen reader combinations (e.g. JAWS on Chrome vs. VoiceOver on Safari) may yield slight timing or punctuation differences.
-- **Automated Audit Scope**: While `axe-core` catches critical automated violations, automated testing cannot evaluate subjective criteria like focus order logic or color perception context. Manual testing remains required for full compliance.
-- **Sandboxed JavaScript Scope**: Scripts written inside the playground run inside the iframe but cannot manipulate external APIs or interact with same-origin resources.
-
----
-
-## Deployment
-
-The project can be deployed seamlessly on any Node.js hosting environment or static/serverless platform supporting Next.js:
-
-```bash
-# Build the production bundle
-npm run build
-
-# Start the Node server
-npm run start
-```
+- [SETUP.md](./SETUP.md): installation, commands, environment variables, build and the testing guide
+- [ARCHITECTURE.md](./ARCHITECTURE.md): high-level design of the playground and the contrast checker
